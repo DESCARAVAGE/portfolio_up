@@ -1,0 +1,48 @@
+#Orienté dev
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3001:3001
+    volumes:
+      - ./backend:/app
+
+    env_file:
+      - ./backend/.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 5173:5173
+    volumes:
+      - ./frontend:/app
+
+  # cv:
+  #   build: ./cv
+  #   ports:
+  #     - 3001:3001
+  #   volumes:
+  #     - ./cv/src/:app/src/:rw
+  #     - ./cv/src/:app/package.json:rw
+  #     - ./cv/upload/:/app/upload/
+  #     - ./cv/download/:/app/download
+  #   environment:
+  #     - WATCHPACK_POLLING=true
+
+  # dev:
+  #   build:
+  #     context: .
+  #     target: dev
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   command: sh -c "npm install && npm run dev -- --host"
+
+  

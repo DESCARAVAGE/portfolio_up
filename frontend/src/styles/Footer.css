@@ -1,0 +1,8 @@
+.footer {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    
+    height: min-content;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.3);
+}
+

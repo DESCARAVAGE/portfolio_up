@@ -1,0 +1,47 @@
+.logo {
+  width: 50px;
+}
+
+.xpImage {
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  width: 70%;
+  position: relative;
+  will-change: transform;
+  transform-origin: center;
+}
+
+.xpImage:hover {
+  z-index: 1000;
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.boxTest {
+  display: flex;
+  justify-content: center;
+}
+
+.boxTest>.miniBox {
+  box-shadow: 0px 0px 2px white;
+  border-radius: 10px;
+  height: 15vh;
+  width: 2vh;
+  flex-grow: 1;
+  transition: all .5s;
+  margin: 10px;
+  object-fit: cover;
+}
+
+.boxTest>.miniBox:hover {
+  flex-grow: 2;
+}
+
+.bgCard {
+  margin-inline: 1rem;
+  padding: 10px;
+  border: 0.1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.062);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+}
