@@ -9,6 +9,8 @@ services:
       - 3001:3001
     volumes:
       - ./backend:/app
+      - ./backend/db:/app/db
+      - ./backend/storage:/app/storage
 
     env_file:
       - ./backend/.env

@@ -1,5 +1,8 @@
 import { createApp } from "./app";
 import { env } from "./config/env";
+import { initDb } from "./db/migration";
+
+initDb();
 
 const app = createApp();
 
