@@ -11,6 +11,8 @@ export function createApp() {
 
     app.use("/api/cv", cvRoutes);
 
+    app.use("/storage", express.static("storage"));
+
     return app;
 }
 
