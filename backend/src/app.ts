@@ -1,19 +1,3 @@
-import express from "express";
-import cvRoutes from "./routes/cv.routes";
-import healthRoute from "./routes/health.routes"
+import { CoreUtils } from "./utils";
 
-export function createApp() {
-    const app = express();
-
-    app.use(express.json());
-
-    app.use("/api/", healthRoute);
-
-    app.use("/api/cv", cvRoutes);
-
-    app.use("/storage", express.static("storage"));
-
-    return app;
-}
-
-export default createApp;
+CoreUtils.runServer();
