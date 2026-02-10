@@ -2,6 +2,8 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { dataSource } from "./db";
 import cvRoutes from "../routes/cv-routes";
+import health from "../routes/health-routes";
+
 
 async function runServer(): Promise<void> {
     /*
@@ -25,6 +27,8 @@ async function runServer(): Promise<void> {
         const app: Express = express();
 
         app.use("/api/cv", cvRoutes);
+
+        app.use("/api/", health);
 
         /* Define a route for the root path ("/")
          using the HTTP GET method */
