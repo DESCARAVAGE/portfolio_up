@@ -1,7 +1,9 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+import { dataSource } from "./db";
+import cvRoutes from "../routes/cv-routes";
 
-const runServer: () => void = (): void => {
+async function runServer(): Promise<void> {
     /*
      * Load up and parse configuration details from
      * the `.env` file to the `process.env`
@@ -14,15 +16,15 @@ const runServer: () => void = (): void => {
      * value of the PORT environment variable
      * from the `process.env`
      */
-    /*
-     * Create an Express application and get the
-     * value of the PORT environment variable
-     * from the `process.env`
-     */
+    
+    await dataSource.initialize();
+
     if (process.env.PORT) {
         const port: number | undefined = +process.env.PORT;
 
         const app: Express = express();
+
+        app.use("/api/cv", cvRoutes);
 
         /* Define a route for the root path ("/")
          using the HTTP GET method */
