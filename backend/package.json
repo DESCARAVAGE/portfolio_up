@@ -5,6 +5,8 @@
   "scripts": {
     "start": "nodemon dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "migration:generate": "typeorm-ts-node-commonjs -d ./src/utils/db.ts migration:generate ./src/migrations/default",
+    "migration:run": "typeorm-ts-node-commonjs -d ./src/utils/db.ts migration:run",
     "build": "tsc"
   },
   "author": "",
@@ -19,6 +21,7 @@
     "express": "^5.2.1",
     "nodemon": "^3.1.11",
     "pg": "^8.18.0",
+    "reflect-metadata": "^0.2.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typeorm": "^0.3.28"

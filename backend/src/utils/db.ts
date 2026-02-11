@@ -1,5 +1,6 @@
-import { DataSource } from "typeorm";
 import * as dotenv from "dotenv";
+import 'reflect-metadata';
+import { DataSource } from "typeorm";
 
 dotenv.config();
 
@@ -10,6 +11,10 @@ export const dataSource = new DataSource({
   username: process.env.USERNAME,
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
+
+  synchronize: true, //false en prod 
+  logging: true,
+
   entities: ["src/entities/*.{ts,js}"],
-  synchronize: true,
+  migrations: ["src/migrations/*.{ts,js}"],
 });

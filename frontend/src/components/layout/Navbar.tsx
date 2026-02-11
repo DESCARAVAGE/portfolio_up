@@ -8,6 +8,10 @@ export function Navbar(): React.JSX.Element {
     window.open("/api/cv/download");
   };
 
+  const handleHealthBack = () => {
+    window.open("/api/health");
+  };
+
   return (
     <Box component="header" className="navbar">
       Chef de projet & CDA full stack
@@ -35,6 +39,7 @@ export function Navbar(): React.JSX.Element {
       variant="contained"
       tabIndex={-1}
       startIcon={<CloudUploadIcon />}
+      onClick={handleHealthBack}
     > Upload cv</Button>
     </Box>
   );
