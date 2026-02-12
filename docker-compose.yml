@@ -1,4 +1,21 @@
 services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: db_portfolio
+      POSTGRES_USER: portfolio
+      POSTGRES_PASSWORD: portfolio
+    volumes:
+      - ./dbData:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d db_portfolio -U portfolio"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build:
       context: ./backend
@@ -25,20 +42,3 @@ services:
     volumes:
       - ./frontend:/app
 
-  db:
-    image: postgres:16
-    container_name: portfolio-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: db_portfolio
-      POSTGRES_USER: portfolio
-      POSTGRES_PASSWORD: portfolio
-    volumes:
-      - ./dbData:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d db_portfolio -U portfolio"]
-      interval: 5s
-      timeout: 5s
-      retries: 10

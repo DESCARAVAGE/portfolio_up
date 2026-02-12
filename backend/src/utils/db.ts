@@ -12,7 +12,7 @@ export const dataSource = new DataSource({
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
 
-  synchronize: true, //false en prod 
+  synchronize: false, //false en prod ou si tu utilise les migrations
   logging: true,
 
   entities: ["src/entities/*.{ts,js}"],
