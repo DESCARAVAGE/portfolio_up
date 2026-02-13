@@ -13,3 +13,8 @@ export function downloadCv(_req: Request, res: Response) {
         res.status(404).json({ message: "Cv not available" });
     }
 }
+
+export function uploadCv(_req: Request, res: Response) {
+
+}
+)
