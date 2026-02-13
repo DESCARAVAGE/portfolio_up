@@ -1,10 +1,15 @@
 import { Box, Button, Divider } from "@mui/material";
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import React from "react";
 import "../../styles/Navbar.css";
 
 export function Navbar(): React.JSX.Element {
   const handleDownloadCv = () => {
     window.open("/api/cv/download");
+  };
+
+  const handleHealthBack = () => {
+    window.open("/api/health");
   };
 
   return (
@@ -27,6 +32,15 @@ export function Navbar(): React.JSX.Element {
       >
         Télécharger mon CV
       </Button>
+       <Button
+       sx={{ margin: 1 }}
+      component="label"
+      role={undefined}
+      variant="contained"
+      tabIndex={-1}
+      startIcon={<CloudUploadIcon />}
+      onClick={handleHealthBack}
+    > Upload cv</Button>
     </Box>
   );
 }

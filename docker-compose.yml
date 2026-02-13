@@ -1,5 +1,20 @@
-#Orienté dev
 services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: db_portfolio
+      POSTGRES_USER: portfolio
+      POSTGRES_PASSWORD: portfolio
+    volumes:
+      - ./dbData:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d db_portfolio -U portfolio"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -8,12 +23,15 @@ services:
     ports:
       - 3001:3001
     volumes:
+      - ./backend/package.json:/app/package.json:rw
+      - ./backend/.env:/app/.env:rw
+      # - ./backend/jest.config.js:/app/jest.config.js
       - ./backend:/app
-      - ./backend/db:/app/db
-      - ./backend/storage:/app/storage
-
-    env_file:
-      - ./backend/.env
+  #   environment:
+  #     - WATCHPACK_POLLING=true
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
     build:
@@ -24,27 +42,3 @@ services:
     volumes:
       - ./frontend:/app
 
-  # cv:
-  #   build: ./cv
-  #   ports:
-  #     - 3001:3001
-  #   volumes:
-  #     - ./cv/src/:app/src/:rw
-  #     - ./cv/src/:app/package.json:rw
-  #     - ./cv/upload/:/app/upload/
-  #     - ./cv/download/:/app/download
-  #   environment:
-  #     - WATCHPACK_POLLING=true
-
-  # dev:
-  #   build:
-  #     context: .
-  #     target: dev
-  #   ports:
-  #     - "5173:5173"
-  #   volumes:
-  #     - .:/app
-  #     - /app/node_modules
-  #   command: sh -c "npm install && npm run dev -- --host"
-
-  
