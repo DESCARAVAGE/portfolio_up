@@ -8,5 +8,4 @@ router.get("/download", downloadCv);
 
 // router.post("/upload", uploadCv);
 
-
 export default router;
