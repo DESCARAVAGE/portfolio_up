@@ -14,7 +14,6 @@ export function downloadCv(_req: Request, res: Response) {
     }
 }
 
-export function uploadCv(_req: Request, res: Response) {
+// export function uploadCv(_req: Request, res: Response) {
 
-}
-)
+// }
