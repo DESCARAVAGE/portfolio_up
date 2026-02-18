@@ -4,7 +4,7 @@
 import './styles/App.css'
 
 interface RootProps {
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 export function App({children}: RootProps): React.JSX.Element {
