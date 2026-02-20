@@ -1,0 +1,31 @@
+# .github/workflows/vitest-frontend-ci.yml
+name: vitest-frontend-ci
+
+on:
+    push:
+        paths:
+            - "frontend/**" # Déclenchement automatique, uniquement lors d'un push et uniquement sur dans le dossier frontend
+
+jobs:
+    test-front:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [20.x]
+
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+    
+          - name: Use Node.js ${{ matrix.node-version }}
+            uses: actions/setup-node@v4
+            with:
+                node-version: ${{ matrix.node-version }}
+                cache: 'npm'
+            
+          - name: Install dependencies
+            run: npm install
+        
+          - name: Run tests
+            run: npm test
