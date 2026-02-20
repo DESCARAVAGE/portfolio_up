@@ -1,29 +1,32 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './styles/index.css'
-import { App } from './App'
-import { createBrowserRouter, Outlet, RouterProvider, ScrollRestoration } from 'react-router-dom';
-import { AppRoutes } from './routes/App-routes';
-import { LangingRoutes } from './routes/Index';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles/index.css";
+import { App } from "./App";
+import {
+  createBrowserRouter,
+  Outlet,
+  RouterProvider,
+  ScrollRestoration,
+} from "react-router-dom";
+import { AppRoutes } from "./routes/App-routes";
+import { LangingRoutes } from "./routes/Index";
 
-
-const root = createRoot(document.getElementById('root')!);
+const root = createRoot(document.getElementById("root")!);
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: (
-      
       <>
         <ScrollRestoration />
         <Outlet />
-        </>
+      </>
       // </App>
     ),
     children: [LangingRoutes],
   },
   {
-    path: '/home',
+    path: "/home",
     element: (
       <App>
         <ScrollRestoration />
@@ -31,12 +34,11 @@ const router = createBrowserRouter([
       </App>
     ),
     children: [AppRoutes],
-  }
+  },
 ]);
 
 root.render(
   <StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>
+  </StrictMode>,
 );
-

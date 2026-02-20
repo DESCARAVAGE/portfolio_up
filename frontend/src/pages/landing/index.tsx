@@ -4,10 +4,8 @@
 // import * as React from 'react';
 import type { JSX } from "react";
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import "../../styles/index.css";
-import { paths } from "../../paths";
+import { BtnPortfolio } from "../../components/btn/btnPortfolio";
 
 export function Page(): JSX.Element {
   const interBubbleRef = useRef<HTMLDivElement>(null);
@@ -16,7 +14,6 @@ export function Page(): JSX.Element {
   const curY = useRef(0);
   const tgX = useRef(0);
   const tgY = useRef(0);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const interBubble = interBubbleRef.current;
@@ -49,10 +46,8 @@ export function Page(): JSX.Element {
 
   return (
     <>
-      <div className="landingCard" onClick={() => navigate(paths.home)}>
-        <h3>Découvrez mon portfolio</h3>
-        <MeetingRoomIcon />
-      </div>
+    <BtnPortfolio />
+      
       <div className="gradient-bg">
         <svg xmlns="http://www.w3.org/2000/svg">
           <defs>
