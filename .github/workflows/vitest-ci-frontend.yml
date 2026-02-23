@@ -28,9 +28,9 @@ jobs:
                 cache: 'npm'
             
           - name: Install dependencies
-            run: npm install
             working-directory: frontend
+            run: npm install
         
           - name: Run tests
-            run: npx playwright install 
             working-directory: frontend
+            run: npm test
