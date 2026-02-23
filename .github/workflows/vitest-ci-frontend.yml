@@ -3,8 +3,10 @@ name: vitest-frontend-ci
 
 on:
     push:
-        paths:
-            - "frontend/**" # Déclenchement automatique, uniquement lors d'un push et uniquement sur dans le dossier frontend
+      branches:
+        - dev
+        # paths:
+        #     - "frontend/**" # Déclenchement automatique, uniquement lors d'un push et uniquement sur dans le dossier frontend
 
 jobs:
     test-front:
@@ -22,12 +24,14 @@ jobs:
             uses: actions/setup-node@v4
             with:
                 # cache-dependency-path: subdir/package-lock.json
-                cache-dependency-path: functions/package-lock.json
+                cache-dependency-path: frontend/package-lock.json
                 node-version: ${{ matrix.node-version }}
                 cache: 'npm'
             
           - name: Install dependencies
             run: npm install
+            working-directory: frontend
         
           - name: Run tests
             run: npm test
+            working-directory: frontend
