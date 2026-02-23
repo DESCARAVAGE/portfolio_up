@@ -2,9 +2,8 @@
 name: vitest-frontend-ci
 
 on:
-    push:
-      branches:
-        - dev
+    pull_request:
+        branches: [ dev ]
         # paths:
         #     - "frontend/**" # Déclenchement automatique, uniquement lors d'un push et uniquement sur dans le dossier frontend
 
