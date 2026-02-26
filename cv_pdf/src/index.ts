@@ -14,5 +14,5 @@ app.get("/cv_pdf", (_: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-            console.log(`[server]: Server is running at http://localhost:${port}/cv_pdf`);
-        });
+    console.log(`[server]: Server is running at http://localhost:${port}/cv_pdf`);
+});
