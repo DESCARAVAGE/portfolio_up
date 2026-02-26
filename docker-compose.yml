@@ -32,6 +32,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  
+  cv_pdf:
+    build:
+      context: ./cv_pdf
+      dockerfile: Dockerfile.dev
+    ports:
+      - 8000:8000
+    volumes:
+      - ./cv_pdf/src/:/app/src/:rw
+      - ./cv_pdf/package.json:/app/package.json:rw
+      - ./cv_pdf/uploads/:/app/uploads
+    environment:
+      - WATCHPACK_POLLING=true
 
   frontend:
     build:
