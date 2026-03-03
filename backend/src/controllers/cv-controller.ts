@@ -6,7 +6,7 @@ export function downloadCv(_req: Request, res: Response) {
         const stream = getCvStream();
 
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Dispositon", 'attachment; filename="exemple.pdf');
+        res.setHeader("Content-Dispositon", 'attachment; filename="cv.pdf');
 
         stream.pipe(res);
     } catch (error) {

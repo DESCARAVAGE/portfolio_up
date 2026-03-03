@@ -26,9 +26,9 @@ async function runServer(): Promise<void> {
 
         const app: Express = express();
 
-        app.use("/api/cv", cvRoutes);
-
         app.use("/api/", health);
+
+        app.use("/api/cv", cvRoutes);
 
         /* Define a route for the root path ("/")
          using the HTTP GET method */
