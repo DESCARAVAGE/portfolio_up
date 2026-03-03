@@ -25,6 +25,7 @@ services:
     volumes:
       - ./backend/package.json:/app/package.json:rw
       - ./backend/.env:/app/.env:rw
+      - ./backend/storage:/app/storage
       # - ./backend/jest.config.js:/app/jest.config.js
       - ./backend:/app
   #   environment:
@@ -41,4 +42,5 @@ services:
       - 5173:5173
     volumes:
       - ./frontend:/app
+
 
