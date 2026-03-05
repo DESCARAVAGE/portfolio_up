@@ -1,3 +1,3 @@
 import { CoreUtils } from "./utils";
 
-CoreUtils.runServer();
+export default CoreUtils.runServer();
