@@ -1,17 +1,24 @@
 import axios from "axios"; // client HTTP pour faire la requête dans le test
-import { json } from "express";
 import nock from "nock"; // outil pour mocker les réponses HTTP
+
+//
+const { Pool } = require('pg');
 
 describe("Ping backend", () => {
   const host = "http://localhost:3001"; // hôte utilisée par les tests
+  let pgPool;
 
   beforeAll(() => {
     axios.defaults.baseURL = host; // configure axios pour pointer vers l'hôte mocké
+    pgPool = new Pool({
+        connectionString: process.env.DATABASE_URL
+    });
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     nock.cleanAll(); // nettoie les mocks nock après les tests
     delete axios.defaults.baseURL; // restaure la config d'axios
+    await pgPool.end();
   });
 
   /**
@@ -37,7 +44,7 @@ describe("Ping backend", () => {
   it("responds on GET /api/health with server message", async () => {
     // mock: quand on GET sur '/api/health' pour ce hôte, renvoie 200 et le status attendu
     nock(host).get("/api/health").reply(200, "ok");
-
+ 
     // exécution: effectuer la requête HTTP via axios
     const res = await axios.get("/api/health");
 
@@ -45,12 +52,4 @@ describe("Ping backend", () => {
     expect(res.status).toBe(200);
     expect(res.data).toBe("ok")
   });
-
-//   /**
-//    * TEST 3
-//    * Vérifie que la DB ce monte bien, pour s'y connecter et faire un GET cv "/api/cv/download"
-//    */
-//   it("testing postgres", () => {
-
-//   })
 });
