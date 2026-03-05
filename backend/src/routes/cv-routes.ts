@@ -1,11 +1,9 @@
 import { Router } from "express";
-import { downloadCv } from "../controllers/cv-controller";
-// import { uploadCv } from "../controllers/cv-controller";
+import { downloadLatestCv } from "../controllers/cv-controller";
 
 const router = Router();
 
-router.get("/download", downloadCv);
-
-// router.post("/upload", uploadCv);
+// Return the CV with the highest id (latest)
+router.get("/download", downloadLatestCv);
 
 export default router;
