@@ -3,11 +3,14 @@ FROM node:lts-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+COPY tsconfig.json tsconfig.json
+COPY vite.config.ts vite.config.ts
 
-EXPOSE 5173
+RUN npm i
+COPY src src
+COPY public public
 
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD npm run dev
 
 
 
