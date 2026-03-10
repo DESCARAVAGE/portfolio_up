@@ -1,4 +1,36 @@
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3001:3001
+    volumes:
+      - ./backend/package.json:/app/package.json:rw
+      - ./backend/.env:/app/.env:rw
+      - ./backend/storage:/app/storage
+      - ./backend/jest.config.js:/app/jest.config.js
+      - ./backend:/app
+    environment:
+      - WATCHPACK_POLLING=true
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - 5173:5173
+    volumes:
+      - ./frontend:/app
+      - ./frontend/public/:/app/public/:rw
+    environment:
+      - WDS_SOCKET_HOST=127.0.0.1
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+
   db:
     image: postgres:16
     restart: unless-stopped
@@ -15,32 +47,5 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
-    ports:
-      - 3001:3001
-    volumes:
-      - ./backend/package.json:/app/package.json:rw
-      - ./backend/.env:/app/.env:rw
-      - ./backend/storage:/app/storage
-      # - ./backend/jest.config.js:/app/jest.config.js
-      - ./backend:/app
-  #   environment:
-  #     - WATCHPACK_POLLING=true
-    depends_on:
-      db:
-        condition: service_healthy
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    ports:
-      - 5173:5173
-    volumes:
-      - ./frontend:/app
 
 
