@@ -42,7 +42,7 @@ jobs:
             working-directory: frontend
             run: npm test
 
-    docker:
+    docker-front:
       needs: test-front
       if: github.ref == 'refs/heads/main'
       runs-on: ubuntu-latest
@@ -62,6 +62,6 @@ jobs:
             push: true
             context: "{{defaultContext}}:frontend"
             file: build.Dockerfile
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/green-step-frontend:latest
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:latest
             build-args: |
               VITE_PUBLIC_API_LINK=${{ secrets.VITE_PUBLIC_API_LINK }}

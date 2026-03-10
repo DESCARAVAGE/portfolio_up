@@ -9,17 +9,18 @@ services:
       - ./backend/package.json:/app/package.json:rw
       - ./backend/.env:/app/.env:rw
       - ./backend/storage:/app/storage
-      # - ./backend/jest.config.js:/app/jest.config.js
+      - ./backend/jest.config.js:/app/jest.config.js
       - ./backend:/app
-  #   environment:
-  #     - WATCHPACK_POLLING=true
+    environment:
+      - WATCHPACK_POLLING=true
     depends_on:
       db:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
-    command: npm run dev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     ports:
       - 5173:5173
     volumes:
