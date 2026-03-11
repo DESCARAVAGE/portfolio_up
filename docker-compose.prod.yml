@@ -1,10 +1,10 @@
-servcies:
+services:
   backend:
     image: descaravage/final-project-study-backend
     env_file: .env.backend
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+    # backend doit gérer sa propre attente de la DB (retries/wait-for)
 
   frontend:
     image: descaravage/final-project-study-frontend
@@ -16,7 +16,7 @@ servcies:
     volumes:
       - ./dbData/:/var/lib/postgresql/data/customDataFolder
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d green_step_db -U green_step"]
+      test: ["CMD-SHELL", "pg_isready -d db_portfolio -U portfolio"]
       interval: 5s
       timeout: 5s
       retries: 10
