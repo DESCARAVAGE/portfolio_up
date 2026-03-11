@@ -1,5 +1,3 @@
-version: ""
-
 servcies:
   backend:
     image: descaravage/final-project-study-backend
@@ -10,19 +8,19 @@ servcies:
 
   frontend:
     image: descaravage/final-project-study-frontend
-  
+
   db:
     image: postgres:16
     restart: always
     env_file: .env.db
-    volumes: 
+    volumes:
       - ./dbData/:/var/lib/postgresql/data/customDataFolder
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d green_step_db -U green_step"]
       interval: 5s
       timeout: 5s
       retries: 10
-  
+
   nginx:
     image: nginx:1.28.2
     depends_on:
