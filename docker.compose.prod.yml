@@ -1,3 +1,0 @@
-servcies:
-  frontend:
-    image: descaravage/final-project-study-frontend
