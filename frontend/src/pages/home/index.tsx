@@ -20,7 +20,6 @@ export function Page(): JSX.Element {
         alignItems: "center",
         gap: "20px",
         marginTop: "50px",
-        
       }}
     >
       <div
