@@ -19,7 +19,7 @@ export function Page(): JSX.Element {
         flexDirection: "column",
         alignItems: "center",
         gap: "20px",
-        marginTop: "50px",
+        marginTop: "50px"
       }}
     >
       <div
