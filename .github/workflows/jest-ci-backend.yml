@@ -66,6 +66,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          context: "{{defaultContext}}:backend"
-          file: build.Dockerfile
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-backend
+          context: ./backend
+          file: backend/build.Dockerfile
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-backend:latest

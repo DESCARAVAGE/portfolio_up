@@ -1,11 +1,14 @@
 FROM node:lts-alpine as builder
 
 WORKDIR /app
-COPY package*.json ./
+COPY package.json ./
 COPY tsconfig.json tsconfig.json
 COPY src src
 
+# Génère le dossier node_modules
 RUN npm i
+
+# Génère le dossier dist
 RUN npm run build
 
 FROM node:lts-alpine
