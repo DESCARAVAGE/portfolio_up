@@ -47,6 +47,8 @@ jobs:
       if: github.ref == 'refs/heads/main'
       runs-on: ubuntu-latest
       steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
         - name: Set up QEMU
           uses: docker/setup-qemu-action@v3
         - name: Set up Docker Buildx
@@ -61,8 +63,8 @@ jobs:
           uses: docker/build-push-action@v5
           with:
             push: true
-            context: frontend
-            file: build.Dockerfile
+            context: ./frontend
+            file: frontend/build.Dockerfile
             tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend
             build-args: |
               VITE_PUBLIC_API_LINK=${{ secrets.VITE_PUBLIC_API_LINK }}
