@@ -2,8 +2,8 @@ FROM node:lts-alpine as builder
 
 WORKDIR /app
 
-COPY pack*.json ./
-COPY tsconfig.json tsconfig.json
+COPY pack*.json ./ 
+COPY tsconfig.app.json tsconfig.app.json
 COPY vite.config.ts vite.config.ts
 COPY index.html index.html
 COPY src src
