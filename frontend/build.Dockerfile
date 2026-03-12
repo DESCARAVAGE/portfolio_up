@@ -10,7 +10,7 @@ COPY src src
 COPY public public
 
 # Génère le dossier node_modules
-RUN npm ci
+RUN npm i
 
 ARG VITE_PUBLIC_API_LINK
 
