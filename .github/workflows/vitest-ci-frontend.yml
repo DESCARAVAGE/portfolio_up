@@ -61,7 +61,7 @@ jobs:
           uses: docker/build-push-action@v5
           with:
             push: true
-            context: "{{defaultContext}}:frontend"
+            context: frontend
             file: build.Dockerfile
             tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend
             build-args: |
