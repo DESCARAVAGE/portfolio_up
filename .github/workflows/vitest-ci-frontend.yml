@@ -65,6 +65,6 @@ jobs:
             push: true
             context: ./frontend
             file: frontend/build.Dockerfile
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:latest
             build-args: |
               VITE_PUBLIC_API_LINK=${{ secrets.VITE_PUBLIC_API_LINK }}
