@@ -27,12 +27,5 @@ export const AppRoutes: RouteObject = {
         return { Component: Page };
       },
     },
-    {
-      path: "goals/:goalId",
-      lazy: async () => {
-        const { Page } = await import("../pages/goals/horizon-26");
-        return { Component: Page };
-      },
-    },
   ],
 };
