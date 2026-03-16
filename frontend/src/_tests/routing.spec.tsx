@@ -64,11 +64,11 @@ describe("Display data for route", () => {
     renderWithRouter("/");
 
     // findByText est nécessaire car la route est lazy (async)
-    const div = await screen.findByText(/Découvrez mon portfolio/i);
+    const button = await screen.findByText(/Découvrez mon portfolio/i);
 
     await pause(1500); // 👈 voir la landing
 
-    expect(div).toBeInTheDocument();
+    expect(button).toBeInTheDocument();
   });
 
   /**
@@ -81,10 +81,10 @@ describe("Display data for route", () => {
     renderWithRouter("/");
 
     // On attend que la landing soit chargée
-    const div = await screen.findByText(/Découvrez mon portfolio/i);
+    const button = await screen.findByText(/Découvrez mon portfolio/i);
 
     // On simule un clic utilisateur
-    await user.click(div);
+    await user.click(button);
 
     await pause(1500); // 👈 voir la navigation
 
