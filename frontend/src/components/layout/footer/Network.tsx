@@ -5,12 +5,14 @@ export function Network(): React.JSX.Element {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
       <Box>
-        <p style={{ textAlign: "center" }}>Me suivre sur linkdin</p>
+        <p style={{ textAlign: "center" }}>Me suivre sur LinkedIn</p>
       </Box>
       <Link
-        href="www.linkedin.com/in/escaravage-daniel"
+        href="https://www.linkedin.com/in/escaravage-daniel"
         color="inherit"
         underline="hover"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         <Box
           sx={{

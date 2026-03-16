@@ -1,6 +1,4 @@
 import React from "react";
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
 import "./../../styles/detail.css";
 import type { JSX } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -11,8 +9,6 @@ import Grid from "@mui/material/Grid";
 import { FirstData } from "../../components/detail/FirstData";
 import { SecondData } from "../../components/detail/SecondData";
 import { ThirdData } from "../../components/detail/ThirdData";
-
-//TODO: fix the white square around the btn
 
 const commonNotions1 = [
   {
@@ -267,7 +263,8 @@ export function Page(): JSX.Element {
         </div>
       </div>
 
-      <Box sx={{ width: "100%", typography: "body1" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", typography: "body1" }}>
+        <Box sx={{ maxWidth: "1400px" }}>
         <TabContext value={value}>
           <Box
             sx={{
@@ -298,23 +295,8 @@ export function Page(): JSX.Element {
             <ThirdData notion={experience.notions[2]} />
           </TabPanel>
         </TabContext>
+        </Box>
       </Box>
     </div>
   );
-}
-
-{
-  /* <p>
-            <strong>Compétences acquises :</strong>
-          </p>
-          <ul>
-            {experience.skills.map((skill, index) => (
-              <li key={index}>{skill}</li>
-            ))}
-          </ul> */
-}
-{
-  /* <DevBase/>
-<CollabPhp/>
-<CusomerMission/> */
 }

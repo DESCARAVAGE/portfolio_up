@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "node:fs";
 import { getCvFilePath } from "../storage/cv-storage";
 import { dataSource } from "../utils/db";
 import { Cv } from "../entities/cv-entities";
@@ -12,11 +12,3 @@ export async function getLatestCvStream() {
   const stream = fs.createReadStream(filePath);
   return { stream, cv };
 }
-
-// import fs from "fs";
-// import { getCvFilePath } from "../storage/cv-storage";
-
-// export function getCvStream() {
-//   const filePath = getCvFilePath('cv.pdf');
-//   return fs.createReadStream(filePath);
-// }

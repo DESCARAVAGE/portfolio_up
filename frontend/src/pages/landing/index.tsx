@@ -1,7 +1,3 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import * as React from 'react';
 import type { JSX } from "react";
 import { useEffect, useRef } from "react";
 import "../../styles/index.css";
@@ -23,7 +19,7 @@ export function Page(): JSX.Element {
       curX.current += (tgX.current - curX.current) / 20;
       curY.current += (tgY.current - curY.current) / 20;
       interBubble.style.transform = `translate(${Math.round(
-        curX.current
+        curX.current,
       )}px, ${Math.round(curY.current)}px)`;
       animationRef.current = requestAnimationFrame(move);
     };
@@ -33,11 +29,11 @@ export function Page(): JSX.Element {
       tgY.current = event.clientY;
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    globalThis.window.addEventListener("mousemove", handleMouseMove);
     move();
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      globalThis.window.removeEventListener("mousemove", handleMouseMove);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -46,8 +42,8 @@ export function Page(): JSX.Element {
 
   return (
     <>
-    <BtnPortfolio />
-      
+      <BtnPortfolio />
+
       <div className="gradient-bg">
         <svg xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -82,13 +78,4 @@ export function Page(): JSX.Element {
       </div>
     </>
   );
-}
-
-{
-  /* <div style={{ display: 'flex', justifyContent: 'center' }}>
-<div className='landingCard' >
-<h3>Bienvenue</h3>
-<HomeFilledIcon />
-</div>
-</div> */
 }

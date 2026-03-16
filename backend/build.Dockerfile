@@ -1,4 +1,4 @@
-FROM node:lts-alpine as builder
+FROM node:lts-alpine AS builder
 
 WORKDIR /app
 COPY package.json ./
@@ -22,4 +22,4 @@ COPY --from=builder /app/package-lock.json /app/package-lock.json
 
 RUN npm i --production
 
-CMD npm start
+ENTRYPOINT [ "npm", "start" ]
