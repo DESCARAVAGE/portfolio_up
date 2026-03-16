@@ -4,10 +4,10 @@ import { Box } from "@mui/material";
 import { Footer } from "./footer/Footer";
 
 interface AppLayoutProps {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
-export function AppLayout({ children }: AppLayoutProps): React.JSX.Element {
+export function AppLayout({ children }: Readonly<AppLayoutProps>): React.JSX.Element {
   return (
     <Box
       sx={{

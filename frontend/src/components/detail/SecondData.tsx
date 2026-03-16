@@ -1,12 +1,11 @@
-import type { JSX } from "react";
 import type { Notion } from "../../types/notion";
 import { Chip, Typography } from "@mui/material";
 
 export interface SecondDataProps {
-    notion: Notion;
+    readonly notion: Notion;
 }
 
-export function SecondData({notion}: SecondDataProps): JSX.Element {
+export function SecondData({notion}: Readonly<SecondDataProps>): React.JSX.Element {
     const skillsArray = notion.skills.split(",").map((skill) => (
     <Chip
       key={skill.trim()}
@@ -29,11 +28,6 @@ export function SecondData({notion}: SecondDataProps): JSX.Element {
     <>
       <div>
         <h3>{notion.underTitle}</h3>
-        {/* <div className="container">
-                <div><img src={notion.picture2} alt={notion.title} className="xpImage"/></div>
-                <div><img src={notion.picture1} alt={notion.title} className="xpImage"/></div>
-            </div>
-            <p>{notion.description}.</p> */}
       </div>
       <div className="boxTest">
         <img className="miniBox" src={notion.picture1} alt={notion.title} />

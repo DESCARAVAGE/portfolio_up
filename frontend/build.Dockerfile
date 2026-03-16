@@ -1,4 +1,4 @@
-FROM node:lts-alpine as builder
+FROM node:lts-alpine AS builder
 
 WORKDIR /app
 
@@ -30,4 +30,4 @@ COPY --from=builder /app/public /app/public
 
 RUN npm i --production
 
-CMD npm start
+ENTRYPOINT [ "npm","run" ,"dev" ]
