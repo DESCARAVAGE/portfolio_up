@@ -1,13 +1,16 @@
 services:
   backend:
-    image: descaravage/final-project-study-backend
+    image: descaravage/final-project-study-backend:latest
     env_file: .env.backend
     depends_on:
       - db
     # backend doit gérer sa propre attente de la DB (retries/wait-for)
 
   frontend:
-    image: descaravage/final-project-study-frontend
+    image: descaravage/final-project-study-frontend:latest
+    env_file: .env.frontend
+    depends_on:
+      - backend
 
   db:
     image: postgres:16
