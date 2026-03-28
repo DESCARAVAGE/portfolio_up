@@ -1,1 +1,4 @@
 dbData
+.env.frontend
+.env.backend
+.env.db

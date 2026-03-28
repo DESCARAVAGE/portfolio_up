@@ -26,7 +26,7 @@ export function Page(): JSX.Element {
         }}
       >
         <img
-          src="public/assets/moi.jpeg"
+          src="/assets/moi.jpeg"
           className="profile-image"
           alt="Profile"
         />
