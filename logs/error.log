@@ -1,0 +1,10 @@
+2026/03/28 08:09:59 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:00 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:00 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:01 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:02 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:04 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:07 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:14 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:27 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10
+2026/03/28 08:10:53 [emerg] 1#1: host not found in upstream "backend" in /etc/nginx/nginx.conf:10

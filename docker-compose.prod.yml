@@ -31,8 +31,7 @@ services:
       - backend
     restart: always
     ports:
-      - 8000:80
+      - ${GATEWAY_PORT:-8000}:80
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - web-client-build:/web-client-build
       - ./logs:/var/log/nginx
