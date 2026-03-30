@@ -6,11 +6,9 @@ services:
     ports:
       - 3001:3001
     volumes:
-      - ./backend/package.json:/app/package.json:rw
+      - ./backend:/app
       - ./backend/.env:/app/.env:rw
       - ./backend/storage:/app/storage
-      - ./backend/jest.config.js:/app/jest.config.js
-      - ./backend:/app
     environment:
       - WATCHPACK_POLLING=true
     depends_on:
@@ -48,16 +46,16 @@ services:
       timeout: 5s
       retries: 10
   
-  nginx:
-    image: nginx:1.28.2
-    depends_on:
-      - frontend
-      - backend
-    restart: always
-    ports:
-      - ${GATEWAY_PORT:-8000}:80
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./logs:/var/log/nginx
+  # nginx:
+  #   image: nginx:1.28.2
+  #   depends_on:
+  #     - frontend
+  #     - backend
+  #   restart: always
+  #   ports:
+  #     - ${GATEWAY_PORT:-8000}:80
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #     - ./logs:/var/log/nginx
 
 
