@@ -11,4 +11,4 @@ COPY jest.config.ts jest.config.ts
 RUN npm i
 COPY src src
 
-ENTRYPOINT [ "npm","run","dev"]
+ENTRYPOINT ["npm","run","dev"]
