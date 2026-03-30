@@ -26,7 +26,7 @@ export function Navbar(): React.JSX.Element {
         endIcon={<FileDownloadIcon />}
         onClick={handleDownloadCv}
       >
-        CV
+        CVCV
       </Button>
     </Box>
   );
