@@ -4,6 +4,8 @@ services:
     env_file: .env.backend
     depends_on:
       - db
+    volumes:
+      - ./backend/storage:/app/storage
     # backend doit gérer sa propre attente de la DB (retries/wait-for)
 
   frontend:

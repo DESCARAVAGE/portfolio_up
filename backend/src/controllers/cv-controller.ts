@@ -14,7 +14,7 @@ export async function downloadLatestCv(_req: Request, res: Response) {
 
     stream.pipe(res);
   } catch (error) {
-    res.status(404).json({ message: "Cv not available" });
-    console.error('Cv not availble');
+    res.status(404).json({ message: error });
+    console.error(error);
   }
 }
