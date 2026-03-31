@@ -20,7 +20,6 @@ ARG VITE_PUBLIC_API_LINK
 
 ENV VITE_PUBLIC_API_LINK=${VITE_PUBLIC_API_LINK}
 
-
 # Génère le dossier dist
 RUN npm run build
 
