@@ -4,9 +4,8 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY package.json ./ 
-COPY tsconfig.app.json tsconfig.app.json
-COPY vite.config.ts vite.config.ts
+COPY package*.json ./
+COPY tsconfig*.json vite.config.ts ./
 
 RUN npm ci --ignore-scripts
 
