@@ -30,4 +30,4 @@ COPY --from=builder /app/public /app/public
 
 RUN npm i --production
 
-ENTRYPOINT [ "npm","run" ,"dev" ]
+ENTRYPOINT [ "npm" ,"run", "dev" ]

@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package.json ./
 COPY tsconfig.json tsconfig.json
 COPY src src
+COPY storage storage
 
 # Génère le dossier node_modules
 RUN npm i
@@ -22,4 +23,4 @@ COPY --from=builder /app/package-lock.json /app/package-lock.json
 
 RUN npm i --production
 
-ENTRYPOINT [ "npm", "start" ]
+ENTRYPOINT [ "npm" ,"run", "dev" ]

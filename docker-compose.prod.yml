@@ -1,18 +1,24 @@
 services:
   backend:
     image: descaravage/final-project-study-backend:latest
+    pull_policy: always
     env_file: .env.backend
     depends_on:
       - db
     volumes:
+      - ./backend:/app
       - ./backend/storage:/app/storage
     # backend doit gérer sa propre attente de la DB (retries/wait-for)
 
   frontend:
     image: descaravage/final-project-study-frontend:latest
+    pull_policy: always
     env_file: .env.frontend
     depends_on:
       - backend
+    volumes:
+      - ./frontend:/app
+      - ./frontend/public/:/app/public/:rw
 
   db:
     image: postgres:16
