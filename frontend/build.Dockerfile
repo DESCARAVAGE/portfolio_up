@@ -7,16 +7,20 @@ WORKDIR /app
 COPY package.json ./ 
 COPY tsconfig.app.json tsconfig.app.json
 COPY vite.config.ts vite.config.ts
+
+RUN npm ci --ignore-scripts
+
 COPY index.html index.html
 COPY src src
 COPY public public
 
-# Génère le dossier node_modules
-RUN npm i
+# # Génère le dossier node_modules
+# RUN npm i
 
 ARG VITE_PUBLIC_API_LINK
 
 ENV VITE_PUBLIC_API_LINK=${VITE_PUBLIC_API_LINK}
+
 
 # Génère le dossier dist
 RUN npm run build
