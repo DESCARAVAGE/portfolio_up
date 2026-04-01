@@ -1,26 +1,33 @@
 FROM node:25-alpine AS builder
 
 WORKDIR /app
-COPY package.json ./
-COPY tsconfig.json tsconfig.json
-COPY src src
-COPY storage storage
 
-# Génère le dossier node_modules
-RUN npm i
+# Copy package files and install ALL dependencies (including devDependencies for build)
+COPY package*.json ./
+RUN npm ci
 
-# Génère le dossier dist
+# Copy source and build
+COPY tsconfig.json ./
+COPY src ./src
+COPY storage ./storage
+
+# Build TypeScript to JavaScript
 RUN npm run build
 
-FROM node:lts-alpine
+FROM node:25-alpine AS production
+
+ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Copier les dossiers à partir de l'image précédente
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
-# COPY --from=builder /app/build /app
+# Install ONLY production dependencies
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-RUN npm i --production
+# Copy built files from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/storage ./storage
 
-ENTRYPOINT [ "npm" ,"run", "dev" ]
+EXPOSE 3000
+
+ENTRYPOINT ["npm", "run", "start"]
