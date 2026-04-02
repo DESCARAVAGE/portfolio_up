@@ -1,8 +1,11 @@
 import * as dotenv from "dotenv";
 import 'reflect-metadata';
 import { DataSource } from "typeorm";
+import { Cv } from "../entities/cv-entities";
 
 dotenv.config();
+
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 export const dataSource = new DataSource({
   type: "postgres",
@@ -15,6 +18,8 @@ export const dataSource = new DataSource({
   synchronize: false, //false en prod ou si tu utilise les migrations
   logging: true,
 
-  entities: ["src/entities/*.{ts,js}"],
-  migrations: ["src/migrations/*.{ts,js}"],
+  entities: [Cv],
+  migrations: isDevelopment
+    ? ["src/migrations/**/*.ts"]
+    : [__dirname + "/../migrations/**/*.js"],
 });

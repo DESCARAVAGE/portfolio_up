@@ -9,7 +9,7 @@ export default defineConfig({
     allowedHosts: ['frontend', 'localhost', '127.0.0.1'],
     proxy: {
       '/api': {
-        target: 'http://backend:3001',
+        target: 'http://backend:3000',
         changeOrigin: true,
         secure: false,
       },

@@ -24,6 +24,4 @@ FROM nginxinc/nginx-unprivileged:alpine AS production
 # Copy built static files to nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]

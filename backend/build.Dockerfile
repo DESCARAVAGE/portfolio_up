@@ -24,7 +24,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-USER node
+
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
@@ -32,6 +32,6 @@ COPY --from=builder /app/storage ./storage
 
 EXPOSE 3000
 
-RUN deluser --remove-home node
+USER 1000
 
 ENTRYPOINT ["npm", "run", "start"]

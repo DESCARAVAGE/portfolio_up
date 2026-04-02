@@ -1,15 +1,19 @@
 services:
   backend:
-    image: descaravage/final-project-study-backend:latest
-    pull_policy: always
+    build:
+      context: ./backend
+      dockerfile: build.Dockerfile
     env_file: .env.backend
     depends_on:
       - db
+    volumes:
+      - ./backend/storage:/app/storage
     # backend doit gérer sa propre attente de la DB (retries/wait-for)
 
   frontend:
-    image: descaravage/final-project-study-frontend:latest
-    pull_policy: always
+    build:
+      context: ./frontend
+      dockerfile: build.Dockerfile
     env_file: .env.frontend
     depends_on:
       - backend
