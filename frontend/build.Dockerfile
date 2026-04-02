@@ -19,7 +19,7 @@ ENV VITE_PUBLIC_API_LINK=${VITE_PUBLIC_API_LINK}
 # Build the app
 RUN npm run build
 
-FROM nginx:alpine AS production
+FROM nginxinc/nginx-unprivileged:alpine AS production
 
 # Copy built static files to nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
