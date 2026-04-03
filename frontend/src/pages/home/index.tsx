@@ -30,10 +30,10 @@ export function Page(): JSX.Element {
         <img src="/assets/moi.jpeg" className="profile-image" alt="Profile" />
       </div>
       <div className="textAbout">
-        Ce projet vient finaliser mon cursur d'apprentissage en tant que Manager de Solution Digital & Data. 
+        Ce projet vient finaliser mon cursus d'apprentissage en tant que Manager de Solution Digitale & Data. 
       </div>
       <div className="textAbout">
-        Je vous mets à disposition mon Curiculum Vitae pour plus de d'information sur mes compétences aquisent et en cours d'acquisiont.
+        Je vous mets à disposition mon Curiculum Vitae pour plus d'information sur mes compétences acquisent et en cours de développement.
       </div>
       <Divider />
       <div className="xpCards">
