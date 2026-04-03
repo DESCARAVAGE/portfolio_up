@@ -16,6 +16,7 @@ export function Page(): JSX.Element {
         alignItems: "center",
         gap: "20px",
         marginTop: "50px",
+        marginBottom: "20px",
       }}
     >
       <div
@@ -25,11 +26,7 @@ export function Page(): JSX.Element {
           alignItems: "center",
         }}
       >
-        <img
-          src="/assets/moi.jpeg"
-          className="profile-image"
-          alt="Profile"
-        />
+        <img src="/assets/moi.jpeg" className="profile-image" alt="Profile" />
         Dany SK
       </div>
       <div className="textAbout">
@@ -44,14 +41,20 @@ export function Page(): JSX.Element {
       <div className="xpCards">
         <div className="titleCards">Mon parcours et expériences</div>
         <div className="content">
-          <button className="card" onClick={() => navigate(paths.xpDetails("1"))}>
+          <button
+            className="card"
+            onClick={() => navigate(paths.xpDetails("1"))}
+          >
             <div className="icon">
               <i className="material-icons md-36">school</i>
             </div>
             <p className="title">DWWM | RNCP 5</p>
             <p className="text">Mon entrée dans l'IT (Bootcamp)</p>
           </button>
-          <button className="card" onClick={() => navigate(paths.xpDetails("2"))}>
+          <button
+            className="card"
+            onClick={() => navigate(paths.xpDetails("2"))}
+          >
             <div className="icon">
               <i className="material-icons md-36">psychology</i>
             </div>
@@ -60,7 +63,10 @@ export function Page(): JSX.Element {
               Approfondissement des connaissances (Alternance)
             </p>
           </button>
-          <button className="card" onClick={() => navigate(paths.xpDetails("3"))}>
+          <button
+            className="card"
+            onClick={() => navigate(paths.xpDetails("3"))}
+          >
             <div className="icon">
               <i className="material-icons md-36">work</i>
             </div>

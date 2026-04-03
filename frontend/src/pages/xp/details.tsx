@@ -52,7 +52,7 @@ const commonNotions1 = [
 
 const commonNotions2 = [
   {
-    title: "Conception et Développement",
+    title: "Conception et Dev",
     underTitle: "Traduction d'une idée en un projet concret",
     school: "Wild Code School",
     schoolPicture: "/assets/LogoWild.png",
@@ -64,7 +64,7 @@ const commonNotions2 = [
     skills: "Figma, UI/UX, Diagrammes d'interactions, Wireframe, Maquette, Prototypage, React, Typescript, Express, Full Remote",
   },
   {
-    title: "CI/CD with Docker Github action",
+    title: "CI/CD",
     underTitle: "Projet : Green Step",
     school: "Wild Code School",
     schoolPicture: "assets/LogoWild.png",
@@ -92,7 +92,7 @@ const commonNotions2 = [
 
 const commonNotions3 = [
   {
-    title: "Compréhension client & structuration projet",
+    title: "Compréhension client & Structuration projet",
     underTitle: "De la théorie sur la pratique",
     school: "Cefim Skolae",
     schoolPicture:
@@ -105,7 +105,7 @@ const commonNotions3 = [
     skills: "Leadership, Postionnement technologiques, Art oratoire, gestion d'équipe, Sprint planning, Méthode Scrum, Masterclass",
   },
   {
-    title: "Conception et Développement avec l'IA",
+    title: "IA : Conception et Développement",
     underTitle: "Autopilotage par l'Intelligence Artificielle",
     school: "Wild Code School",
     schoolPicture: "assets/LogoWild.png",
@@ -142,7 +142,7 @@ const experiences = {
     notions: commonNotions1,
   },
   "2": {
-    title: "Concepteur et Développeur d'Application",
+    title: "Concepteur d'Application",
     rncp: "Titre RNCP de niveau 6",
     duration: "2023 - 2024",
     skills: ["TypeScript", "Express", "MongoDB", "SQL", "Docker"],
@@ -202,7 +202,7 @@ export function Page(): JSX.Element {
 
   return (
     <div style={{ padding: "20px", width: "100%" }}>
-      <div style={{ height: "fit-content", marginTop: "20px" }}>
+      <div style={{ height: "fit-content", marginTop: "20px",  marginBottom: "10px" }}>
         <Grid container spacing={1}>
           <Grid size={1} sx={{ display: "flex", alignItems: "center" }}>
             <Button
@@ -227,23 +227,24 @@ export function Page(): JSX.Element {
               justifyContent: "center",
             }}
           >
-            <Tooltip title={experience.notions[0].school} placement="left">
-              <img
-                className="logo"
-                src={experience.notions[0].schoolPicture}
-                alt="picture of the school"
-              />
-            </Tooltip>
+            
             <Link
               href={experience.link}
               underline="hover"
               target="not_blank"
               color="inherit"
             >
-              <Tooltip title={experience.rncp} placement="right">
-                <Typography variant="h4">{experience.title}</Typography>
+              <Tooltip title={experience.rncp} placement="left">
+                <Typography variant="h5">{experience.title}</Typography>
               </Tooltip>
             </Link>
+            <Tooltip title={experience.notions[0].school} placement="right">
+              <img
+                className="logo"
+                src={experience.notions[0].schoolPicture}
+                alt="picture of the school"
+              />
+            </Tooltip>
           </Grid>
           <Grid size={1} sx={{ display: "flex", alignItems: "center" }}>
             {/* Empty grid for spacing */}
@@ -279,9 +280,9 @@ export function Page(): JSX.Element {
               aria-label="lab API tabs example"
               sx={{ "& .MuiTab-root:not(.Mui-selected)": { color: "white" } }}
             >
-              <Tab label={experience.notions[0].title} value="1" />
-              <Tab label={experience.notions[1].title} value="2" />
-              <Tab label={experience.notions[2].title} value="3" />
+              <Tab sx={{ textTransform: 'none' }} label={experience.notions[0].title} value="1" />
+              <Tab sx={{ textTransform: 'none' }} label={experience.notions[1].title} value="2" />
+              <Tab sx={{ textTransform: 'none' }} label={experience.notions[2].title} value="3" />
             </TabList>
           </Box>
 
