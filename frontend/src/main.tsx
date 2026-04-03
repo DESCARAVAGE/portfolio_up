@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import { AppRoutes } from "./routes/App-routes";
 import { LangingRoutes } from "./routes/Index";
+import { BackgroundWB } from "./components/layout/BackgroundWB";
 
 const root = createRoot(document.getElementById("root")!);
 
@@ -18,10 +19,10 @@ const router = createBrowserRouter([
     path: "/",
     element: (
       <>
+        <BackgroundWB />
         <ScrollRestoration />
         <Outlet />
       </>
-      // </App>
     ),
     children: [LangingRoutes],
   },
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
     path: "/home",
     element: (
       <App>
+        <BackgroundWB />
         <ScrollRestoration />
         <Outlet />
       </App>

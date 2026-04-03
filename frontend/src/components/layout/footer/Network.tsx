@@ -1,12 +1,10 @@
 import { Box, Link } from "@mui/material";
 import type React from "react";
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
 
 export function Network(): React.JSX.Element {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
-      <Box>
-        <p style={{ textAlign: "center" }}>Me suivre sur LinkedIn</p>
-      </Box>
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center",  padding: 2 }}>
       <Link
         href="https://www.linkedin.com/in/escaravage-daniel"
         color="inherit"
@@ -14,18 +12,10 @@ export function Network(): React.JSX.Element {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <Box
-          sx={{
-            backgroundColor: "royalblue",
-            padding: 2,
-            borderRadius: 2,
-            color: "white",
-            width: "fit-content",
-            marginX: "auto",
-          }}
-        >
-          LinkedIn Profile
-        </Box>
+      <Box>
+        <p style={{ textAlign: "center" }}>Rejoindre mon réseau</p>
+      </Box>
+          <LinkedInIcon />
       </Link>
     </Box>
   );
