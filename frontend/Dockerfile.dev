@@ -1,4 +1,4 @@
-FROM node:25-alpine
+FROM node:lts
 
 WORKDIR /app
 
@@ -9,6 +9,4 @@ RUN npm i
 COPY src src
 COPY public public
 
-EXPOSE 80
-
-ENTRYPOINT ["npm", "run", "dev", "--", "--host", "--port", "80"]
+ENTRYPOINT ["npm", "run", "dev"]

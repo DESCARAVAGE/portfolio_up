@@ -92,7 +92,7 @@ const commonNotions2 = [
 
 const commonNotions3 = [
   {
-    title: "Compréhension client & Structuration projet",
+    title: "Échange client & Structure projet",
     underTitle: "De la théorie sur la pratique",
     school: "Cefim Skolae",
     schoolPicture:
@@ -105,7 +105,7 @@ const commonNotions3 = [
     skills: "Leadership, Postionnement technologiques, Art oratoire, gestion d'équipe, Sprint planning, Méthode Scrum, Masterclass",
   },
   {
-    title: "IA : Conception et Développement",
+    title: "IA : Pilotage",
     underTitle: "Autopilotage par l'Intelligence Artificielle",
     school: "Wild Code School",
     schoolPicture: "assets/LogoWild.png",
@@ -201,7 +201,7 @@ export function Page(): JSX.Element {
   }
 
   return (
-    <div style={{ padding: "20px", width: "100%" }}>
+    <div style={{ padding: "20px", width: "100%", zIndex: 1 }}>
       <div style={{ height: "fit-content", marginTop: "20px",  marginBottom: "10px" }}>
         <Grid container spacing={1}>
           <Grid size={1} sx={{ display: "flex", alignItems: "center" }}>

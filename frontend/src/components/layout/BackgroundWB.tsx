@@ -1,8 +1,8 @@
 import type { JSX } from "react";
 import { useEffect, useRef } from "react";
-import "../../styles/index.css";
+import "../../styles/Bgwb.css";
 
-export function Background(): JSX.Element {
+export function BackgroundWB(): JSX.Element {
   const interBubbleRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
   const curX = useRef(0);
