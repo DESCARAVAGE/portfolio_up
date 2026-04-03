@@ -1,6 +1,6 @@
-FROM node:25-alpine
+FROM node:lts
 
-RUN apk --no-cache add curl
+# RUN apk --no-cache add curl
 
 WORKDIR /app
 

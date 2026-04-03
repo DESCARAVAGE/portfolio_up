@@ -17,6 +17,7 @@ export function Page(): JSX.Element {
         gap: "20px",
         marginTop: "50px",
         marginBottom: "20px",
+        zIndex: 1,
       }}
     >
       <div
@@ -27,19 +28,16 @@ export function Page(): JSX.Element {
         }}
       >
         <img src="/assets/moi.jpeg" className="profile-image" alt="Profile" />
-        Dany SK
       </div>
       <div className="textAbout">
-        À propos | Bjr je suis moi, vous êtes vous, nous sommes nous, je veux
-        être recruter pour créer de beaux sites qui ne cassent pas :)
+        Ce projet vient finaliser mon cursur d'apprentissage en tant que Manager de Solution Digital & Data. 
       </div>
       <div className="textAbout">
-        Compétences | HTML, CSS, JavaScript, TypeScript, React, Node.js,
-        Express, MongoDB, SQL, Git, Docker, CI/CD
+        Je vous mets à disposition mon Curiculum Vitae pour plus de d'information sur mes compétences aquisent et en cours d'acquisiont.
       </div>
       <Divider />
       <div className="xpCards">
-        <div className="titleCards">Mon parcours et expériences</div>
+        <div className="titleCards">Découvrez on parcours et expériences</div>
         <div className="content">
           <button
             className="card"

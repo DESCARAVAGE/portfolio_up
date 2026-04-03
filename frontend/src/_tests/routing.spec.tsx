@@ -89,7 +89,7 @@ describe("Display data for route", () => {
     await pause(1500); // 👈 voir la navigation
 
     // On attend que la page /home soit rendue
-    const homeText = await screen.findByText(/Dany SK/i);
+    const homeText = await screen.findByText(/Rejoindre mon réseau/i);
 
     await pause(1500); // 👈 voir la navigation
 
