@@ -46,7 +46,7 @@ export function SecondData({notion}: Readonly<SecondDataProps>): React.JSX.Eleme
       </div>
 
       <div className="bgCard">
-        <Typography sx={{ textAlign: 'justify' }}  variant="h6">{notion.description}.</Typography>
+        <Typography sx={{ textAlign: 'justify' }}  variant="body1">{notion.description}.</Typography>
       </div>
     </>
   );
