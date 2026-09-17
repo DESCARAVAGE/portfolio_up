@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy package files and install ALL dependencies (including devDependencies for build)
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # Copy source files
 COPY tsconfig*.json vite.config.ts ./
