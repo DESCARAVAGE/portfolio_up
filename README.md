@@ -1,140 +1,43 @@
-# React + TypeScript + Vite
+# Portfolio — [Ton prénom/nom]
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🎯 Pourquoi ce projet
 
-Currently, two official plugins are available:
+Après 3 années de Faculté de sport, je me suis reconverti dans la programmation — d'abord en autodidacte, puis en suivant des formations de professionnalisation pour des clients et en entreprise.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Ce portfolio répond à un manque concret : l'absence de présence en ligne construite et maîtrisée de bout en bout. Plutôt que de passer par une plateforme clé-en-main, j'ai fait le choix de tout gérer moi-même, « à l'ancienne » : provisionnement et configuration d'un VPS OVH, conteneurisation avec Docker, mise en place d'un reverse proxy, sécurisation du serveur, et supervision manuelle des services — sans dashboard automatisé qui fait le travail à ma place.
 
-## React Compiler
+L'objectif : démontrer une compréhension réelle de la chaîne complète, du code jusqu'à l'infrastructure qui le fait tourner.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## 🔗 Lien du projet
 
-Note: This will impact Vite dev & build performances.
+👉 [www.dany-sk-fsp.com](https://www.dany-sk-fsp.com/)
 
-## Expanding the ESLint configuration
+## 🛠️ Technologies
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Backend
+- **[Node.js](https://nodejs.org/) + [Express](https://expressjs.com/fr/)** — Serveur HTTP léger et flexible, avec un écosystème mature pour construire une API REST rapidement tout en gardant le contrôle sur chaque middleware.
+- **[TypeScript](https://www.typescriptlang.org/)** — Typage statique pour fiabiliser le code et limiter les erreurs à l'exécution, particulièrement utile en solo sur un projet qui grandit.
+- **[TypeORM](https://typeorm.io/)** — ORM pour gérer les entités et les migrations PostgreSQL sans écrire du SQL brut à chaque requête, tout en gardant la possibilité de descendre au SQL quand c'est nécessaire.
+- **[PostgreSQL](https://www.postgresql.org/)** — Base de données relationnelle robuste et éprouvée, adaptée à un modèle de données structuré.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Frontend
+- **[Vite](https://vitejs.dev/)** — Serveur de développement et bundler rapide, avec un temps de démarrage et de rebuild quasi instantané comparé aux outils plus anciens.
+- **[À compléter — React / Vue / autre]** — [Explication à ajouter]
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### CI/CD
+- **[Github Actions](https://github.com/features/actions?locale=fr-fr)**
+- **[Docker Build](https://github.com/features/actions?locale=fr-fr)**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Infrastructure & déploiement
+- **[Docker](https://www.docker.com/) / Docker Compose** — Conteneurisation de chaque service (frontend, backend, base de données, proxy) pour des environnements reproductibles et un déploiement cohérent entre local et production.
+- **[Nginx](https://nginx.org/)** — Reverse proxy interne devant le frontend.
+- **[Caddy](https://caddyserver.com/)** — Proxy en périphérie avec gestion automatique du HTTPS (certificats TLS renouvelés sans intervention manuelle).
+- **[GitHub Actions](https://docs.github.com/fr/actions)** — Intégration continue pour automatiser build et déploiement.
+- **[Fail2ban](https://github.com/fail2ban/fail2ban)** — Protection du serveur contre les tentatives de connexion SSH par force brute.
+- **VPS [OVHcloud](https://www.ovhcloud.com/fr/)** — Hébergement géré manuellement : configuration système, sécurité et supervision faites à la main plutôt que via une plateforme managée.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> *[À compléter si d'autres technologies manquent à cette liste]*
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🙏 Remerciements
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-<!-- TODO: Précision des rôle archi -->
-<!-- Le frontend ne doit pas accéder directement au fichier car cela créerait un couplage fort avec le mode de stockage, exposerait le système de fichier ou les URLs de stockage, et empêcherait tout évolution ultérieur (changement de storage, ajout de règles d'accès, traçabilité). LE frontend doit consommer une API, pas une ressource physique. 
-
-Le backend est responsable de la gestion des headers HTTP (Content-Type, Content-Disposition) car ils font partie du protocole de transport. C’est ce qui permet de forcer un téléchargement côté client, indépendamment du framework frontend utilisé.
-
-backend/
-├── src/
-│   ├── app.ts                # Configuration express
-│   ├── server.ts             # Démarrage serveur
-│   │
-│   ├── routes/
-│   │   └── cv.routes.ts
-│   │
-│   ├── controllers/
-│   │   └── cv.controller.ts
-│   │
-│   ├── services/
-│   │   └── cv.service.ts
-│   │
-│   ├── middlewares/
-│   │   ├── auth.middleware.ts
-│   │   └── upload.middleware.ts
-│   │
-│   ├── db/
-│   │   ├── sqlite.ts
-│   │   └── migrations.ts
-│   │
-│   └── storage/
-│       └── cv.pdf
-│
-├── package.json
-├── tsconfig.json
-├── Dockerfile.dev
-└── .env
-
-architecture
-Client
-  ↓
-Routes
-  ↓
-Middlewares (optionnels)
-  ↓
-Controller   ← orchestration HTTP
-  ↓
-Service      ← logique métier
-  ↓
-Storage / DB ← filesystem ou SQLite
-
-Le controller gère HTTP, le service gère le métier, le storage gère la persistance.
-
-✅ la route mappe une URL vers un controller
-
-La route ne contient aucune logique métier, elle ne fait qu’associer un endpoint HTTP à une fonction de controller.
-
-Admin → POST /api/cv
-        → middleware upload
-        → controller
-        → service
-        → /data/cv.pdf
-
-Client → GET /api/cv
-        → controller
-        → service
-        → stream fichier
--->
+Merci à la communauté des développeurs et à l'écosystème open source, qui donne accès à des outils puissants et à une documentation permettant d'apprendre en continu — et qui encourage à rester curieux, projet après projet.
