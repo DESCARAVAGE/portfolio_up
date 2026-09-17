@@ -1,4 +1,4 @@
-# Portfolio — [Ton prénom/nom]
+# Portfolio — Dany SK
 
 ## 🎯 Pourquoi ce projet
 
@@ -26,7 +26,7 @@ L'objectif : démontrer une compréhension réelle de la chaîne complète, du c
 
 ### CI/CD
 - **[Github Actions](https://github.com/features/actions?locale=fr-fr)**
-- **[Docker Build](https://github.com/features/actions?locale=fr-fr)**
+- **[Docker Build](https://docs.docker.com/build/ci/github-actions/)**
 
 ### Infrastructure & déploiement
 - **[Docker](https://www.docker.com/) / Docker Compose** — Conteneurisation de chaque service (frontend, backend, base de données, proxy) pour des environnements reproductibles et un déploiement cohérent entre local et production.
