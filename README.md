@@ -12,7 +12,7 @@ L'objectif : démontrer une compréhension réelle de la chaîne complète, du c
 
 👉 [www.dany-sk-fsp.com](https://www.dany-sk-fsp.com/)
 
-![Aperçu du portfolio](frontend/public/assets/promo.png)
+![Aperçu du portfolio](/frontend/public/assets/promo.png "Aperçu du portfolio")
 
 ## 🛠️ Technologies
 
