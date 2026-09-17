@@ -1,4 +1,4 @@
-# Portfolio — Dany SK
+# Portfolio — [Ton prénom/nom]
 
 ## 🎯 Pourquoi ce projet
 
@@ -19,24 +19,35 @@ L'objectif : démontrer une compréhension réelle de la chaîne complète, du c
 - **[TypeScript](https://www.typescriptlang.org/)** — Typage statique pour fiabiliser le code et limiter les erreurs à l'exécution, particulièrement utile en solo sur un projet qui grandit.
 - **[TypeORM](https://typeorm.io/)** — ORM pour gérer les entités et les migrations PostgreSQL sans écrire du SQL brut à chaque requête, tout en gardant la possibilité de descendre au SQL quand c'est nécessaire.
 - **[PostgreSQL](https://www.postgresql.org/)** — Base de données relationnelle robuste et éprouvée, adaptée à un modèle de données structuré.
+- **[Jest](https://jestjs.io/) + [Supertest](https://github.com/forwardemail/supertest)** — Tests unitaires et d'intégration de l'API, exécutés en CI contre une vraie instance PostgreSQL de test (pas de mock de la base).
 
 ### Frontend
+- **[React](https://react.dev/) 19 + [TypeScript](https://www.typescriptlang.org/)** — Bibliothèque UI composant par composant, avec typage statique pour fiabiliser les props et les états.
 - **[Vite](https://vitejs.dev/)** — Serveur de développement et bundler rapide, avec un temps de démarrage et de rebuild quasi instantané comparé aux outils plus anciens.
-- **[À compléter — React / Vue / autre]** — [Explication à ajouter]
-
-### CI/CD
-- **[Github Actions](https://github.com/features/actions?locale=fr-fr)**
-- **[Docker Build](https://docs.docker.com/build/ci/github-actions/)**
+- **[React Router](https://reactrouter.com/)** — Navigation côté client entre les différentes sections du portfolio.
+- **[MUI](https://mui.com/) + [HeroUI](https://www.heroui.com/)** — Composants d'interface prêts à l'emploi et accessibles, pour aller plus vite sans sacrifier la cohérence visuelle.
+- **[Emotion](https://emotion.sh/)** — Styling CSS-in-JS utilisé par MUI, pour des styles scoppés par composant.
+- **[Sass](https://sass-lang.com/)** — Pour les styles personnalisés au-delà de ce que couvrent les librairies de composants.
+- **[Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/) + [Testing Library](https://testing-library.com/)** — Tests unitaires et d'intégration front, exécutés automatiquement en CI avant chaque build.
 
 ### Infrastructure & déploiement
 - **[Docker](https://www.docker.com/) / Docker Compose** — Conteneurisation de chaque service (frontend, backend, base de données, proxy) pour des environnements reproductibles et un déploiement cohérent entre local et production.
 - **[Nginx](https://nginx.org/)** — Reverse proxy interne devant le frontend.
 - **[Caddy](https://caddyserver.com/)** — Proxy en périphérie avec gestion automatique du HTTPS (certificats TLS renouvelés sans intervention manuelle).
-- **[GitHub Actions](https://docs.github.com/fr/actions)** — Intégration continue pour automatiser build et déploiement.
 - **[Fail2ban](https://github.com/fail2ban/fail2ban)** — Protection du serveur contre les tentatives de connexion SSH par force brute.
 - **VPS [OVHcloud](https://www.ovhcloud.com/fr/)** — Hébergement géré manuellement : configuration système, sécurité et supervision faites à la main plutôt que via une plateforme managée.
 
-> *[À compléter si d'autres technologies manquent à cette liste]*
+### CI/CD
+
+- **[GitHub Actions](https://docs.github.com/fr/actions)** — Deux pipelines indépendants, un pour le frontend et un pour le backend, déclenchés uniquement quand le dossier concerné change (pas de build inutile si un seul des deux évolue).
+- **[Docker Build](https://docs.docker.com/build/ci/github-actions/)**
+
+Chaque pipeline suit le même principe : **tester avant de construire**.
+1. **Tests automatiques** à chaque push — Vitest/Playwright côté frontend, Jest/Supertest côté backend (contre un vrai conteneur PostgreSQL éphémère, pas une base mockée).
+2. **Build & push conditionnels** — uniquement si les tests passent *et* que le push a lieu sur `main` : construction d'images Docker multi-architecture ([QEMU](https://www.qemu.org/) + [Docker Buildx](https://docs.docker.com/build/buildx/)) puis publication sur [Docker Hub](https://hub.docker.com/).
+3. **Déploiement** — le VPS OVH récupère ensuite ces images à jour via un script (`fetch-and-deploy.sh`) qui relance la stack Docker Compose en production.
+
+Ce découplage garantit qu'aucune image cassée n'atteint jamais Docker Hub : si les tests échouent, le build s'arrête avant la publication.
 
 ## 🙏 Remerciements
 
