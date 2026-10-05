@@ -1,4 +1,4 @@
-FROM node:25-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY storage ./storage
 # Build TypeScript to JavaScript
 RUN npm run build
 
-FROM node:25-alpine AS production
+FROM node:24-alpine AS production
 
 ENV NODE_ENV=production
 
