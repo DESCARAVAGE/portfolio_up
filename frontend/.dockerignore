@@ -1,0 +1,15 @@
+# Installés et générés dans l'image : ne jamais copier ceux de la machine hôte
+node_modules
+.next
+out
+
+# Rapports de tests et de Lighthouse
+playwright-report
+test-results
+.lighthouseci
+coverage
+
+# Secrets et fichiers locaux
+.env*
+*.pem
+.DS_Store
