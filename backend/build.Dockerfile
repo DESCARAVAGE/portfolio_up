@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm ci --ignore-scripts
 
 # Copy source and build
-COPY tsconfig.json ./
+COPY tsconfig*.json ./
 COPY src ./src
 COPY storage ./storage
 

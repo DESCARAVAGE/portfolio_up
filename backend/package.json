@@ -9,7 +9,7 @@
     "migration:generate": "typeorm-ts-node-commonjs -d ./src/utils/db.ts migration:generate ./src/migrations/default",
     "migration:run": "typeorm-ts-node-commonjs -d ./src/utils/db.ts migration:run",
     "migration:run:prod": "typeorm -d ./dist/utils/db.js migration:run",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "test": "jest --runInBand"
   },
   "author": "",
