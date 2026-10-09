@@ -1,28 +1,49 @@
+# Image de production du portfolio Next.js (sortie standalone).
+# Le serveur écoute sur 8080 : c'est le port vers lequel nginx.conf envoie "/".
+
 FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files and install ALL dependencies (including devDependencies for build)
-COPY package*.json ./
-RUN npm ci --ignore-scripts
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    NEXT_TELEMETRY_DISABLED=1
 
-# Copy source files
-COPY tsconfig*.json vite.config.ts ./
-COPY index.html ./
-COPY src ./src
+# pnpm à la version déclarée dans package.json ("packageManager")
+RUN corepack enable
+
+# Dépendances d'abord, pour profiter du cache Docker tant que le lockfile ne change pas
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Uniquement ce qu'il faut pour construire le site (pas de copie globale :
+# aucun fichier local ou secret ne peut se retrouver dans l'image par erreur)
+COPY next.config.ts tsconfig.json postcss.config.mjs ./
+COPY app ./app
 COPY public ./public
 
-# Build args
-ARG VITE_PUBLIC_API_LINK
-ENV VITE_PUBLIC_API_LINK=${VITE_PUBLIC_API_LINK}
+# Adresse publique : lue au build pour l'URL canonique, l'Open Graph et le sitemap
+ARG NEXT_PUBLIC_SITE_URL=https://www.dany-sk-fsp.com
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 
-# Build the app
-RUN npm run build
+RUN pnpm build
 
-FROM nginxinc/nginx-unprivileged:alpine AS production
 
-# Copy built static files to nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY default.conf /etc/nginx/conf.d/default.conf
+FROM node:24-alpine AS production
 
-CMD ["nginx", "-g", "daemon off;"]
+WORKDIR /app
+
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=8080 \
+    HOSTNAME=0.0.0.0
+
+# Serveur minimal + fichiers statiques (non copiés automatiquement par Next)
+COPY --from=builder --chown=1000:1000 /app/.next/standalone ./
+COPY --from=builder --chown=1000:1000 /app/.next/static ./.next/static
+COPY --from=builder --chown=1000:1000 /app/public ./public
+
+USER 1000
+
+EXPOSE 8080
+
+CMD ["node", "server.js"]

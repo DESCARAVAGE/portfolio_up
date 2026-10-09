@@ -1,0 +1,201 @@
+/*
+ * Styles des composants du portfolio : brouillard, cartes (verre / plein / orange),
+ * rail de défilement. Les couleurs de base (--bg, --ink, --accent…) viennent
+ * de app/globals.css ; ce fichier n'ajoute que les tokens propres à ses composants.
+ * Importé dans layout.tsx APRÈS globals.css (et par Surface.tsx).
+ */
+
+/* ----------------------------------------------------------------------------
+ * Brouillard <VantaFog />
+ * Le dégradé s'affiche immédiatement, même sans JavaScript ni WebGL.
+ * Le canvas de Vanta apparaît en fondu par-dessus quand il est prêt (data-ready).
+ * ------------------------------------------------------------------------- */
+
+:root {
+  --fog-cloud: rgba(17, 17, 17, 0.14);
+  --fog-cloud-soft: rgba(17, 17, 17, 0.07);
+}
+
+.dark {
+  --fog-cloud: rgba(242, 242, 240, 0.17);
+  --fog-cloud-soft: rgba(242, 242, 240, 0.08);
+}
+
+.fog {
+  background:
+    radial-gradient(55% 45% at 18% 28%, var(--fog-cloud), transparent 70%),
+    radial-gradient(45% 40% at 82% 18%, var(--fog-cloud-soft), transparent 70%),
+    radial-gradient(65% 55% at 62% 88%, var(--fog-cloud), transparent 72%), var(--bg);
+}
+
+.fog > canvas {
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.fog[data-ready] > canvas {
+  opacity: 1;
+}
+
+/* ----------------------------------------------------------------------------
+ * Rail de défilement <ScrollRail /> : seulement avec une souris
+ * (la barre native est masquée dans ce cas, voir globals.css)
+ * ------------------------------------------------------------------------- */
+
+.scroll-rail {
+  display: none;
+}
+
+@media (pointer: fine) {
+  .scroll-rail {
+    display: flex;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * Surfaces <Surface />
+ * Structure : .surface > .surface__body + .surface__edge + .surface__shine + contenu
+ * Le corps et le contour sont des FRÈRES (pas imbriqués) : un backdrop-filter
+ * dans un autre ne verrait que son parent, pas le brouillard.
+ * ------------------------------------------------------------------------- */
+
+:root {
+  /* Verre */
+  --glass-fill: rgba(255, 255, 255, 0.38);
+  --glass-fill-dense: rgba(242, 242, 240, 0.78);
+  --glass-blur: 18px;
+  /* Le contour « lentille » : on retraite le brouillard vu au travers */
+  --glass-edge: blur(0.6px) brightness(0.55) contrast(2.8) saturate(1.4);
+  --glass-hairline: rgba(17, 17, 17, 0.1);
+  --glass-shine: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 30px 60px -32px rgba(0, 0, 0, 0.28);
+
+  /* Plein */
+  --solid-fill: #111111;
+  --solid-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.45);
+}
+
+.dark {
+  --glass-fill: rgba(18, 18, 18, 0.34);
+  --glass-fill-dense: rgba(11, 11, 11, 0.72);
+  --glass-edge: blur(0.6px) brightness(2.6) contrast(1.5) saturate(1.2);
+  --glass-hairline: rgba(255, 255, 255, 0.1);
+  --glass-shine: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.85);
+
+  --solid-fill: #f2f2f0;
+  --solid-shadow: 0 30px 70px -28px rgba(0, 0, 0, 0.9);
+}
+
+.surface {
+  position: relative;
+  border-radius: var(--surface-radius, 1.25rem);
+}
+
+.surface__body,
+.surface__edge,
+.surface__shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.surface__content {
+  position: relative;
+}
+
+/* Verre */
+.surface--glass {
+  color: var(--ink);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 0 0 1px var(--glass-hairline);
+}
+
+.surface--glass .surface__body {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+}
+
+/* Anneau de 1.5 px qui réfracte le fond (masque = bord seulement) */
+.surface--glass .surface__edge {
+  padding: 1.5px;
+  -webkit-backdrop-filter: var(--glass-edge);
+  backdrop-filter: var(--glass-edge);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+/* Reflet qui suit le pointeur, sur le même anneau */
+.surface--glass .surface__shine {
+  padding: 1.5px;
+  background: radial-gradient(260px circle at var(--mx, 30%) var(--my, 0%), var(--glass-shine), transparent 65%);
+  opacity: 0.55;
+  transition: opacity 0.4s ease;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+.surface--glass:hover .surface__shine {
+  opacity: 1;
+}
+
+/* Verre dense : le header passe au-dessus du texte, il doit rester lisible */
+.surface--dense .surface__body {
+  background: var(--glass-fill-dense);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  backdrop-filter: blur(28px) saturate(1.5);
+}
+
+/* Plein (encre / accent) */
+.surface--solid {
+  color: var(--paper);
+  box-shadow: var(--solid-shadow);
+}
+.surface--solid .surface__body {
+  background: var(--solid-fill);
+}
+
+.surface--accent {
+  color: var(--accent-ink);
+  box-shadow: var(--solid-shadow);
+}
+.surface--accent .surface__body {
+  background: var(--accent-surface);
+}
+
+/* Le texte secondaire s'adapte à la surface pleine */
+.surface--solid .text-mute,
+.surface--accent .text-mute {
+  color: inherit;
+  opacity: 0.72;
+}
+.surface--accent .text-mute {
+  opacity: 0.92;
+}
+
+/* Navigateurs sans backdrop-filter : verre plus opaque, lisible */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .surface--glass .surface__body {
+    background: var(--glass-fill);
+    filter: none;
+  }
+  :root {
+    --glass-fill: rgba(255, 255, 255, 0.82);
+  }
+  .dark {
+    --glass-fill: rgba(18, 18, 18, 0.82);
+  }
+}
