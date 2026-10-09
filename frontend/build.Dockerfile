@@ -15,7 +15,11 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-COPY . .
+# Uniquement ce qu'il faut pour construire le site (pas de copie globale :
+# aucun fichier local ou secret ne peut se retrouver dans l'image par erreur)
+COPY next.config.ts tsconfig.json postcss.config.mjs ./
+COPY app ./app
+COPY public ./public
 
 # Adresse publique : lue au build pour l'URL canonique, l'Open Graph et le sitemap
 ARG NEXT_PUBLIC_SITE_URL=https://www.dany-sk-fsp.com
