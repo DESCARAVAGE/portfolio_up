@@ -85,12 +85,32 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Version du site lue dans frontend/package.json (2.0.0 → tags 2.0.0, 2.0 et 2)
+      - name: Version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./frontend/package.json').version")
+          echo "full=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "minor=${VERSION%.*}" >> "$GITHUB_OUTPUT"
+          echo "major=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
+          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           push: true
           context: ./frontend
           file: frontend/build.Dockerfile
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:latest
+          # latest reste utilisé par fetch-and-deploy.sh ; les autres tags permettent un retour arrière précis
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:${{ steps.version.outputs.full }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:${{ steps.version.outputs.minor }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:${{ steps.version.outputs.major }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:sha-${{ steps.version.outputs.sha }}
           build-args: |
             NEXT_PUBLIC_SITE_URL=https://www.dany-sk-fsp.com
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.full }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}

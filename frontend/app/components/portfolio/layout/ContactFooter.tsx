@@ -3,6 +3,7 @@ import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
 import ScrollSlide from "@/app/components/ui/motion/ScrollSlide";
 import CopyEmail from "@/app/components/ui/base/CopyEmail";
+import pkg from "@/package.json";
 
 const pill = "rounded-full px-5 py-3 font-medium transition-transform hover:-translate-y-0.5";
 
@@ -91,7 +92,7 @@ export default function ContactFooter() {
       </Reveal>
 
       <span className="text-mute font-mono text-xs">
-        © {PROFILE.year} {PROFILE.fullName}
+        © {PROFILE.year} {PROFILE.fullName} · v{pkg.version}
       </span>
     </footer>
   );

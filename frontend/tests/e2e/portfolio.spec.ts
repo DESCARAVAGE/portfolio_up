@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { readFile } from "node:fs/promises";
 
 /** Coupe le défilement fluide : les tests vérifient la destination, pas l'animation. */
 async function instantScroll(page: Page) {
@@ -197,5 +198,66 @@ test.describe("Intégration portfolio_up", () => {
     expect(res.status()).toBe(200);
     expect(res.headers()["content-type"]).toBe("application/pdf");
     expect((await res.body()).subarray(0, 5).toString()).toBe("%PDF-");
+  });
+});
+
+test.describe("Contact", () => {
+  const EMAIL = "danysk.epro@gmail.com";
+
+  test("« M'écrire » et les autres liens e-mail visent la bonne adresse", async ({ page }) => {
+    await page.goto("/");
+    const write = page.getByRole("link", { name: "M'écrire", exact: true });
+    await expect(write).toHaveAttribute("href", `mailto:${EMAIL}`);
+
+    // Grand titre « on en parle ? », bouton « M'écrire » et adresse en clair
+    const hrefs = await page
+      .locator('a[href^="mailto:"]')
+      .evaluateAll((links) => links.map((a) => a.getAttribute("href")));
+    expect(hrefs.length).toBeGreaterThanOrEqual(3);
+    expect(new Set(hrefs)).toEqual(new Set([`mailto:${EMAIL}`]));
+
+    // Le clic confie l'e-mail au logiciel de messagerie : la page ne doit ni changer ni planter
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    const url = page.url();
+    await write.click();
+    await expect(page).toHaveURL(url);
+    expect(errors).toEqual([]);
+  });
+
+  test("« Copier l'adresse » copie l'e-mail et l'annonce", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await page.goto("/");
+    const button = page.locator("#contact").getByRole("button");
+    await expect(button).toHaveText("Copier l'adresse");
+
+    await button.click();
+    await expect(button).toHaveText("Adresse copiée ✓");
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(EMAIL);
+
+    // Le libellé revient tout seul après la confirmation
+    await expect(button).toHaveText("Copier l'adresse", { timeout: 5_000 });
+  });
+
+  test("les deux boutons de CV téléchargent le PDF", async ({ page }) => {
+    // Le serveur Next seul ne sert pas /api : ce test ne tourne que contre la stack Docker complète.
+    test.skip(!process.env.BASE_URL, "nécessite BASE_URL (stack docker compose)");
+    await page.goto("/");
+
+    for (const name of ["Télécharger mon CV", "Mon CV"]) {
+      const link = page.getByRole("link", { name, exact: true });
+      const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
+      expect(download.suggestedFilename(), name).toMatch(/\.pdf$/i);
+      const content = await readFile(await download.path());
+      expect(content.subarray(0, 5).toString(), name).toBe("%PDF-");
+    }
+  });
+});
+
+test.describe("Version", () => {
+  test("le pied de page affiche la version de package.json", async ({ page }) => {
+    const { version } = JSON.parse(await readFile("package.json", "utf8"));
+    await page.goto("/");
+    await expect(page.locator("#contact")).toContainText(`v${version}`);
   });
 });
