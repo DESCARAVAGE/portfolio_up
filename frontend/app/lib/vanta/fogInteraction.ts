@@ -44,7 +44,8 @@ export class FogInteraction {
   burst(x: number, y: number) {
     // une case libre, sinon on recycle l'onde la plus ancienne
     const slot =
-      this.ripples.find((r) => !r.active) ?? this.ripples.reduce((oldest, r) => (r.age > oldest.age ? r : oldest));
+      this.ripples.find((r) => !r.active) ??
+      this.ripples.reduce((oldest, r) => (r.age > oldest.age ? r : oldest), this.ripples[0]);
     Object.assign(slot, { x, y, age: 0, active: true });
   }
 
