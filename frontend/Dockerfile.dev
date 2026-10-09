@@ -1,12 +1,20 @@
-FROM node:lts
+# Image de développement : serveur Next avec rechargement à chaud, port 5173
+# (le même que l'ancien frontend Vite, pour ne rien changer à docker-compose.yml).
+
+FROM node:24-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY tsconfig*.json vite.config.ts ./
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    NEXT_TELEMETRY_DISABLED=1
 
-RUN npm i
-COPY src src
-COPY public public
+RUN corepack enable
 
-ENTRYPOINT ["npm", "run", "dev"]
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["pnpm", "dev", "--hostname", "0.0.0.0", "--port", "5173"]

@@ -1,0 +1,138 @@
+/*
+ * Base de toute l'application : Tailwind, thème clair / sombre, couleurs,
+ * fond de page, défilement, animations d'entrée.
+ * Les styles propres aux composants (cartes en verre, brouillard, rail)
+ * sont dans app/styles/portfolio.css, importé APRÈS ce fichier.
+ */
+
+@import "tailwindcss";
+
+/* `dark:` de Tailwind suit la classe `dark` posée par next-themes sur <html>,
+   et non la préférence du système : le bouton de thème a donc toujours le dernier mot. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ----------------------------------------------------------------------------
+ * Couleurs (tokens)
+ * Une seule source de vérité : chaque couleur change avec la classe `dark`.
+ * Contrastes vérifiés (WCAG AA ≥ 4,5:1), y compris sur le fond de secours nuageux.
+ * ------------------------------------------------------------------------- */
+
+:root {
+  --bg: #f4f4f2; /* fond de page, visible avant / sans le brouillard */
+  --ink: #111111; /* texte principal */
+  --mute: #545452; /* texte secondaire : 6,9:1 sur le fond, 5,1:1 sur le nuage le plus sombre */
+  --line: rgba(17, 17, 17, 0.14); /* filets et bordures */
+  --paper: #f2f2f0; /* texte sur carte pleine (inverse de --ink) */
+  --accent: #e3412b; /* orange : titres, détails, survol */
+  --accent-surface: #c8361f; /* fond orange sous du texte blanc : 4,7:1 */
+  --accent-ink: #ffffff; /* texte sur fond orange */
+}
+
+.dark {
+  --bg: #050505;
+  --ink: #f2f2f0;
+  --mute: #a3a3a0; /* 8:1 sur le fond, 5,4:1 sur le nuage le plus clair */
+  --line: rgba(242, 242, 240, 0.14);
+  --paper: #0b0b0b;
+}
+
+/*
+ * Les mêmes couleurs, en classes Tailwind : `bg-accent-surface`, `text-ink`,
+ * `border-line`, `bg-page`… (au lieu de `bg-[var(--accent-surface)]`).
+ * `font-mono` utilise Geist Mono, chargée par next/font dans layout.tsx.
+ */
+@theme inline {
+  --color-page: var(--bg);
+  --color-ink: var(--ink);
+  --color-line: var(--line);
+  --color-paper: var(--paper);
+  --color-accent: var(--accent);
+  --color-accent-surface: var(--accent-surface);
+  --color-accent-ink: var(--accent-ink);
+  --font-mono: var(--font-geist-mono, ui-monospace), ui-monospace, monospace;
+}
+
+/* ----------------------------------------------------------------------------
+ * Page
+ * ------------------------------------------------------------------------- */
+
+/*
+ * Le fond va sur <body>, jamais sur <html> : sans fond sur <html>, le navigateur
+ * peint celui de <body> sur tout le canevas, SOUS le brouillard (z-index -10).
+ * Un fond sur <html> ferait passer celui de <body> au-dessus et masquerait le brouillard.
+ */
+body {
+  background: var(--bg);
+  color: var(--ink);
+  /* Les variables Geist sont posées sur <body> par next/font (layout.tsx) : la police
+     doit donc être déclarée ici, sur <body>, et non sur <html> où elles n'existent pas. */
+  font-family: var(--font-geist-sans, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Texte secondaire (les cartes pleines et orange l'adaptent, voir portfolio.css) */
+.text-mute {
+  color: var(--mute);
+}
+
+/* Ancres (#experience…) : la section s'arrête sous le header flottant, pas derrière */
+html {
+  scroll-padding-top: 6.5rem;
+}
+
+/* Défilement fluide, sauf si l'utilisateur a demandé moins d'animations */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Avec une souris, la barre native est remplacée par <ScrollRail /> ; au tactile, on la garde */
+@media (pointer: fine) {
+  html {
+    scrollbar-width: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Zones qui défilent à l'intérieur de la page : barre fine aux couleurs du site */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--mute) transparent;
+}
+
+/* ----------------------------------------------------------------------------
+ * Animations d'entrée en CSS (.anim-rise, .anim-fade)
+ * Le contenu est dans le HTML dès le premier affichage, sans attendre le
+ * JavaScript. Délai réglable par élément : style={{ "--delay": "0.3s" }}.
+ * ------------------------------------------------------------------------- */
+
+@keyframes rise-in {
+  from {
+    transform: translateY(var(--rise-from, 110%));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .anim-rise {
+    animation: rise-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--delay, 0s);
+  }
+  .anim-fade {
+    animation: fade-in 0.8s ease both;
+    animation-delay: var(--delay, 0s);
+  }
+}
