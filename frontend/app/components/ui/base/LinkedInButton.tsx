@@ -1,3 +1,4 @@
+import { FaLinkedinIn } from "react-icons/fa6";
 import { PROFILE } from "@/app/content/profile";
 
 const STYLES = {
@@ -10,8 +11,8 @@ const STYLES = {
 
 /**
  * Bouton rond vers le profil LinkedIn, logo seul. Le nom est donné aux lecteurs
- * d'écran par aria-label. Le logo officiel (public/icons/linkedin.svg) sert de
- * masque : il prend la couleur du texte du bouton, dans les deux thèmes.
+ * d'écran par aria-label. Le logo vient de react-icons (Font Awesome) : un SVG
+ * en currentColor, qui prend la couleur du texte du bouton dans les deux thèmes.
  */
 export default function LinkedInButton({
   variant = "accent",
@@ -29,7 +30,7 @@ export default function LinkedInButton({
       title="LinkedIn"
       className={`grid shrink-0 place-items-center rounded-full transition hover:-translate-y-0.5 hover:scale-105 ${STYLES[variant]} ${className}`}
     >
-      <span className="icon-linkedin h-5 w-5" aria-hidden />
+      <FaLinkedinIn className="h-5 w-5" aria-hidden />
     </a>
   );
 }
