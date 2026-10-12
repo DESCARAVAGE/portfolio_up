@@ -4,8 +4,12 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useMotionFactor } from "@/app/hooks/useMotionFactor";
 
-/** Opacité de départ : le texte reste lisible même sans défiler. */
-const FLOOR = 0.35;
+/**
+ * Opacité de départ : le texte reste lisible même sans défiler.
+ * 0,5 garde un contraste d'au moins 3:1 (texte de grande taille, WCAG AA) :
+ * 3,5:1 en thème clair, 4,9:1 en sombre. En dessous, Lighthouse le refuse.
+ */
+const FLOOR = 0.5;
 
 /**
  * Paragraphe dont les mots s'allument un par un au fil du défilement.

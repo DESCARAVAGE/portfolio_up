@@ -37,6 +37,8 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
 
 - Mémoire réduite pour limiter les rechargements en boucle observés sur iPhone (à confirmer sur l'appareil).
 - Contraste des numéros d'étapes des projets en thème clair (3,9:1 → 6:1).
+- Contraste du texte qui s'allume au défilement (« À propos ») avant d'être atteint :
+  opacité de départ 0,35 → 0,5 (2,3:1 → 3,5:1). Lighthouse accessibilité revient à 100.
 
 ## [2.0.0] — 2026-10-09
 
