@@ -50,6 +50,15 @@ export default function ContactFooter() {
               >
                 Mon CV <span aria-hidden>↓</span>
               </a>
+              <a
+                href={PROFILE.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                className={`${pill} border border-[color-mix(in_srgb,currentColor_35%,transparent)]`}
+              >
+                LinkedIn <span aria-hidden>↗</span>
+                <span className="sr-only"> (nouvel onglet)</span>
+              </a>
             </div>
           </div>
 

@@ -15,7 +15,7 @@ export default function PersonJsonLd() {
     url: PROFILE.siteUrl,
     email: `mailto:${PROFILE.email}`,
     address: { "@type": "PostalAddress", addressLocality: "Tours", addressCountry: "FR" },
-    sameAs: PROFILE.socials.map((s) => s.href),
+    sameAs: [PROFILE.linkedin, ...PROFILE.socials.map((s) => s.href)],
     knowsAbout: ["React", "TypeScript", "Next.js", "Accessibilité web", "Tests end-to-end", "Agents IA"],
   };
 

@@ -149,15 +149,15 @@ est produit au build, sans JavaScript envoyé pour elles. Seuls les effets et le
 
 Tout se passe dans **`app/content/profile.ts`**. Aucun composant n'est à toucher pour :
 
-| Changer…                                 | Où dans `profile.ts`                                                                     |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Nom, e-mail, réseaux                     | `PROFILE` (ajouter LinkedIn dans `socials`)                                              |
-| Sections, ordre, titres, menu            | `SECTIONS` : la navigation et la numérotation en sont générées, aucun lien mort possible |
-| Titre et accroche du haut                | `HERO`                                                                                   |
-| Chiffres clés                            | `HIGHLIGHTS`                                                                             |
-| Expériences                              | `EXPERIENCES` (`featured: true` = étude de cas en grand)                                 |
-| Projets                                  | `PROJECTS` (`featured` = projet phare, `minor` = carte compacte en bas)                  |
-| Compétences, approche, vision, formation | `SKILLS`, `APPROACH`, `VISION`, `EDUCATION`, `CERTIFICATIONS`                            |
+| Changer…                                 | Où dans `profile.ts`                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Nom, e-mail, réseaux                     | `PROFILE` (`linkedin` : bouton de la barre et du pied de page ; `socials` : autres liens) |
+| Sections, ordre, titres, menu            | `SECTIONS` : la navigation et la numérotation en sont générées, aucun lien mort possible  |
+| Titre et accroche du haut                | `HERO`                                                                                    |
+| Chiffres clés                            | `HIGHLIGHTS`                                                                              |
+| Expériences                              | `EXPERIENCES` (`featured: true` = étude de cas en grand)                                  |
+| Projets                                  | `PROJECTS` (`featured` = projet phare, `minor` = carte compacte en bas)                   |
+| Compétences, approche, vision, formation | `SKILLS`, `APPROACH`, `VISION`, `EDUCATION`, `CERTIFICATIONS`                             |
 
 Le CV n'est pas dans le frontend : `PROFILE.cv` pointe vers `/api/cv/download`,
 servi par le backend (dernier CV enregistré en base, fichier dans

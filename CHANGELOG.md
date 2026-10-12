@@ -25,6 +25,10 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
   l'économie de données ou peu de mémoire, la 3D n'est pas lancée d'office : un bouton
   « Activer le fond 3D » la propose, et le choix est retenu.
 - Mesure en direct : si l'appareil peine, la qualité du brouillard baisse toute seule.
+- Bouton LinkedIn au centre de la barre de navigation et dans le pied de page. Sur ordinateur,
+  les liens des sections l'entourent ; sur téléphone, le bouton « Menu » devient une icône
+  ronde pour que la barre reste symétrique. Le profil LinkedIn est aussi déclaré aux moteurs
+  de recherche (JSON-LD `sameAs`).
 
 ### Corrigé
 

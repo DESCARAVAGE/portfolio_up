@@ -48,7 +48,9 @@ export const PROFILE = {
    */
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   year: "2026",
-  /** Ajouter LinkedIn ici : { label: "LinkedIn", href: "https://www.linkedin.com/in/…" } */
+  /** Bouton au centre de la barre de navigation et dans le pied de page. */
+  linkedin: "https://www.linkedin.com/in/escaravage-daniel",
+  /** Autres profils : liens texte dans le pied de page. */
   socials: [{ label: "GitHub", href: "https://github.com/descaravage" }] as { label: string; href: string }[],
 } as const;
 

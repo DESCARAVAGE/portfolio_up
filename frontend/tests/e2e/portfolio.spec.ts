@@ -44,7 +44,8 @@ test.describe("Navigation", () => {
     await instantScroll(page);
     if (isMobile) await page.getByRole("button", { name: "Menu" }).click();
 
-    const links = page.getByRole("navigation", { name: "Sections" }).last().getByRole("link");
+    // Liens internes seulement (la barre contient aussi le bouton LinkedIn)
+    const links = page.getByRole("navigation", { name: "Sections" }).last().locator('a[href^="#"]');
     const count = await links.count();
     expect(count).toBeGreaterThan(5);
 
@@ -398,5 +399,26 @@ test.describe("Fond adapté à l'appareil", () => {
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 20 });
     await expect(fog).toHaveAttribute("data-quality", /^(lite|low)$/, { timeout: 20_000 });
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+  });
+});
+
+test.describe("LinkedIn", () => {
+  test("bouton au centre de la barre de navigation et dans le pied de page", async ({ page }) => {
+    await page.goto("/");
+    const href = "https://www.linkedin.com/in/escaravage-daniel";
+    for (const zone of [page.getByRole("banner"), page.locator("#contact")]) {
+      const link = zone.getByRole("link", { name: /LinkedIn/ });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute("href", href);
+      await expect(link).toHaveAttribute("target", "_blank");
+    }
+
+    // Centré dans la barre (à quelques pixels près)
+    const bar = await page.getByRole("banner").locator(".surface").first().boundingBox();
+    const btn = await page
+      .getByRole("banner")
+      .getByRole("link", { name: /LinkedIn/ })
+      .boundingBox();
+    expect(Math.abs(btn!.x + btn!.width / 2 - (bar!.x + bar!.width / 2))).toBeLessThan(4);
   });
 });
