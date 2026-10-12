@@ -116,7 +116,7 @@ export default function SiteHeader() {
             aria-controls="menu-mobile"
             aria-label={open ? "Fermer le menu" : "Menu"}
             onClick={() => setOpen((o) => !o)}
-            className="grid h-11 w-11 place-items-center rounded-full border border-[var(--line)] text-[var(--ink)] transition hover:scale-105 lg:hidden"
+            className="grid h-11 w-11 place-items-center rounded-full border border-[var(--line)] text-[var(--ink)] transition hover:scale-105 hover:text-[var(--accent)] lg:hidden"
           >
             <MenuIcon open={open} />
           </button>
