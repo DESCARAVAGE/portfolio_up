@@ -413,6 +413,10 @@ test.describe("LinkedIn", () => {
       await expect(link).toHaveAttribute("target", "_blank");
     }
 
+    // Le logo (public/icons/linkedin.svg) est bien servi : sinon le bouton serait un rond vide
+    const logo = await page.request.get("/icons/linkedin.svg");
+    expect(logo.status(), "ajouter le logo officiel dans public/icons/linkedin.svg").toBe(200);
+
     // Centré dans la barre (à quelques pixels près)
     const bar = await page.getByRole("banner").locator(".surface").first().boundingBox();
     const btn = await page

@@ -56,6 +56,17 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * Logo LinkedIn <LinkedInButton /> : le fichier officiel sert de masque,
+ * le logo prend donc la couleur du texte (currentColor).
+ * ------------------------------------------------------------------------- */
+
+.icon-linkedin {
+  background-color: currentColor;
+  -webkit-mask: url("/icons/linkedin.svg") center / contain no-repeat;
+  mask: url("/icons/linkedin.svg") center / contain no-repeat;
+}
+
+/* ----------------------------------------------------------------------------
  * Surfaces <Surface />
  * Structure : .surface > .surface__body + .surface__edge + .surface__shine + contenu
  * Le corps et le contour sont des FRÈRES (pas imbriqués) : un backdrop-filter

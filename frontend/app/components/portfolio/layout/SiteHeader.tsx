@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Surface from "@/app/components/ui/base/Surface";
 import ThemeToggle from "@/app/components/ThemeToggle";
+import LinkedInButton from "@/app/components/ui/base/LinkedInButton";
 import { useActiveSection } from "@/app/hooks/useActiveSection";
 import { NAV, SECTIONS, PROFILE } from "@/app/content/profile";
 import { EASE_OUT } from "@/app/lib/motion";
@@ -20,10 +21,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
  *   maison (→ haut de page), compteur | LinkedIn | menu, thème
  * Dès 1024 px, les liens des sections (lien actif souligné) entourent LinkedIn,
  * moitié à gauche, moitié à droite ; en dessous, ils passent dans un menu déroulant.
- * Sous 360 px, trop étroit pour trois colonnes égales : LinkedIn se centre dans l'espace libre.
  * Une seule <nav> : son `display: contents` place ses enfants dans la grille de la
  * barre, et l'ordre au clavier suit l'ordre à l'écran.
- * Sous 1024 px, la navigation passe dans un menu déroulant.
  */
 export default function SiteHeader() {
   const active = useActiveSection(IDS);
@@ -50,7 +49,7 @@ export default function SiteHeader() {
         density="dense"
         radius="999px"
         className="mx-auto max-w-6xl"
-        contentClassName="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 py-2 pr-2.5 pl-2.5 min-[360px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-3"
+        contentClassName="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 py-2 pr-2.5 pl-2.5 sm:gap-x-3"
       >
         {/* Maison dans un cercle, même style que le bouton de thème : la couleur suit le thème
             (currentColor = --ink). Pas de texte visible : le nom est donné par aria-label. */}
@@ -93,15 +92,7 @@ export default function SiteHeader() {
             ))}
           </div>
 
-          <a
-            href={PROFILE.linkedin}
-            target="_blank"
-            rel="noreferrer"
-            className="col-start-2 row-start-1 justify-self-center rounded-full border border-[var(--line)] px-4 py-2.5 whitespace-nowrap transition hover:scale-105 hover:text-[var(--accent)]"
-          >
-            LinkedIn <span aria-hidden>↗</span>
-            <span className="sr-only"> (nouvel onglet)</span>
-          </a>
+          <LinkedInButton className="col-start-2 row-start-1 justify-self-center" />
 
           <div className="col-start-3 row-start-1 hidden items-center gap-0.5 justify-self-start lg:flex">
             {NAV_RIGHT.map((item) => (

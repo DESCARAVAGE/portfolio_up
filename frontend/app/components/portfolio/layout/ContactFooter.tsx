@@ -3,6 +3,7 @@ import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
 import ScrollSlide from "@/app/components/ui/motion/ScrollSlide";
 import CopyEmail from "@/app/components/ui/base/CopyEmail";
+import LinkedInButton from "@/app/components/ui/base/LinkedInButton";
 import pkg from "@/package.json";
 
 const pill = "rounded-full px-5 py-3 font-medium transition-transform hover:-translate-y-0.5";
@@ -36,7 +37,7 @@ export default function ContactFooter() {
         >
           <div className="flex max-w-lg flex-[1_1_20rem] flex-col gap-6">
             <p className="m-0 text-xl leading-snug">{CONTACT.pitch}</p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <a
                 href={`mailto:${PROFILE.email}`}
                 className={`${pill} bg-[var(--accent-surface)] text-[var(--accent-ink)]`}
@@ -50,15 +51,7 @@ export default function ContactFooter() {
               >
                 Mon CV <span aria-hidden>↓</span>
               </a>
-              <a
-                href={PROFILE.linkedin}
-                target="_blank"
-                rel="noreferrer"
-                className={`${pill} border border-[color-mix(in_srgb,currentColor_35%,transparent)]`}
-              >
-                LinkedIn <span aria-hidden>↗</span>
-                <span className="sr-only"> (nouvel onglet)</span>
-              </a>
+              <LinkedInButton variant="outline" />
             </div>
           </div>
 
