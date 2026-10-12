@@ -48,10 +48,9 @@ export const PROFILE = {
    */
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   year: "2026",
-  /** Bouton au centre de la barre de navigation et dans le pied de page. */
+  /** Profils : boutons ronds au centre de la barre de navigation et dans le pied de page. */
   linkedin: "https://www.linkedin.com/in/escaravage-daniel",
-  /** Autres profils : liens texte dans le pied de page. */
-  socials: [{ label: "GitHub", href: "https://github.com/descaravage" }] as { label: string; href: string }[],
+  github: "https://github.com/descaravage",
 } as const;
 
 /**

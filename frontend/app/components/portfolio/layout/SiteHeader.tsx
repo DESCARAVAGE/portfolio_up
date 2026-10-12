@@ -5,21 +5,22 @@ import { AnimatePresence, motion } from "motion/react";
 import Surface from "@/app/components/ui/base/Surface";
 import ThemeToggle from "@/app/components/ThemeToggle";
 import LinkedInButton from "@/app/components/ui/base/LinkedInButton";
+import GitHubButton from "@/app/components/ui/base/GitHubButton";
 import { useActiveSection } from "@/app/hooks/useActiveSection";
 import { NAV, SECTIONS, PROFILE } from "@/app/content/profile";
 import { EASE_OUT } from "@/app/lib/motion";
 
 const IDS = SECTIONS.map((s) => s.id);
-/** Sur ordinateur, les liens se répartissent de part et d'autre du bouton LinkedIn. */
+/** Sur ordinateur, les liens se répartissent de part et d'autre des boutons LinkedIn et GitHub. */
 const NAV_LEFT = NAV.slice(0, Math.floor(NAV.length / 2));
 const NAV_RIGHT = NAV.slice(Math.floor(NAV.length / 2));
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
- * Barre flottante en verre, sur trois colonnes de même largeur autour du bouton
- * LinkedIn, qui reste ainsi pile au centre :
- *   maison (→ haut de page), compteur | LinkedIn | menu, thème
- * Dès 1024 px, les liens des sections (lien actif souligné) entourent LinkedIn,
+ * Barre flottante en verre, sur trois colonnes de même largeur autour des boutons
+ * LinkedIn et GitHub, qui restent ainsi pile au centre :
+ *   maison (→ haut de page), compteur | LinkedIn, GitHub | menu, thème
+ * Dès 1024 px, les liens des sections (lien actif souligné) entourent ces boutons,
  * moitié à gauche, moitié à droite ; en dessous, ils passent dans un menu déroulant.
  * Une seule <nav> : son `display: contents` place ses enfants dans la grille de la
  * barre, et l'ordre au clavier suit l'ordre à l'écran.
@@ -92,7 +93,10 @@ export default function SiteHeader() {
             ))}
           </div>
 
-          <LinkedInButton className="col-start-2 row-start-1 justify-self-center" />
+          <div className="col-start-2 row-start-1 flex items-center gap-2 justify-self-center">
+            <LinkedInButton />
+            <GitHubButton />
+          </div>
 
           <div className="col-start-3 row-start-1 hidden items-center gap-0.5 justify-self-start lg:flex">
             {NAV_RIGHT.map((item) => (

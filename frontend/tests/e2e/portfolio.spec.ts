@@ -402,26 +402,31 @@ test.describe("Fond adapté à l'appareil", () => {
   });
 });
 
-test.describe("LinkedIn", () => {
-  test("bouton au centre de la barre de navigation et dans le pied de page", async ({ page }) => {
+test.describe("LinkedIn et GitHub", () => {
+  const PROFILES = [
+    { name: "LinkedIn", href: "https://www.linkedin.com/in/escaravage-daniel" },
+    { name: "GitHub", href: "https://github.com/descaravage" },
+  ];
+
+  test("boutons au centre de la barre de navigation et dans le pied de page", async ({ page }) => {
     await page.goto("/");
-    const href = "https://www.linkedin.com/in/escaravage-daniel";
-    for (const zone of [page.getByRole("banner"), page.locator("#contact")]) {
-      const link = zone.getByRole("link", { name: /LinkedIn/ });
-      await expect(link).toBeVisible();
-      await expect(link).toHaveAttribute("href", href);
-      await expect(link).toHaveAttribute("target", "_blank");
+    const banner = page.getByRole("banner");
+
+    for (const { name, href } of PROFILES) {
+      for (const zone of [banner, page.locator("#contact")]) {
+        const link = zone.getByRole("link", { name: new RegExp(name) });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute("href", href);
+        await expect(link).toHaveAttribute("target", "_blank");
+        await expect(link.locator("svg")).toHaveCount(1); // le logo est dessiné
+      }
     }
 
-    // Le logo est bien dessiné dans les deux boutons
-    await expect(page.locator('a[href*="linkedin.com"] svg')).toHaveCount(2);
-
-    // Centré dans la barre (à quelques pixels près)
-    const bar = await page.getByRole("banner").locator(".surface").first().boundingBox();
-    const btn = await page
-      .getByRole("banner")
-      .getByRole("link", { name: /LinkedIn/ })
-      .boundingBox();
-    expect(Math.abs(btn!.x + btn!.width / 2 - (bar!.x + bar!.width / 2))).toBeLessThan(4);
+    // Les deux boutons, ensemble, sont centrés dans la barre (à quelques pixels près)
+    const bar = await banner.locator(".surface").first().boundingBox();
+    const first = await banner.getByRole("link", { name: /LinkedIn/ }).boundingBox();
+    const last = await banner.getByRole("link", { name: /GitHub/ }).boundingBox();
+    const middle = (first!.x + last!.x + last!.width) / 2;
+    expect(Math.abs(middle - (bar!.x + bar!.width / 2))).toBeLessThan(4);
   });
 });

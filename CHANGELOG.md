@@ -30,6 +30,8 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
   les liens des sections l'entourent ; sur téléphone, le bouton « Menu » devient une icône
   ronde pour que la barre reste symétrique. Le profil LinkedIn est aussi déclaré aux moteurs
   de recherche (JSON-LD `sameAs`).
+- Bouton GitHub à côté de LinkedIn (encre pleine dans la barre, contour dans le pied de page) :
+  les deux profils sont accessibles sans défiler. Composant commun `SocialButton`.
 
 ### Corrigé
 
