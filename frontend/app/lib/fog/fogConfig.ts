@@ -24,17 +24,20 @@ export const FOG_PALETTES: Record<ResolvedTheme, FogColors> = {
   },
 };
 
-/** Réglages Vanta qui ne dépendent pas du thème. */
-export const FOG_OPTIONS = {
-  // Le shader FOG d'origine n'exploite pas la souris : on désactive
-  // les écouteurs de Vanta, l'interaction est gérée par useFogPointer.
-  mouseControls: false,
-  touchControls: false,
-  gyroControls: false,
-  minHeight: 200.0,
-  minWidth: 200.0,
-  blurFactor: 0.6,
-  zoom: 1,
+/**
+ * Réglages du rendu, choisis pour consommer le moins de mémoire et de batterie possible.
+ * Le brouillard est flou et lent : moins de pixels et moins d'images ne se voient pas.
+ */
+export const FOG_RENDER = {
+  /** Images par seconde (l'écran en affiche 60 à 120 : on en calcule une sur deux ou sur quatre). */
+  fps: 30,
+  /** Le canvas est calculé N fois moins dense que l'écran, puis étiré par le navigateur. */
+  scale: 2,
+  /** Idem sur téléphone et tablette (écran tactile ou fenêtre étroite). */
+  scaleMobile: 4,
+  /** Plafond de pixels du canvas, pour les très grands écrans. */
+  maxPixels: 1_000_000,
+  /** Vitesse de l'animation (1 = celle de l'effet d'origine). */
   speed: 1,
 } as const;
 

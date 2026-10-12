@@ -7,6 +7,22 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la nu
 La version affichée sur le site (pied de page) et celle des images Docker sont lues dans
 `frontend/package.json`.
 
+## [Non publié]
+
+### Modifié
+
+- Fond en brouillard réécrit en WebGL sans bibliothèque : Three.js et Vanta.js sont retirés
+  (~150 Ko compressés de moins, ~4 Ko pour le nouveau moteur). Même rendu, mais bien moins
+  de mémoire : contexte WebGL minimal, 30 images par seconde, pas de réallocation quand la
+  barre d'adresse d'iOS bouge, retour au fond CSS si le système reprend le contexte WebGL.
+- Écrans tactiles : l'anneau et le reflet des cartes en verre deviennent une bordure fixe
+  (un calque de flou par carte au lieu de trois).
+
+### Corrigé
+
+- Mémoire réduite pour limiter les rechargements en boucle observés sur iPhone (à confirmer sur l'appareil).
+- Contraste des numéros d'étapes des projets en thème clair (3,9:1 → 6:1).
+
 ## [2.0.0] — 2026-10-09
 
 Refonte complète du frontend. Le backend, la base de données et l'infrastructure restent en place.

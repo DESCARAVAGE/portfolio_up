@@ -261,3 +261,51 @@ test.describe("Version", () => {
     await expect(page.locator("#contact")).toContainText(`v${version}`);
   });
 });
+
+test.describe("Brouillard économe en mémoire", () => {
+  /** Réveille le brouillard (comme un premier geste). Renvoie false si WebGL est indisponible. */
+  async function wakeFog(page: Page) {
+    await page.goto("/");
+    await page.evaluate(() => window.dispatchEvent(new Event("scroll")));
+    return page
+      .locator(".fog[data-ready] canvas")
+      .waitFor({ state: "attached", timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  test("contexte WebGL minimal et canvas en basse résolution", async ({ page, isMobile }) => {
+    test.skip(!(await wakeFog(page)), "WebGL indisponible ici : le fond CSS reste, rien à mesurer");
+    const info = await page.evaluate(() => {
+      const canvas = document.querySelector<HTMLCanvasElement>(".fog canvas")!;
+      const attrs = canvas.getContext("webgl")?.getContextAttributes();
+      return { attrs, width: canvas.width, screen: window.innerWidth * window.devicePixelRatio };
+    });
+    expect(info.attrs).toMatchObject({ alpha: false, antialias: false, depth: false, stencil: false });
+    // Densité de l'écran divisée par 4 sur mobile, par 2 sur ordinateur
+    expect(info.width).toBeLessThanOrEqual(Math.ceil(info.screen / (isMobile ? 4 : 2)) + 1);
+  });
+
+  test("si le système reprend le contexte WebGL, le fond CSS prend le relais", async ({ page }) => {
+    test.skip(!(await wakeFog(page)), "WebGL indisponible ici : le fond CSS reste, rien à mesurer");
+    await page.evaluate(() => {
+      const canvas = document.querySelector<HTMLCanvasElement>(".fog canvas")!;
+      canvas.getContext("webgl")?.getExtension("WEBGL_lose_context")?.loseContext();
+    });
+    await expect(page.locator(".fog canvas")).toHaveCount(0);
+    await expect(page.locator(".fog")).not.toHaveAttribute("data-ready");
+  });
+
+  test("sur écran tactile, une carte en verre n'a qu'un seul calque de flou", async ({ page, isMobile }) => {
+    await page.goto("/");
+    const display = (selector: string) =>
+      page
+        .locator(`.surface--glass ${selector}`)
+        .first()
+        .evaluate((el) => getComputedStyle(el).display);
+    // Anneau et reflet : remplacés par une bordure fixe sur mobile, gardés avec une souris
+    const expected = isMobile ? "none" : "block";
+    expect(await display(".surface__edge")).toBe(expected);
+    expect(await display(".surface__shine")).toBe(expected);
+  });
+});

@@ -274,7 +274,7 @@ export const PROJECTS: Project[] = [
   {
     title: "Refonte de mon CV en ligne",
     summary:
-      "Refonte UI/UX de mon CV en ligne, auto-hébergé sur mon serveur Linux. Fond WebGL interactif (shader Vanta patché), cartes en verre qui réfractent le décor, thème synchronisé avec le système, qualité suivie avec SonarQube.",
+      "Refonte UI/UX de mon CV en ligne, auto-hébergé sur mon serveur Linux. Fond WebGL interactif écrit sans bibliothèque, cartes en verre qui réfractent le décor, thème synchronisé avec le système, qualité suivie avec SonarQube.",
     role: "Projet personnel",
     period: "2026",
     stack: ["Next.js", "Three.js", "GLSL", "Motion", "Docker", "Caddy"],

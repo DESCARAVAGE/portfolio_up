@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import ThemeProvider from "@/app/providers/ThemeProvider";
 import MotionProvider from "@/app/providers/MotionProvider";
-import VantaFog from "@/app/components/VantaFog";
+import FogBackground from "@/app/components/FogBackground";
 import { PROFILE } from "@/app/content/profile";
 import "./styles/globals.css";
 import "./styles/portfolio.css";
@@ -68,7 +68,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </noscript>
         <ThemeProvider>
           <MotionProvider>
-            <VantaFog />
+            <FogBackground />
             {children}
           </MotionProvider>
         </ThemeProvider>
