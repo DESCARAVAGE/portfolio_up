@@ -3,6 +3,8 @@ import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
 import ScrollSlide from "@/app/components/ui/motion/ScrollSlide";
 import CopyEmail from "@/app/components/ui/base/CopyEmail";
+import LinkedInButton from "@/app/components/ui/base/LinkedInButton";
+import GitHubButton from "@/app/components/ui/base/GitHubButton";
 import pkg from "@/package.json";
 
 const pill = "rounded-full px-5 py-3 font-medium transition-transform hover:-translate-y-0.5";
@@ -36,7 +38,7 @@ export default function ContactFooter() {
         >
           <div className="flex max-w-lg flex-[1_1_20rem] flex-col gap-6">
             <p className="m-0 text-xl leading-snug">{CONTACT.pitch}</p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <a
                 href={`mailto:${PROFILE.email}`}
                 className={`${pill} bg-[var(--accent-surface)] text-[var(--accent-ink)]`}
@@ -50,6 +52,11 @@ export default function ContactFooter() {
               >
                 Mon CV <span aria-hidden>↓</span>
               </a>
+              {/* Les deux profils restent côte à côte, même quand la ligne se coupe */}
+              <div className="flex gap-3">
+                <LinkedInButton variant="outline" />
+                <GitHubButton variant="outline" />
+              </div>
             </div>
           </div>
 
@@ -71,20 +78,6 @@ export default function ContactFooter() {
                   email={PROFILE.email}
                   className="rounded-full border border-[color-mix(in_srgb,currentColor_30%,transparent)] px-3 py-1.5 text-xs transition-colors hover:border-current"
                 />
-              </span>
-              <span className="flex flex-wrap gap-x-6 gap-y-2">
-                {PROFILE.socials.map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline-offset-4 hover:underline"
-                  >
-                    {s.label} <span aria-hidden>↗</span>
-                    <span className="sr-only"> (nouvel onglet)</span>
-                  </a>
-                ))}
               </span>
             </div>
           </div>

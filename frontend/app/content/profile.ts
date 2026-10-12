@@ -48,8 +48,9 @@ export const PROFILE = {
    */
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   year: "2026",
-  /** Ajouter LinkedIn ici : { label: "LinkedIn", href: "https://www.linkedin.com/in/…" } */
-  socials: [{ label: "GitHub", href: "https://github.com/descaravage" }] as { label: string; href: string }[],
+  /** Profils : boutons ronds au centre de la barre de navigation et dans le pied de page. */
+  linkedin: "https://www.linkedin.com/in/escaravage-daniel",
+  github: "https://github.com/descaravage",
 } as const;
 
 /**
@@ -274,7 +275,7 @@ export const PROJECTS: Project[] = [
   {
     title: "Refonte de mon CV en ligne",
     summary:
-      "Refonte UI/UX de mon CV en ligne, auto-hébergé sur mon serveur Linux. Fond WebGL interactif (shader Vanta patché), cartes en verre qui réfractent le décor, thème synchronisé avec le système, qualité suivie avec SonarQube.",
+      "Refonte UI/UX de mon CV en ligne, auto-hébergé sur mon serveur Linux. Fond WebGL interactif écrit sans bibliothèque, dont la qualité s'adapte à l'appareil, cartes en verre qui réfractent le décor, thème synchronisé avec le système, qualité suivie avec SonarQube.",
     role: "Projet personnel",
     period: "2026",
     stack: ["Next.js", "Three.js", "GLSL", "Motion", "Docker", "Caddy"],

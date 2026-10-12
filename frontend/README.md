@@ -34,7 +34,7 @@ tourne derrière la même passerelle nginx que la version 1.
 | Framework    | Next.js 16 (App Router, Turbopack), React 19, TypeScript            |
 | Styles       | Tailwind CSS v4, deux feuilles CSS (`globals.css`, `portfolio.css`) |
 | Animations   | Motion (`motion/react`), animations CSS pour le premier écran       |
-| Fond 3D      | Vanta.js FOG + Three.js, shader patché (remous et ondes au clic)    |
+| Fond 3D      | WebGL sans bibliothèque, shader FOG (remous et ondes au clic)       |
 | Thème        | next-themes (clair / sombre / système)                              |
 | Qualité      | ESLint, Prettier, Playwright + axe-core, Lighthouse CI              |
 | Gestionnaire | pnpm 10                                                             |
@@ -114,18 +114,17 @@ app/
 │   │   ├── media/          Visuels interactifs : LoopVideo, CompareSlider
 │   │   └── scroll/         Indicateurs de défilement : ScrollProgress, ScrollRail
 │   ├── seo/                Données structurées (JSON-LD Person)
-│   ├── VantaFog.tsx        Fond 3D plein écran
+│   ├── FogBackground.tsx   Fond 3D plein écran
 │   └── ThemeToggle.tsx     Bouton clair / sombre
 │
-├── hooks/                  Logique réutilisable (useVantaFog, useMotionFactor, useActiveSection…)
+├── hooks/                  Logique réutilisable (useFog, useMotionFactor, useActiveSection…)
 ├── lib/
 │   ├── motion.ts           Courbes et variantes d'animation partagées
-│   └── vanta/              Brouillard : configuration, shader, interaction, chargement
+│   └── fog/                Brouillard : moteur WebGL, shader, interaction, chargement
 ├── providers/              ThemeProvider (next-themes), MotionProvider (mouvement réduit)
 ├── styles/
 │   ├── globals.css         Base de l'application : Tailwind, couleurs, fond, défilement
 │   └── portfolio.css       Styles des composants : brouillard, cartes, rail
-├── types/                  Déclarations pour les paquets sans types (Vanta)
 └── assets/images/          Images importées (optimisées par next/image)
 
 public/
@@ -152,7 +151,7 @@ Tout se passe dans **`app/content/profile.ts`**. Aucun composant n'est à touche
 
 | Changer…                                 | Où dans `profile.ts`                                                                     |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Nom, e-mail, réseaux                     | `PROFILE` (ajouter LinkedIn dans `socials`)                                              |
+| Nom, e-mail, réseaux                     | `PROFILE` (`linkedin`, `github` : boutons ronds de la barre et du pied de page)          |
 | Sections, ordre, titres, menu            | `SECTIONS` : la navigation et la numérotation en sont générées, aucun lien mort possible |
 | Titre et accroche du haut                | `HERO`                                                                                   |
 | Chiffres clés                            | `HIGHLIGHTS`                                                                             |
@@ -211,6 +210,7 @@ next-themes. Elles existent aussi en classes Tailwind :
 | `--mute` / `.text-mute`             | Texte secondaire                               |
 | `--line` / `border-line`            | Filets et bordures                             |
 | `--accent`                          | Orange décoratif (titres, détails)             |
+| `--accent-text`                     | Petit texte orange (contraste AA sur le verre) |
 | `--accent-surface` / `--accent-ink` | Fond orange sous du texte blanc (contraste AA) |
 
 Le fond de page est posé sur `<body>`, jamais sur `<html>` : sinon il passerait
@@ -220,24 +220,48 @@ au-dessus du brouillard et le masquerait.
 
 Le brouillard est un décor : il ne doit jamais ralentir l'affichage du contenu.
 
-- **Chargement différé.** Three.js et Vanta (~150 Ko compressés) ne sont importés
-  qu'au premier geste du visiteur (souris, toucher, défilement, clavier) ou
+- **Chargement différé.** Le moteur (~4 Ko compressés, sans bibliothèque) n'est
+  importé qu'au premier geste du visiteur (souris, toucher, défilement, clavier) ou
   5 s après le chargement. Un dégradé CSS s'affiche en attendant, puis le
   brouillard apparaît en fondu.
-- **Pas de brouillard** si l'utilisateur a demandé moins d'animations, active
-  l'économie de données, ou si WebGL est indisponible : le dégradé reste.
-- **Interaction** : le pointeur remue le brouillard, un clic dans le fond lance
-  une onde. Réglages dans `app/lib/vanta/fogConfig.ts` (`FOG_INTERACTION`).
-- **Couleurs** : une palette par thème (`FOG_PALETTES`), changée sans recréer la scène.
+- **Adapté à l'appareil.** Le palier est choisi dans le navigateur du visiteur
+  (`detectFogTier`, dans `fogSupport.ts`) :
 
-| Fichier                       | Rôle                                                     |
-| ----------------------------- | -------------------------------------------------------- |
-| `hooks/useVantaFog.ts`        | Cycle de vie : quand charger, créer, recolorer, détruire |
-| `lib/vanta/fogSupport.ts`     | Conditions de lancement et déclenchement différé         |
-| `lib/vanta/createFog.ts`      | Seul fichier qui importe Three.js (chargé à la demande)  |
-| `lib/vanta/fogShader.ts`      | Patch GLSL du shader de Vanta                            |
-| `lib/vanta/fogInteraction.ts` | Remous et ondes, image par image                         |
-| `hooks/useFogPointer.ts`      | Relie souris et toucher à l'interaction                  |
+  | Palier  | Quand                                                                                  | Fond                                          |
+  | ------- | -------------------------------------------------------------------------------------- | --------------------------------------------- |
+  | `full`  | Ordinateur (souris, écran large)                                                       | 3D, canvas 2× moins dense que l'écran, 60 i/s |
+  | `lite`  | Écran tactile ou fenêtre étroite                                                       | 3D, canvas 4× moins dense, 30 i/s             |
+  | `offer` | Navigateur intégré (Instagram, Facebook, TikTok…), économie de données, mémoire ≤ 2 Go | Dégradé CSS + bouton « Activer le fond 3D »   |
+  | `off`   | Mouvement réduit demandé                                                               | Dégradé CSS seul                              |
+
+  Pendant les premières secondes, le moteur chronomètre ses images : si l'appareil
+  peine, il descend d'un niveau (`full` → `lite` → `low`). Le choix d'activer la 3D est
+  retenu pour les visites suivantes. Palier et qualité en cours se lisent dans les
+  attributs `data-tier` et `data-quality` de `.fog` (inspecteur). Réglages : `FOG_QUALITY`
+  et `FOG_PROBE` (`app/lib/fog/fogConfig.ts`).
+
+- **Peu de mémoire.** Sur iPhone, une page trop gourmande est rechargée par le
+  système. Le moteur garde donc le strict minimum : contexte WebGL sans transparence,
+  anticrénelage ni tampon de profondeur ; aucune réallocation quand la barre d'adresse
+  d'iOS bouge. Si le système reprend malgré tout le contexte WebGL, le dégradé CSS revient.
+- **Cartes en verre sur écran tactile** : l'anneau et le reflet, qui suivent la souris,
+  deviennent une bordure fixe. Chaque carte n'a plus qu'un calque de flou au lieu de trois.
+- **Pas de brouillard** si WebGL est indisponible : le dégradé reste.
+- **Interaction** : le pointeur remue le brouillard, un clic dans le fond lance
+  une onde. Réglages dans `app/lib/fog/fogConfig.ts` (`FOG_INTERACTION`).
+- **Couleurs** : une palette par thème (`FOG_PALETTES`), changée sans recréer le moteur.
+
+| Fichier                     | Rôle                                                      |
+| --------------------------- | --------------------------------------------------------- |
+| `components/FogBackground`  | Le fond : dégradé CSS, puis canvas en fondu               |
+| `hooks/useFog.ts`           | Cycle de vie : quand charger, créer, recolorer, détruire  |
+| `lib/fog/fogSupport.ts`     | Palier selon l'appareil, déclenchement différé            |
+| `lib/fog/createFog.ts`      | Moteur WebGL : taille, cadence, mesure, perte de contexte |
+| `components/FogOffer.tsx`   | Bouton « Activer le fond 3D » (palier `offer`)            |
+| `lib/fog/fogShader.ts`      | Shaders GLSL : bruit fractal, remous, ondes               |
+| `lib/fog/fogInteraction.ts` | Remous et ondes, image par image                          |
+| `lib/fog/fogConfig.ts`      | Palettes, réglages du rendu et de l'interaction           |
+| `hooks/useFogPointer.ts`    | Relie souris et toucher à l'interaction                   |
 
 ## Qualité : tests, accessibilité, performance
 

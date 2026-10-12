@@ -44,7 +44,8 @@ test.describe("Navigation", () => {
     await instantScroll(page);
     if (isMobile) await page.getByRole("button", { name: "Menu" }).click();
 
-    const links = page.getByRole("navigation", { name: "Sections" }).last().getByRole("link");
+    // Liens internes seulement (la barre contient aussi le bouton LinkedIn)
+    const links = page.getByRole("navigation", { name: "Sections" }).last().locator('a[href^="#"]');
     const count = await links.count();
     expect(count).toBeGreaterThan(5);
 
@@ -259,5 +260,173 @@ test.describe("Version", () => {
     const { version } = JSON.parse(await readFile("package.json", "utf8"));
     await page.goto("/");
     await expect(page.locator("#contact")).toContainText(`v${version}`);
+  });
+});
+
+test.describe("Brouillard économe en mémoire", () => {
+  /** Réveille le brouillard (comme un premier geste). Renvoie false si WebGL est indisponible. */
+  async function wakeFog(page: Page) {
+    await page.goto("/");
+    await page.evaluate(() => window.dispatchEvent(new Event("scroll")));
+    return page
+      .locator(".fog[data-ready] canvas")
+      .waitFor({ state: "attached", timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  test("contexte WebGL minimal et canvas en basse résolution", async ({ page, isMobile }) => {
+    test.skip(!(await wakeFog(page)), "WebGL indisponible ici : le fond CSS reste, rien à mesurer");
+    const info = await page.evaluate(() => {
+      const canvas = document.querySelector<HTMLCanvasElement>(".fog canvas")!;
+      const attrs = canvas.getContext("webgl")?.getContextAttributes();
+      return { attrs, width: canvas.width, screen: window.innerWidth * window.devicePixelRatio };
+    });
+    expect(info.attrs).toMatchObject({ alpha: false, antialias: false, depth: false, stencil: false });
+    // Densité de l'écran divisée par 4 sur mobile, par 2 sur ordinateur
+    expect(info.width).toBeLessThanOrEqual(Math.ceil(info.screen / (isMobile ? 4 : 2)) + 1);
+  });
+
+  test("si le système reprend le contexte WebGL, le fond CSS prend le relais", async ({ page }) => {
+    test.skip(!(await wakeFog(page)), "WebGL indisponible ici : le fond CSS reste, rien à mesurer");
+    await page.evaluate(() => {
+      const canvas = document.querySelector<HTMLCanvasElement>(".fog canvas")!;
+      canvas.getContext("webgl")?.getExtension("WEBGL_lose_context")?.loseContext();
+    });
+    await expect(page.locator(".fog canvas")).toHaveCount(0);
+    await expect(page.locator(".fog")).not.toHaveAttribute("data-ready");
+  });
+
+  test("sur écran tactile, une carte en verre n'a qu'un seul calque de flou", async ({ page, isMobile }) => {
+    await page.goto("/");
+    const display = (selector: string) =>
+      page
+        .locator(`.surface--glass ${selector}`)
+        .first()
+        .evaluate((el) => getComputedStyle(el).display);
+    // Anneau et reflet : remplacés par une bordure fixe sur mobile, gardés avec une souris
+    const expected = isMobile ? "none" : "block";
+    expect(await display(".surface__edge")).toBe(expected);
+    expect(await display(".surface__shine")).toBe(expected);
+  });
+});
+
+test.describe("Fond adapté à l'appareil", () => {
+  const INSTAGRAM_IPHONE =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 400.0.0.0.0 (iPhone15,2; iOS 18_6; fr_FR; fr; scale=3.00; 1179x2556)";
+  const IPHONE = { viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true };
+  const offer = (page: Page) => page.getByRole("button", { name: "Activer le fond 3D" });
+
+  /** WebGL est-il disponible dans ce navigateur de test ? (sinon, rien à vérifier sur le canvas) */
+  async function webglAvailable(page: Page) {
+    return page.evaluate(() => !!document.createElement("canvas").getContext("webgl"));
+  }
+
+  test("ordinateur : 3D complète ; téléphone : 3D allégée", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await expect(page.locator(".fog")).toHaveAttribute("data-tier", isMobile ? "lite" : "full");
+    await expect(offer(page)).toHaveCount(0);
+  });
+
+  test("mouvement réduit : ni 3D, ni bouton pour l'activer", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator(".fog")).toHaveAttribute("data-tier", "off");
+    await expect(offer(page)).toHaveCount(0);
+  });
+
+  test("navigateur d'Instagram : fond CSS, et la 3D se lance au choix du visiteur", async ({ browser }) => {
+    const context = await browser.newContext({ ...IPHONE, userAgent: INSTAGRAM_IPHONE });
+    const page = await context.newPage();
+    await page.goto("/");
+    const fog = page.locator(".fog");
+    await expect(fog).toHaveAttribute("data-tier", "offer");
+
+    // Un geste ne lance pas la 3D ici
+    await page.evaluate(() => window.dispatchEvent(new Event("scroll")));
+    await page.waitForTimeout(1500);
+    await expect(page.locator(".fog canvas")).toHaveCount(0);
+
+    // Le bouton est lisible, accessible, et indique comment avoir la version complète
+    await expect(offer(page)).toBeVisible();
+    await expect(page.getByText("ouvrir le lien dans le navigateur")).toBeVisible();
+    const a11y = await new AxeBuilder({ page })
+      .include("aside")
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(a11y.violations.map((v) => v.id)).toEqual([]);
+
+    await offer(page).click();
+    await expect(fog).toHaveAttribute("data-tier", "lite");
+    await expect(offer(page)).toHaveCount(0);
+    if (await webglAvailable(page)) {
+      await expect(page.locator(".fog[data-ready] canvas")).toHaveCount(1, { timeout: 10_000 });
+    }
+
+    // Le choix est retenu pour la visite suivante
+    await page.reload();
+    await expect(fog).toHaveAttribute("data-tier", "lite");
+    await expect(offer(page)).toHaveCount(0);
+    await context.close();
+  });
+
+  test("le bouton peut être masqué", async ({ browser }) => {
+    const context = await browser.newContext({ ...IPHONE, userAgent: INSTAGRAM_IPHONE });
+    const page = await context.newPage();
+    await page.goto("/");
+    await page.getByRole("button", { name: "Masquer" }).click();
+    await expect(offer(page)).toHaveCount(0);
+    await expect(page.locator(".fog canvas")).toHaveCount(0);
+    await context.close();
+  });
+
+  test("appareil à faible mémoire : la 3D est proposée, pas imposée", async ({ page }) => {
+    await page.addInitScript(() => Object.defineProperty(Navigator.prototype, "deviceMemory", { get: () => 1 }));
+    await page.goto("/");
+    await expect(page.locator(".fog")).toHaveAttribute("data-tier", "offer");
+    await expect(offer(page)).toBeVisible();
+  });
+
+  test("si l'appareil peine, la qualité baisse toute seule", async ({ page, isMobile }) => {
+    test.skip(isMobile, "un seul cas suffit : on part de la qualité complète (ordinateur)");
+    await page.goto("/");
+    test.skip(!(await webglAvailable(page)), "WebGL indisponible ici : rien à mesurer");
+    const fog = page.locator(".fog");
+    await page.evaluate(() => window.dispatchEvent(new Event("scroll")));
+    await expect(fog).toHaveAttribute("data-quality", "full", { timeout: 10_000 });
+    // Processeur 20 fois plus lent pendant la mesure : les images arrivent en retard
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 20 });
+    await expect(fog).toHaveAttribute("data-quality", /^(lite|low)$/, { timeout: 20_000 });
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+  });
+});
+
+test.describe("LinkedIn et GitHub", () => {
+  const PROFILES = [
+    { name: "LinkedIn", href: "https://www.linkedin.com/in/escaravage-daniel" },
+    { name: "GitHub", href: "https://github.com/descaravage" },
+  ];
+
+  test("boutons au centre de la barre de navigation et dans le pied de page", async ({ page }) => {
+    await page.goto("/");
+    const banner = page.getByRole("banner");
+
+    for (const { name, href } of PROFILES) {
+      for (const zone of [banner, page.locator("#contact")]) {
+        const link = zone.getByRole("link", { name: new RegExp(name) });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute("href", href);
+        await expect(link).toHaveAttribute("target", "_blank");
+        await expect(link.locator("svg")).toHaveCount(1); // le logo est dessiné
+      }
+    }
+
+    // Les deux boutons, ensemble, sont centrés dans la barre (à quelques pixels près)
+    const bar = await banner.locator(".surface").first().boundingBox();
+    const first = await banner.getByRole("link", { name: /LinkedIn/ }).boundingBox();
+    const last = await banner.getByRole("link", { name: /GitHub/ }).boundingBox();
+    const middle = (first!.x + last!.x + last!.width) / 2;
+    expect(Math.abs(middle - (bar!.x + bar!.width / 2))).toBeLessThan(4);
   });
 });

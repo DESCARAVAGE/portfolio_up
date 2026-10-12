@@ -1,5 +1,5 @@
-import { FOG_INTERACTION } from "@/app/lib/vanta/fogConfig";
-import type { FogUniforms } from "@/app/lib/vanta/fogShader";
+import { FOG_INTERACTION } from "@/app/lib/fog/fogConfig";
+import type { FogState } from "@/app/lib/fog/fogShader";
 
 type Ripple = { x: number; y: number; age: number; active: boolean };
 
@@ -9,7 +9,7 @@ const damp = (rate: number, dt: number) => 1 - Math.exp(-rate * dt);
  * État de l'interaction (aucune dépendance au DOM).
  * - move(x, y)  : le pointeur bouge → remous + parallaxe
  * - burst(x, y) : clic / tap → nouvelle onde de choc
- * - update()    : appelé à chaque frame par Vanta, écrit dans les uniforms
+ * - update()    : appelé à chaque image par le moteur, écrit dans l'état du shader
  * Coordonnées en uv : 0..1, origine en bas à gauche.
  */
 export class FogInteraction {
@@ -27,7 +27,7 @@ export class FogInteraction {
     active: false,
   }));
 
-  constructor(private uniforms: FogUniforms) {}
+  constructor(private state: FogState) {}
 
   move(x: number, y: number) {
     if (this.hasPointer) {
@@ -53,7 +53,7 @@ export class FogInteraction {
     const now = performance.now();
     const dt = Math.min((now - this.last) / 1000, 0.1); // évite un saut après un onglet en pause
     this.last = now;
-    const { cfg, uniforms: u } = this;
+    const { cfg, state: s } = this;
 
     // Le pointeur affiché suit la cible en douceur
     const k = damp(cfg.follow, dt);
@@ -70,16 +70,22 @@ export class FogInteraction {
     this.parallax.x += (px - this.parallax.x) * kp;
     this.parallax.y += (py - this.parallax.y) * kp;
 
-    u.uPointer.value.set(this.pointer.x, this.pointer.y);
-    u.uStir.value = this.stir;
-    u.uParallax.value.set(this.parallax.x, this.parallax.y);
+    s.pointer[0] = this.pointer.x;
+    s.pointer[1] = this.pointer.y;
+    s.stir = this.stir;
+    s.parallax[0] = this.parallax.x;
+    s.parallax[1] = this.parallax.y;
 
     this.ripples.forEach((r, i) => {
       if (r.active) {
         r.age += dt;
         if (r.age > cfg.rippleLife) r.active = false;
       }
-      u.uRipples.value[i].set(r.x, r.y, r.age, r.active ? 1 : 0);
+      const o = i * 4;
+      s.ripples[o] = r.x;
+      s.ripples[o + 1] = r.y;
+      s.ripples[o + 2] = r.age;
+      s.ripples[o + 3] = r.active ? 1 : 0;
     });
   }
 }

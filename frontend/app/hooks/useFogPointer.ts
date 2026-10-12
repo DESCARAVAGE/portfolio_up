@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
-import { FOG_INTERACTION } from "@/app/lib/vanta/fogConfig";
-import type { FogInteraction } from "@/app/lib/vanta/fogInteraction";
+import { FOG_INTERACTION } from "@/app/lib/fog/fogConfig";
+import type { FogInteraction } from "@/app/lib/fog/fogInteraction";
 
 /** Éléments sur lesquels un clic ne doit PAS déclencher d'onde. */
 const INTERACTIVE =
@@ -21,13 +21,15 @@ export function useFogPointer(el: RefObject<HTMLElement | null>, interaction: Re
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reducedMotion.matches) {
       if (process.env.NODE_ENV !== "production") {
-        console.info("[VantaFog] interaction désactivée : le système demande de réduire les animations");
+        console.info("[fog] interaction désactivée : le système demande de réduire les animations");
       }
       return;
     }
 
     const toUv = (clientX: number, clientY: number) => {
-      const rect = el.current?.getBoundingClientRect();
+      // Le canvas peut dépasser du fond en bas (voir createFog) : on se repère sur lui
+      const target = el.current?.querySelector("canvas") ?? el.current;
+      const rect = target?.getBoundingClientRect();
       if (!rect || rect.width === 0 || rect.height === 0) return null;
       return {
         x: (clientX - rect.left) / rect.width,

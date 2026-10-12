@@ -25,6 +25,7 @@
   --paper: #f2f2f0; /* texte sur carte pleine (inverse de --ink) */
   --accent: #e3412b; /* orange : titres, détails, survol */
   --accent-surface: #c8361f; /* fond orange sous du texte blanc : 4,7:1 */
+  --accent-text: #b02f1a; /* petit texte orange sur le clair : 6:1 sur une carte en verre */
   --accent-ink: #ffffff; /* texte sur fond orange */
 }
 
@@ -34,6 +35,7 @@
   --mute: #a3a3a0; /* 8:1 sur le fond, 5,4:1 sur le nuage le plus clair */
   --line: rgba(242, 242, 240, 0.14);
   --paper: #0b0b0b;
+  --accent-text: var(--accent);
 }
 
 /*

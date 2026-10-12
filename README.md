@@ -54,7 +54,7 @@ Chaque service tourne dans son conteneur Docker. Le frontend et le backend sont 
 - **[Next.js](https://nextjs.org/) 16 (App Router, Turbopack) + [React](https://react.dev/) 19 + [TypeScript](https://www.typescriptlang.org/)** — Les sections sont rendues côté serveur au moment du build : la page arrive déjà prête, et seuls les éléments interactifs envoient du JavaScript.
 - **[Tailwind CSS](https://tailwindcss.com/) v4** — Styles utilitaires et thème clair / sombre piloté par des variables CSS.
 - **[Motion](https://motion.dev/)** — Animations au défilement, qui respectent le réglage « réduire les animations » du système.
-- **[Vanta.js](https://www.vantajs.com/) + [Three.js](https://threejs.org/)** — Fond en brouillard 3D interactif, chargé seulement au premier geste du visiteur pour ne jamais ralentir l'affichage.
+- **WebGL** — Fond en brouillard interactif, sans bibliothèque (~4 Ko compressés) : un shader inspiré de l'effet FOG de [Vanta.js](https://www.vantajs.com/), chargé seulement au premier geste du visiteur. Sa qualité s'adapte à l'appareil (complète, allégée, ou proposée par un bouton dans les navigateurs d'Instagram et consorts).
 - **[next-themes](https://github.com/pacocoursey/next-themes)** — Thème clair / sombre synchronisé avec le système.
 - **[Playwright](https://playwright.dev/) + [axe-core](https://github.com/dequelabs/axe-core)** — Tests de bout en bout sur ordinateur et mobile, dont l'accessibilité (WCAG 2.2 AA), le téléchargement du CV et le contact.
 - **[Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci)** — Contrôle de la performance, de l'accessibilité et du SEO à chaque build.

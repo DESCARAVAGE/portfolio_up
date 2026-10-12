@@ -6,9 +6,11 @@
  */
 
 /* ----------------------------------------------------------------------------
- * Brouillard <VantaFog />
+ * Brouillard <FogBackground />
  * Le dégradé s'affiche immédiatement, même sans JavaScript ni WebGL.
- * Le canvas de Vanta apparaît en fondu par-dessus quand il est prêt (data-ready).
+ * Le canvas WebGL apparaît en fondu par-dessus quand il est prêt (data-ready).
+ * overflow: hidden : le canvas peut être un peu plus haut que l'écran (barre
+ * d'adresse d'iOS repliée), son bas est rogné plutôt que recalculé.
  * ------------------------------------------------------------------------- */
 
 :root {
@@ -22,6 +24,7 @@
 }
 
 .fog {
+  overflow: hidden;
   background:
     radial-gradient(55% 45% at 18% 28%, var(--fog-cloud), transparent 70%),
     radial-gradient(45% 40% at 82% 18%, var(--fog-cloud-soft), transparent 70%),
@@ -157,6 +160,32 @@
   background: var(--glass-fill-dense);
   -webkit-backdrop-filter: blur(28px) saturate(1.5);
   backdrop-filter: blur(28px) saturate(1.5);
+}
+
+/* Écran tactile : l'anneau et le reflet deviennent une bordure et un liseré
+   lumineux fixes, peints sur le corps de la carte. Sans souris, le reflet ne bouge
+   pas ; or chacun coûtait un calque graphique par carte (l'anneau, un second flou
+   recalculé à chaque image du brouillard). Sur iPhone, leur cumul faisait manquer
+   de mémoire. */
+@media (pointer: coarse) {
+  :root {
+    --glass-ring: rgba(17, 17, 17, 0.2);
+    --glass-top: rgba(255, 255, 255, 0.9);
+  }
+  .dark {
+    --glass-ring: rgba(255, 255, 255, 0.12);
+    --glass-top: rgba(255, 255, 255, 0.3);
+  }
+
+  .surface--glass .surface__edge,
+  .surface--glass .surface__shine {
+    display: none;
+  }
+
+  .surface--glass .surface__body {
+    border: 1px solid var(--glass-ring);
+    box-shadow: inset 0 1px 0 var(--glass-top);
+  }
 }
 
 /* Plein (encre / accent) */

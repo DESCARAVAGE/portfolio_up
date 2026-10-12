@@ -120,7 +120,7 @@ function Featured({ project }: { project: Project }) {
             <ol className="text-mute m-0 flex list-none flex-wrap gap-x-6 gap-y-2 p-0 font-mono text-xs">
               {steps.map((s, i) => (
                 <li key={i} className="flex gap-2">
-                  <span aria-hidden className="text-[var(--accent)]">
+                  <span aria-hidden className="text-[var(--accent-text)]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {s}
