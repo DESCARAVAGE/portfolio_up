@@ -1,13 +1,60 @@
+import type { FogQuality } from "@/app/lib/fog/fogConfig";
+
 /**
- * Faut-il lancer le brouillard 3D ? Non si l'utilisateur a demandé moins
- * d'animations, ou s'il a activé l'économie de données : le fond CSS fixe suffit.
+ * Palier du fond, décidé une fois dans le navigateur du visiteur :
+ * - "full" / "lite" : brouillard 3D, qualité de départ (voir FOG_QUALITY) ;
+ * - "offer" : fond CSS, et un bouton propose d'activer la 3D ;
+ * - "off"   : fond CSS seul (mouvement réduit demandé : on ne propose rien).
+ * Côté serveur, le palier est inconnu (null) : la page est la même pour tous.
  */
-export function fogAllowed(): boolean {
-  if (typeof window === "undefined") return false;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-  if (connection?.saveData) return false;
-  return true;
+export type FogTier = FogQuality | "offer" | "off";
+
+/**
+ * Navigateurs intégrés aux applications (Instagram, Facebook, TikTok, LinkedIn…).
+ * Sur iPhone, leur budget mémoire est plus serré que celui de Safari : le
+ * brouillard y faisait recharger la page en boucle.
+ */
+const IN_APP_BROWSER =
+  /Instagram|FBAN|FBAV|FB_IAB|FB4A|musical_ly|Bytedance|TikTok|LinkedInApp|Snapchat|Pinterest|Line\//i;
+
+/** Mémoire de l'appareil (Go), annoncée par Chrome et Edge seulement. */
+const LOW_MEMORY_GB = 2;
+
+/** Le visiteur a activé la 3D lui-même : on s'en souvient pour ses prochaines visites. */
+const OPT_IN_KEY = "fog-opt-in";
+
+export function isInAppBrowser(): boolean {
+  return typeof navigator !== "undefined" && IN_APP_BROWSER.test(navigator.userAgent);
+}
+
+export function rememberOptIn() {
+  try {
+    localStorage.setItem(OPT_IN_KEY, "1");
+  } catch {
+    /* navigation privée : le choix vaut pour cette visite seulement */
+  }
+}
+
+function hasOptedIn(): boolean {
+  try {
+    return localStorage.getItem(OPT_IN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function detectFogTier(): FogTier {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "off";
+
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number };
+  const constrained =
+    isInAppBrowser() ||
+    nav.connection?.saveData === true ||
+    (nav.deviceMemory !== undefined && nav.deviceMemory <= LOW_MEMORY_GB);
+  if (constrained) return hasOptedIn() ? "lite" : "offer";
+
+  const touch = window.matchMedia("(pointer: coarse)").matches;
+  return touch || window.innerWidth < 600 ? "lite" : "full";
 }
 
 /** Premiers gestes du visiteur qui réveillent le brouillard. */

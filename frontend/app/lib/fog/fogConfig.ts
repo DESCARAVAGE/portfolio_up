@@ -25,20 +25,43 @@ export const FOG_PALETTES: Record<ResolvedTheme, FogColors> = {
 };
 
 /**
- * Réglages du rendu, choisis pour consommer le moins de mémoire et de batterie possible.
- * Le brouillard est flou et lent : moins de pixels et moins d'images ne se voient pas.
+ * Niveaux de qualité du rendu, du plus riche au plus léger.
+ * Le brouillard est flou et lent : moins de pixels et moins d'images se voient peu.
+ * - full : ordinateur (souris, grand écran) ;
+ * - lite : téléphone et tablette tactile, ou 3D activée à la main ;
+ * - low  : appareil qui peine, détecté pendant le rendu (voir FOG_PROBE).
  */
+export type FogQuality = "full" | "lite" | "low";
+
+export const FOG_QUALITY: Record<FogQuality, { scale: number; fps: number }> = {
+  /** scale : le canvas est N fois moins dense que l'écran, puis étiré par le navigateur. */
+  full: { scale: 2, fps: 60 },
+  lite: { scale: 4, fps: 30 },
+  low: { scale: 6, fps: 24 },
+};
+
+/** Ordre de repli quand l'appareil peine. */
+export const FOG_QUALITY_STEPS: readonly FogQuality[] = ["full", "lite", "low"];
+
 export const FOG_RENDER = {
-  /** Images par seconde (l'écran en affiche 60 à 120 : on en calcule une sur deux ou sur quatre). */
-  fps: 30,
-  /** Le canvas est calculé N fois moins dense que l'écran, puis étiré par le navigateur. */
-  scale: 2,
-  /** Idem sur téléphone et tablette (écran tactile ou fenêtre étroite). */
-  scaleMobile: 4,
   /** Plafond de pixels du canvas, pour les très grands écrans. */
   maxPixels: 1_000_000,
   /** Vitesse de l'animation (1 = celle de l'effet d'origine). */
   speed: 1,
+} as const;
+
+/**
+ * Mesure en direct : après le démarrage, on chronomètre les images.
+ * Si l'intervalle médian dépasse `slowFactor` fois celui visé, on descend d'un niveau
+ * et on remesure. On ne coupe jamais le brouillard pour lenteur (seulement
+ * si le système reprend le contexte WebGL).
+ */
+export const FOG_PROBE = {
+  /** On laisse passer les premières images (compilation du shader, chargement de la page). */
+  warmupMs: 600,
+  /** Durée de la mesure. */
+  windowMs: 2000,
+  slowFactor: 1.5,
 } as const;
 
 /**

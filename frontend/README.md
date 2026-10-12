@@ -224,30 +224,44 @@ Le brouillard est un décor : il ne doit jamais ralentir l'affichage du contenu.
   importé qu'au premier geste du visiteur (souris, toucher, défilement, clavier) ou
   5 s après le chargement. Un dégradé CSS s'affiche en attendant, puis le
   brouillard apparaît en fondu.
+- **Adapté à l'appareil.** Le palier est choisi dans le navigateur du visiteur
+  (`detectFogTier`, dans `fogSupport.ts`) :
+
+  | Palier  | Quand                                                                                  | Fond                                          |
+  | ------- | -------------------------------------------------------------------------------------- | --------------------------------------------- |
+  | `full`  | Ordinateur (souris, écran large)                                                       | 3D, canvas 2× moins dense que l'écran, 60 i/s |
+  | `lite`  | Écran tactile ou fenêtre étroite                                                       | 3D, canvas 4× moins dense, 30 i/s             |
+  | `offer` | Navigateur intégré (Instagram, Facebook, TikTok…), économie de données, mémoire ≤ 2 Go | Dégradé CSS + bouton « Activer le fond 3D »   |
+  | `off`   | Mouvement réduit demandé                                                               | Dégradé CSS seul                              |
+
+  Pendant les premières secondes, le moteur chronomètre ses images : si l'appareil
+  peine, il descend d'un niveau (`full` → `lite` → `low`). Le choix d'activer la 3D est
+  retenu pour les visites suivantes. Palier et qualité en cours se lisent dans les
+  attributs `data-tier` et `data-quality` de `.fog` (inspecteur). Réglages : `FOG_QUALITY`
+  et `FOG_PROBE` (`app/lib/fog/fogConfig.ts`).
+
 - **Peu de mémoire.** Sur iPhone, une page trop gourmande est rechargée par le
   système. Le moteur garde donc le strict minimum : contexte WebGL sans transparence,
-  anticrénelage ni tampon de profondeur ; canvas 2 à 4 fois moins dense que l'écran ;
-  30 images par seconde ; aucune réallocation quand la barre d'adresse d'iOS bouge.
-  Si le système reprend malgré tout le contexte WebGL, le dégradé CSS revient.
-  Réglages dans `FOG_RENDER` (`app/lib/fog/fogConfig.ts`).
+  anticrénelage ni tampon de profondeur ; aucune réallocation quand la barre d'adresse
+  d'iOS bouge. Si le système reprend malgré tout le contexte WebGL, le dégradé CSS revient.
 - **Cartes en verre sur écran tactile** : l'anneau et le reflet, qui suivent la souris,
   deviennent une bordure fixe. Chaque carte n'a plus qu'un calque de flou au lieu de trois.
-- **Pas de brouillard** si l'utilisateur a demandé moins d'animations, active
-  l'économie de données, ou si WebGL est indisponible : le dégradé reste.
+- **Pas de brouillard** si WebGL est indisponible : le dégradé reste.
 - **Interaction** : le pointeur remue le brouillard, un clic dans le fond lance
   une onde. Réglages dans `app/lib/fog/fogConfig.ts` (`FOG_INTERACTION`).
 - **Couleurs** : une palette par thème (`FOG_PALETTES`), changée sans recréer le moteur.
 
-| Fichier                     | Rôle                                                     |
-| --------------------------- | -------------------------------------------------------- |
-| `components/FogBackground`  | Le fond : dégradé CSS, puis canvas en fondu              |
-| `hooks/useFog.ts`           | Cycle de vie : quand charger, créer, recolorer, détruire |
-| `lib/fog/fogSupport.ts`     | Conditions de lancement et déclenchement différé         |
-| `lib/fog/createFog.ts`      | Moteur WebGL : taille, cadence, pause, perte de contexte |
-| `lib/fog/fogShader.ts`      | Shaders GLSL : bruit fractal, remous, ondes              |
-| `lib/fog/fogInteraction.ts` | Remous et ondes, image par image                         |
-| `lib/fog/fogConfig.ts`      | Palettes, réglages du rendu et de l'interaction          |
-| `hooks/useFogPointer.ts`    | Relie souris et toucher à l'interaction                  |
+| Fichier                     | Rôle                                                      |
+| --------------------------- | --------------------------------------------------------- |
+| `components/FogBackground`  | Le fond : dégradé CSS, puis canvas en fondu               |
+| `hooks/useFog.ts`           | Cycle de vie : quand charger, créer, recolorer, détruire  |
+| `lib/fog/fogSupport.ts`     | Palier selon l'appareil, déclenchement différé            |
+| `lib/fog/createFog.ts`      | Moteur WebGL : taille, cadence, mesure, perte de contexte |
+| `components/FogOffer.tsx`   | Bouton « Activer le fond 3D » (palier `offer`)            |
+| `lib/fog/fogShader.ts`      | Shaders GLSL : bruit fractal, remous, ondes               |
+| `lib/fog/fogInteraction.ts` | Remous et ondes, image par image                          |
+| `lib/fog/fogConfig.ts`      | Palettes, réglages du rendu et de l'interaction           |
+| `hooks/useFogPointer.ts`    | Relie souris et toucher à l'interaction                   |
 
 ## Qualité : tests, accessibilité, performance
 

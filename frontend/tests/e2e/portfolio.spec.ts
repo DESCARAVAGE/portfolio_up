@@ -309,3 +309,94 @@ test.describe("Brouillard économe en mémoire", () => {
     expect(await display(".surface__shine")).toBe(expected);
   });
 });
+
+test.describe("Fond adapté à l'appareil", () => {
+  const INSTAGRAM_IPHONE =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 400.0.0.0.0 (iPhone15,2; iOS 18_6; fr_FR; fr; scale=3.00; 1179x2556)";
+  const IPHONE = { viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true };
+  const offer = (page: Page) => page.getByRole("button", { name: "Activer le fond 3D" });
+
+  /** WebGL est-il disponible dans ce navigateur de test ? (sinon, rien à vérifier sur le canvas) */
+  async function webglAvailable(page: Page) {
+    return page.evaluate(() => !!document.createElement("canvas").getContext("webgl"));
+  }
+
+  test("ordinateur : 3D complète ; téléphone : 3D allégée", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await expect(page.locator(".fog")).toHaveAttribute("data-tier", isMobile ? "lite" : "full");
+    await expect(offer(page)).toHaveCount(0);
+  });
+
+  test("mouvement réduit : ni 3D, ni bouton pour l'activer", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator(".fog")).toHaveAttribute("data-tier", "off");
+    await expect(offer(page)).toHaveCount(0);
+  });
+
+  test("navigateur d'Instagram : fond CSS, et la 3D se lance au choix du visiteur", async ({ browser }) => {
+    const context = await browser.newContext({ ...IPHONE, userAgent: INSTAGRAM_IPHONE });
+    const page = await context.newPage();
+    await page.goto("/");
+    const fog = page.locator(".fog");
+    await expect(fog).toHaveAttribute("data-tier", "offer");
+
+    // Un geste ne lance pas la 3D ici
+    await page.evaluate(() => window.dispatchEvent(new Event("scroll")));
+    await page.waitForTimeout(1500);
+    await expect(page.locator(".fog canvas")).toHaveCount(0);
+
+    // Le bouton est lisible, accessible, et indique comment avoir la version complète
+    await expect(offer(page)).toBeVisible();
+    await expect(page.getByText("ouvrir le lien dans le navigateur")).toBeVisible();
+    const a11y = await new AxeBuilder({ page })
+      .include("aside")
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(a11y.violations.map((v) => v.id)).toEqual([]);
+
+    await offer(page).click();
+    await expect(fog).toHaveAttribute("data-tier", "lite");
+    await expect(offer(page)).toHaveCount(0);
+    if (await webglAvailable(page)) {
+      await expect(page.locator(".fog[data-ready] canvas")).toHaveCount(1, { timeout: 10_000 });
+    }
+
+    // Le choix est retenu pour la visite suivante
+    await page.reload();
+    await expect(fog).toHaveAttribute("data-tier", "lite");
+    await expect(offer(page)).toHaveCount(0);
+    await context.close();
+  });
+
+  test("le bouton peut être masqué", async ({ browser }) => {
+    const context = await browser.newContext({ ...IPHONE, userAgent: INSTAGRAM_IPHONE });
+    const page = await context.newPage();
+    await page.goto("/");
+    await page.getByRole("button", { name: "Masquer" }).click();
+    await expect(offer(page)).toHaveCount(0);
+    await expect(page.locator(".fog canvas")).toHaveCount(0);
+    await context.close();
+  });
+
+  test("appareil à faible mémoire : la 3D est proposée, pas imposée", async ({ page }) => {
+    await page.addInitScript(() => Object.defineProperty(Navigator.prototype, "deviceMemory", { get: () => 1 }));
+    await page.goto("/");
+    await expect(page.locator(".fog")).toHaveAttribute("data-tier", "offer");
+    await expect(offer(page)).toBeVisible();
+  });
+
+  test("si l'appareil peine, la qualité baisse toute seule", async ({ page, isMobile }) => {
+    test.skip(isMobile, "un seul cas suffit : on part de la qualité complète (ordinateur)");
+    await page.goto("/");
+    test.skip(!(await webglAvailable(page)), "WebGL indisponible ici : rien à mesurer");
+    const fog = page.locator(".fog");
+    await page.evaluate(() => window.dispatchEvent(new Event("scroll")));
+    await expect(fog).toHaveAttribute("data-quality", "full", { timeout: 10_000 });
+    // Processeur 20 fois plus lent pendant la mesure : les images arrivent en retard
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 20 });
+    await expect(fog).toHaveAttribute("data-quality", /^(lite|low)$/, { timeout: 20_000 });
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+  });
+});

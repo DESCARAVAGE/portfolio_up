@@ -1,4 +1,11 @@
-import { FOG_RENDER, type FogColors } from "@/app/lib/fog/fogConfig";
+import {
+  FOG_PROBE,
+  FOG_QUALITY,
+  FOG_QUALITY_STEPS,
+  FOG_RENDER,
+  type FogColors,
+  type FogQuality,
+} from "@/app/lib/fog/fogConfig";
 import { FRAGMENT_SHADER, VERTEX_SHADER, createFogState } from "@/app/lib/fog/fogShader";
 import { FogInteraction } from "@/app/lib/fog/fogInteraction";
 
@@ -11,10 +18,11 @@ import { FogInteraction } from "@/app/lib/fog/fogInteraction";
  * sur iPhone, où le système recharge l'onglet quand la page en prend trop :
  * - contexte WebGL minimal : ni transparence, ni anticrénelage, ni tampon de
  *   profondeur ou de stencil (un seul triangle plein écran n'en a pas besoin) ;
- * - canvas calculé en basse résolution (voir FOG_RENDER), étiré par le navigateur ;
+ * - canvas calculé en basse résolution (voir FOG_QUALITY), étiré par le navigateur ;
  * - jamais réalloué quand seule la hauteur diminue (barre d'adresse d'iOS qui
  *   apparaît et disparaît pendant le défilement) : le bas du canvas est rogné ;
- * - 30 images par seconde, et aucune quand l'onglet est caché ;
+ * - 24 à 60 images par seconde selon l'appareil, aucune quand l'onglet est caché ;
+ * - si l'appareil peine, la qualité baisse toute seule (mesure en direct, FOG_PROBE) ;
  * - si le système reprend le contexte WebGL, le canvas disparaît et le fond CSS reste.
  */
 
@@ -78,12 +86,21 @@ function createProgram(gl: WebGLRenderingContext): WebGLProgram | null {
   return null;
 }
 
+type FogOptions = {
+  /** Qualité de départ. */
+  quality: FogQuality;
+  /** Appelé à chaque changement de qualité (dont le départ). */
+  onQuality?: (quality: FogQuality) => void;
+  /** Appelé si le système reprend le contexte WebGL (mémoire). */
+  onLost?: () => void;
+};
+
 /**
  * Crée le brouillard dans `el`. Renvoie null si WebGL est indisponible :
  * le fond CSS de secours reste alors affiché, sans erreur dans la console.
- * `onLost` est appelé si le système reprend le contexte WebGL (mémoire).
  */
-export function createFog(el: HTMLElement, colors: FogColors, onLost?: () => void): FogHandle | null {
+export function createFog(el: HTMLElement, colors: FogColors, options: FogOptions): FogHandle | null {
+  const { onQuality, onLost } = options;
   const canvas = document.createElement("canvas");
   const gl = canvas.getContext("webgl", CONTEXT_OPTIONS);
   if (!gl) return null;
@@ -117,6 +134,7 @@ export function createFog(el: HTMLElement, colors: FogColors, onLost?: () => voi
   const interaction = new FogInteraction(state);
 
   // --- Taille ---------------------------------------------------------------
+  let quality = options.quality;
   let cssW = 0;
   let cssH = 0;
 
@@ -130,11 +148,7 @@ export function createFog(el: HTMLElement, colors: FogColors, onLost?: () => voi
     cssH = h;
 
     const dpr = window.devicePixelRatio || 1;
-    const mobile = window.matchMedia("(pointer: coarse)").matches || w < 600;
-    const ratio = Math.min(
-      dpr / (mobile ? FOG_RENDER.scaleMobile : FOG_RENDER.scale),
-      Math.sqrt(FOG_RENDER.maxPixels / (w * h)),
-    );
+    const ratio = Math.min(dpr / FOG_QUALITY[quality].scale, Math.sqrt(FOG_RENDER.maxPixels / (w * h)));
     canvas.width = Math.max(1, Math.round(w * ratio));
     canvas.height = Math.max(1, Math.round(h * ratio));
     canvas.style.height = `${h}px`;
@@ -145,7 +159,7 @@ export function createFog(el: HTMLElement, colors: FogColors, onLost?: () => voi
   };
 
   // --- Rendu ----------------------------------------------------------------
-  const frameMs = 1000 / FOG_RENDER.fps;
+  let frameMs = 1000 / FOG_QUALITY[quality].fps;
   let time = 0;
   let last = 0;
   let raf = 0;
@@ -162,11 +176,53 @@ export function createFog(el: HTMLElement, colors: FogColors, onLost?: () => voi
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
+  // --- Mesure en direct ------------------------------------------------------
+  let probing = true;
+  let probeStart = 0;
+  let intervals: number[] = [];
+
+  const resetProbe = () => {
+    probeStart = 0;
+    intervals = [];
+  };
+
+  const setQuality = (next: FogQuality) => {
+    quality = next;
+    frameMs = 1000 / FOG_QUALITY[next].fps;
+    cssW = 0; // force la réallocation à la nouvelle densité
+    resize();
+    onQuality?.(next);
+  };
+
+  /** Chronomètre les images ; descend d'un niveau si elles arrivent trop lentement. */
+  const probe = (now: number, interval: number) => {
+    probeStart ||= now;
+    const elapsed = now - probeStart;
+    if (elapsed > FOG_PROBE.warmupMs) intervals.push(interval);
+    if (elapsed < FOG_PROBE.warmupMs + FOG_PROBE.windowMs) return;
+
+    // Médiane, pas moyenne : un accroc isolé (chargement de la page) ne compte pas
+    intervals.sort((a, b) => a - b);
+    const median = intervals[Math.floor(intervals.length / 2)] ?? 0;
+    const slow = median > frameMs * FOG_PROBE.slowFactor;
+    const lower = FOG_QUALITY_STEPS[FOG_QUALITY_STEPS.indexOf(quality) + 1];
+    if (slow && lower) {
+      setQuality(lower);
+      resetProbe(); // on remesure au niveau suivant
+    } else {
+      probing = false; // l'appareil suit : la qualité est fixée
+    }
+  };
+
   const frame = (now: number) => {
     raf = requestAnimationFrame(frame);
-    // L'écran rafraîchit à 60-120 Hz : on ne calcule qu'une image toutes les ~33 ms
+    // L'écran rafraîchit à 60-120 Hz : on ne calcule que les images voulues (FOG_QUALITY.fps)
     if (last && now - last < frameMs * 0.9) return;
-    time += last ? (Math.min(now - last, 100) / 1000) * FOG_RENDER.speed : 0;
+    if (last) {
+      const interval = now - last;
+      time += (Math.min(interval, 100) / 1000) * FOG_RENDER.speed;
+      if (probing) probe(now, interval);
+    }
     last = now;
     draw();
   };
@@ -175,6 +231,7 @@ export function createFog(el: HTMLElement, colors: FogColors, onLost?: () => voi
     if (running || lost || document.hidden) return;
     running = true;
     last = 0;
+    resetProbe(); // une mesure interrompue (onglet caché) repart de zéro
     raf = requestAnimationFrame(frame);
   };
 
@@ -223,6 +280,7 @@ export function createFog(el: HTMLElement, colors: FogColors, onLost?: () => voi
   Object.assign(canvas.style, { position: "absolute", top: "0", left: "0", width: "100%", minHeight: "100%" });
   el.appendChild(canvas);
   resize();
+  onQuality?.(quality);
   setColors(colors); // dessine aussi la première image, avant le fondu d'apparition
   start();
 

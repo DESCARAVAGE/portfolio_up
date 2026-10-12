@@ -18,6 +18,14 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
 - Écrans tactiles : l'anneau et le reflet des cartes en verre deviennent une bordure fixe
   (un calque de flou par carte au lieu de trois).
 
+### Nouveau
+
+- Fond adapté à l'appareil : 3D complète sur ordinateur, allégée sur écran tactile.
+  Dans les navigateurs intégrés aux applications (Instagram, Facebook, TikTok…), avec
+  l'économie de données ou peu de mémoire, la 3D n'est pas lancée d'office : un bouton
+  « Activer le fond 3D » la propose, et le choix est retenu.
+- Mesure en direct : si l'appareil peine, la qualité du brouillard baisse toute seule.
+
 ### Corrigé
 
 - Mémoire réduite pour limiter les rechargements en boucle observés sur iPhone (à confirmer sur l'appareil).
