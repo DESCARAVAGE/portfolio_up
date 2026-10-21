@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeor
 @Entity('cv')
 export class Cv {
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
     @Column({type :'text'})
     filename: string;
@@ -12,7 +12,7 @@ export class Cv {
     mimeType: string;
 
     @Column()
-    size: number
+    size: number;
 
     @Column({type: 'text'})
     url: string;

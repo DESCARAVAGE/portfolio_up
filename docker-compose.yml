@@ -23,11 +23,9 @@ services:
       - 5173:5173
     volumes:
       - ./frontend:/app
-      - ./frontend/public/:/app/public/:rw
-    environment:
-      - WDS_SOCKET_HOST=127.0.0.1
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
+      # node_modules et .next restent ceux du conteneur (pas ceux de la machine hôte)
+      - /app/node_modules
+      - /app/.next
 
   db:
     image: postgres:16
@@ -57,5 +55,3 @@ services:
   #   volumes:
   #     - ./nginx.conf:/etc/nginx/nginx.conf
   #     - ./logs:/var/log/nginx
-
-
