@@ -67,10 +67,16 @@ jobs:
           path: frontend/playwright-report
           retention-days: 7
 
+  # Sur une PR : l'image est construite pour vérifier le Dockerfile, sans être publiée.
+  # Sur main : construite puis publiée sur Docker Hub.
   docker-front:
     needs: qualite
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      # Sans secrets (PR Dependabot, fork), un nom local : l'image n'est pas publiée de toute façon.
+      IMAGE: ${{ secrets.DOCKERHUB_USERNAME || 'local' }}/final-project-study-frontend
+      PUBLISH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -80,6 +86,7 @@ jobs:
           cleanup: false
 
       - name: Login to Docker Hub
+        if: env.PUBLISH == 'true'
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -98,16 +105,16 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
         with:
-          push: true
+          push: ${{ env.PUBLISH == 'true' }}
           context: ./frontend
           file: frontend/build.Dockerfile
           # latest reste utilisé par fetch-and-deploy.sh ; les autres tags permettent un retour arrière précis
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:${{ steps.version.outputs.full }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:${{ steps.version.outputs.minor }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:${{ steps.version.outputs.major }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-frontend:sha-${{ steps.version.outputs.sha }}
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ steps.version.outputs.full }}
+            ${{ env.IMAGE }}:${{ steps.version.outputs.minor }}
+            ${{ env.IMAGE }}:${{ steps.version.outputs.major }}
+            ${{ env.IMAGE }}:sha-${{ steps.version.outputs.sha }}
           build-args: |
             NEXT_PUBLIC_SITE_URL=https://www.dany-sk-fsp.com
           labels: |
