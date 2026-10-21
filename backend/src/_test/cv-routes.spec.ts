@@ -13,7 +13,8 @@ import { getLatestCvStream } from "../services/cv-service";
  * le routage, le contrôleur et les en-têtes HTTP sont réellement exécutés.
  *
  * Seul le service est simulé, pour ne pas dépendre d'une base PostgreSQL.
- * Le fichier envoyé est le vrai storage/cv.pdf du dépôt.
+ * Le fichier envoyé est storage/cv.pdf : le vrai CV en local, sinon un PDF
+ * de test créé par jest.global-setup.js (le CV n'est pas versionné).
  */
 jest.mock("../services/cv-service");
 
