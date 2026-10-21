@@ -2,6 +2,17 @@ import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { readFile } from "node:fs/promises";
 
+/** Clique un lien de section dans la barre (dans le menu déroulant sur mobile). */
+async function clickNav(page: Page, isMobile: boolean, name: string) {
+  if (isMobile) await page.getByRole("button", { name: "Menu" }).click();
+  // Dans le menu mobile, le lien porte aussi son numéro (« 09 Contact »)
+  await page
+    .getByRole("navigation", { name: "Sections" })
+    .last()
+    .getByRole("link", { name: new RegExp(`${name}$`) })
+    .click();
+}
+
 /** Coupe le défilement fluide : les tests vérifient la destination, pas l'animation. */
 async function instantScroll(page: Page) {
   await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
@@ -58,6 +69,29 @@ test.describe("Navigation", () => {
     // Un clic amène bien la section à l'écran
     await links.filter({ hasText: "Formation" }).click();
     await expect(page.locator("#formation h2")).toBeInViewport();
+  });
+
+  test("« Contact », dernière section, s'active aussi en bas de page", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await instantScroll(page);
+    const menu = () => page.getByRole("navigation", { name: "Sections" }).last();
+    if (isMobile) await page.getByRole("button", { name: "Menu" }).click();
+    await menu().getByRole("link", { name: "Contact" }).click();
+    await expect(page).toHaveURL(/#contact$/);
+    // Le menu mobile se referme au clic : on le rouvre pour lire le lien actif
+    if (isMobile) await page.getByRole("button", { name: "Menu" }).click();
+    await expect(menu().getByRole("link", { name: "Contact" })).toHaveAttribute("aria-current", "location");
+  });
+
+  test("le trait orange de la barre glisse jusqu'à « Contact » en bas de page", async ({ page, isMobile }) => {
+    test.skip(isMobile, "la barre complète n'existe que sur ordinateur");
+    // Grand écran (2560×1440) : le pied de page n'atteint jamais le milieu de l'écran
+    await page.setViewportSize({ width: 2560, height: 1440 });
+    await page.goto("/");
+    await instantScroll(page);
+    await clickNav(page, isMobile, "Contact");
+    const contact = page.getByRole("navigation", { name: "Sections" }).first().getByRole("link", { name: "Contact" });
+    await expect(contact).toHaveAttribute("aria-current", "location");
   });
 
   test("le lien d'évitement mène au contenu principal", async ({ page, isMobile }) => {
@@ -446,6 +480,76 @@ test.describe("Pages légales", () => {
       await page.getByRole("link", { name: /Retour au portfolio/ }).click();
       await expect(page).toHaveURL(/\/$/);
     }
+  });
+
+  test("« Retour au portfolio » ramène à l'endroit quitté, pas en haut de page", async ({ page, isMobile }) => {
+    // Parcours réel : clic sur « Contact » dans la barre (lien d'ancre, sans état de Next dans l'historique)
+    await page.goto("/");
+    await instantScroll(page);
+    await clickNav(page, isMobile, "Contact");
+    await expect(page).toHaveURL(/\/#contact$/);
+    await page.waitForTimeout(800);
+    const before = await page.evaluate(() => window.scrollY);
+    expect(before).toBeGreaterThan(500);
+
+    await page
+      .getByRole("navigation", { name: "Informations légales" })
+      .getByRole("link", { name: "Mentions légales" })
+      .click();
+    await expect(page.getByRole("heading", { level: 1, name: "Mentions légales" })).toBeVisible();
+    // D'une page légale à l'autre, puis un saut dans le sommaire : rien de tout ça ne doit compter dans « Retour »
+    await page
+      .getByRole("navigation", { name: "Informations légales" })
+      .getByRole("link", { name: "Confidentialité" })
+      .click();
+    await expect(page.getByRole("heading", { level: 1, name: "Confidentialité" })).toBeVisible();
+    await page.getByRole("navigation", { name: "Sommaire" }).getByRole("link", { name: "Vos droits" }).click();
+    await expect(page).toHaveURL(/\/confidentialite#droits$/);
+
+    await page.getByRole("link", { name: /Retour au portfolio/ }).click();
+    await expect(page).toHaveURL(/\/#contact$/);
+    // On est bien revenu sur le portfolio (pas seulement l'URL), à la même hauteur
+    await expect(page.getByRole("heading", { level: 1, name: "Confidentialité" })).toHaveCount(0);
+    await expect(page.locator("#contact")).toBeInViewport();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before - 150);
+  });
+
+  test("le bouton « Haut de page » apparaît aussi sur une page courte, sur un grand écran", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "grand écran uniquement");
+    await page.setViewportSize({ width: 1440, height: 1200 });
+    await page.goto("/mentions-legales");
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect(page.getByRole("button", { name: "Haut de page" })).toBeVisible();
+  });
+
+  test("sans passage par le portfolio (lien direct), « Retour » mène à l'accueil", async ({ page }) => {
+    await page.goto("/mentions-legales");
+    await page.getByRole("link", { name: /Retour au portfolio/ }).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("le sommaire mène à chaque rubrique, et le bouton « Haut de page » remonte au titre", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/confidentialite");
+    const toc = page.getByRole("navigation", { name: "Sommaire" });
+    await expect(toc.getByRole("link")).toHaveCount(8);
+
+    // La rubrique choisie est celle que le sommaire marque « en cours »
+    await toc.getByRole("link", { name: "Journaux du serveur" }).click();
+    await expect(toc.getByRole("link", { name: "Journaux du serveur" })).toHaveAttribute("aria-current", "location");
+
+    await toc.getByRole("link", { name: "Vos droits" }).click();
+    await expect(page).toHaveURL(/#droits$/);
+    await expect(page.getByRole("heading", { level: 2, name: "Vos droits" })).toBeInViewport();
+
+    const top = page.getByRole("button", { name: "Haut de page" });
+    await expect(top).toBeVisible();
+    await top.click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.getByRole("heading", { level: 1, name: "Confidentialité" })).toBeFocused();
   });
 
   test("les mentions légales identifient l'éditeur professionnel et l'hébergeur", async ({ page }) => {

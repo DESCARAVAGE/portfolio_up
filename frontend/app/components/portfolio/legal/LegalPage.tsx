@@ -1,45 +1,65 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import Surface from "@/app/components/ui/base/Surface";
 import ThemeToggle from "@/app/components/ThemeToggle";
-import { LEGAL, LEGAL_PAGES } from "@/app/content/legal";
+import BackToPortfolio from "@/app/components/portfolio/legal/BackToPortfolio";
+import BackToTop from "@/app/components/portfolio/legal/BackToTop";
+import LegalNav from "@/app/components/portfolio/legal/LegalNav";
+import LegalToc, { type TocItem } from "@/app/components/portfolio/legal/LegalToc";
+import { LEGAL } from "@/app/content/legal";
 import { PROFILE } from "@/app/content/profile";
 
 const pill =
   "rounded-full border border-[var(--line)] px-4 py-2.5 text-[0.9375rem] transition hover:scale-105 hover:text-[var(--accent)]";
 
+/** Id du titre : cible du bouton « Haut de page ». */
+const TITLE_ID = "titre";
+
 /**
- * Mise en page commune des pages légales : retour au portfolio et thème en haut,
- * texte dans une carte en verre dense (lisible sur le brouillard), liens légaux en bas.
- * Pas d'animation : ces pages se lisent, elles ne se montrent pas.
+ * Mise en page commune des pages légales :
+ * - en haut : retour au portfolio (à l'endroit quitté) et thème ;
+ * - sommaire : colonne collante sur ordinateur, bloc au-dessus du texte sur mobile ;
+ * - texte dans une carte en verre dense (lisible sur le brouillard) ;
+ * - bouton « Haut de page » une fois la page défilée.
+ * Pas d'animation d'apparition : ces pages se lisent, elles ne se montrent pas.
  */
-export default function LegalPage({ title, children }: { title: string; children: ReactNode }) {
+export default function LegalPage({
+  title,
+  toc,
+  children,
+}: {
+  title: string;
+  toc: readonly TocItem[];
+  children: ReactNode;
+}) {
   return (
     <>
       <header className="px-4 pt-4">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
-          <Link href="/" className={pill}>
-            <span aria-hidden>← </span>Retour au portfolio
-          </Link>
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
+          <BackToPortfolio className={pill} />
           <ThemeToggle />
         </div>
       </header>
 
-      <main id="contenu" className="px-4 py-10 sm:py-14">
-        <Surface
-          variant="glass"
-          density="dense"
-          radius="1.75rem"
-          className="mx-auto max-w-3xl"
-          contentClassName="flex flex-col gap-10 p-7 sm:p-12"
-        >
-          <h1 className="m-0 text-[clamp(2.25rem,6vw,3.5rem)] leading-none font-semibold tracking-[-0.04em]">
-            {title}
-          </h1>
-          {children}
-          <p className="text-mute m-0 font-mono text-xs">Dernière mise à jour : {LEGAL.updatedAt}</p>
-        </Surface>
-      </main>
+      <div className="mx-auto grid max-w-5xl gap-6 px-4 py-10 sm:py-14 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
+        <LegalToc
+          items={toc}
+          className="rounded-2xl border border-[var(--line)] bg-[var(--glass-fill-dense)] p-5 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:bg-transparent lg:p-0 lg:pt-2"
+        />
+
+        <main id="contenu" className="min-w-0">
+          <Surface variant="glass" density="dense" radius="1.75rem" contentClassName="flex flex-col gap-10 p-7 sm:p-12">
+            <h1
+              id={TITLE_ID}
+              tabIndex={-1}
+              className="m-0 text-[clamp(2.25rem,6vw,3.5rem)] leading-none font-semibold tracking-[-0.04em] outline-none"
+            >
+              {title}
+            </h1>
+            {children}
+            <p className="text-mute m-0 font-mono text-xs">Dernière mise à jour : {LEGAL.updatedAt}</p>
+          </Surface>
+        </main>
+      </div>
 
       <footer className="text-mute flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 pb-10 font-mono text-xs">
         <span>
@@ -47,32 +67,24 @@ export default function LegalPage({ title, children }: { title: string; children
         </span>
         <LegalNav />
       </footer>
+
+      <BackToTop targetId={TITLE_ID} />
     </>
   );
 }
 
-/** Liens vers les pages légales : pied de page du portfolio et des pages légales. */
-export function LegalNav({ className = "" }: { className?: string }) {
+/** Une rubrique : titre de niveau 2 et contenu. `id` = cible du sommaire. */
+export function LegalSection({ id, title, children }: TocItem & { children: ReactNode }) {
   return (
-    <nav aria-label="Informations légales" className={className}>
-      <ul className="m-0 flex list-none flex-wrap gap-x-6 gap-y-2 p-0">
-        {LEGAL_PAGES.map((p) => (
-          <li key={p.href}>
-            <Link href={p.href} className="underline-offset-4 hover:text-[var(--accent)] hover:underline">
-              {p.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-}
-
-/** Une rubrique : titre de niveau 2 et contenu. */
-export function LegalSection({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-3 leading-relaxed">
-      <h2 className="m-0 text-xl font-semibold tracking-[-0.01em]">{title}</h2>
+    <section
+      id={id}
+      tabIndex={-1}
+      aria-labelledby={`${id}-titre`}
+      className="flex scroll-mt-6 flex-col gap-3 leading-relaxed outline-none"
+    >
+      <h2 id={`${id}-titre`} className="m-0 text-xl font-semibold tracking-[-0.01em]">
+        {title}
+      </h2>
       {children}
     </section>
   );

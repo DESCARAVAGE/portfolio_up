@@ -5,7 +5,7 @@ import ScrollSlide from "@/app/components/ui/motion/ScrollSlide";
 import CopyEmail from "@/app/components/ui/base/CopyEmail";
 import LinkedInButton from "@/app/components/ui/base/LinkedInButton";
 import GitHubButton from "@/app/components/ui/base/GitHubButton";
-import { LegalNav } from "@/app/components/portfolio/legal/LegalPage";
+import LegalNav from "@/app/components/portfolio/legal/LegalNav";
 import pkg from "@/package.json";
 
 const pill = "rounded-full px-5 py-3 font-medium transition-transform hover:-translate-y-0.5";

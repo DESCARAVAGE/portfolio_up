@@ -20,6 +20,18 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
 
 ### Nouveau
 
+- Pages « Mentions légales » et « Confidentialité », liées depuis le pied de page et listées
+  dans le sitemap. Éditeur en entrepreneur individuel, hébergeur OVH, crédits (Font Awesome
+  CC BY 4.0, Vanta.js, Geist), journaux et durées de conservation, droits RGPD.
+  Données dans `frontend/app/content/legal.ts`. Un test e2e bloque la CI tant qu'un champ
+  « [À COMPLÉTER » est publié.
+- Pages légales : sommaire (rubrique en cours surlignée), bouton « Haut de page », et
+  « Retour au portfolio » qui revient à l'endroit quitté (ex. `/#contact`, même position)
+  au lieu de recharger l'accueil en haut de page.
+- Licence MIT pour le code source (fichier `LICENSE`) ; les contenus restent réservés.
+- Le CV n'est plus dans le dépôt ni dans l'image Docker publique : il est monté sur le
+  serveur en lecture seule. Les tests backend utilisent un PDF factice.
+- Journaux Docker limités (10 Mo × 5 fichiers par service).
 - Fond adapté à l'appareil : 3D complète sur ordinateur, allégée sur écran tactile.
   Dans les navigateurs intégrés aux applications (Instagram, Facebook, TikTok…), avec
   l'économie de données ou peu de mémoire, la 3D n'est pas lancée d'office : un bouton
@@ -39,6 +51,13 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
 - Contraste des numéros d'étapes des projets en thème clair (3,9:1 → 6:1).
 - Contraste du texte qui s'allume au défilement (« À propos ») avant d'être atteint :
   opacité de départ 0,35 → 0,5 (2,3:1 → 3,5:1). Lighthouse accessibilité revient à 100.
+
+- Barre de navigation : le trait orange et le compteur passent bien sur « Contact » en bas
+  de page, même sur grand écran.
+- « Retour au portfolio » ne restait pas bloqué sur la page légale après un clic sur un
+  lien de la barre (#contact) : l'adresse et la position quittées sont mémorisées, puis
+  rétablies sans recharger la page.
+- Bouton « Haut de page » visible aussi sur les pages courtes affichées sur grand écran.
 
 ## [2.0.0] — 2026-10-09
 

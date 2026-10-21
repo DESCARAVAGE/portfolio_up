@@ -10,6 +10,16 @@ export const metadata: Metadata = {
   alternates: { canonical: "/mentions-legales" },
 };
 
+/** Rubriques de la page : sommaire et ancres (#editeur…). */
+const TOC = [
+  { id: "editeur", title: "Éditeur du site" },
+  { id: "hebergeur", title: "Hébergeur" },
+  { id: "propriete-intellectuelle", title: "Propriété intellectuelle" },
+  { id: "credits", title: "Crédits" },
+  { id: "donnees-personnelles", title: "Données personnelles" },
+] as const;
+const [editeur, hebergeur, propriete, credits, donnees] = TOC;
+
 /**
  * Mentions légales d'un site professionnel (entrepreneur individuel).
  * Base : loi n° 2004-575 du 21 juin 2004 (LCEN), art. 1-1, dans sa version issue
@@ -19,8 +29,8 @@ export default function MentionsLegales() {
   const { publisher: p, host: h } = LEGAL;
 
   return (
-    <LegalPage title="Mentions légales">
-      <LegalSection title="Éditeur du site">
+    <LegalPage title="Mentions légales" toc={TOC}>
+      <LegalSection {...editeur}>
         <LegalFacts
           items={[
             { label: "Nom", value: `${p.name}, ${p.status}` },
@@ -34,7 +44,7 @@ export default function MentionsLegales() {
         />
       </LegalSection>
 
-      <LegalSection title="Hébergeur">
+      <LegalSection {...hebergeur}>
         <LegalFacts
           items={[
             { label: "Société", value: `${h.name}, ${h.form}` },
@@ -46,7 +56,7 @@ export default function MentionsLegales() {
         />
       </LegalSection>
 
-      <LegalSection title="Propriété intellectuelle">
+      <LegalSection {...propriete}>
         <p className="m-0">
           Les textes, la photographie, le CV et les visuels de ce site appartiennent à {p.name}, sauf mention contraire.
           Leur reproduction sans autorisation est interdite.
@@ -63,7 +73,7 @@ export default function MentionsLegales() {
         </p>
       </LegalSection>
 
-      <LegalSection title="Crédits">
+      <LegalSection {...credits}>
         <ul className="m-0 flex flex-col gap-2 pl-5">
           {CREDITS.map((c) => (
             <li key={c.what}>
@@ -73,7 +83,7 @@ export default function MentionsLegales() {
         </ul>
       </LegalSection>
 
-      <LegalSection title="Données personnelles">
+      <LegalSection {...donnees}>
         <p className="m-0">
           Ce site ne dépose aucun cookie et ne mesure pas l&apos;audience. Ce qui est enregistré, pourquoi et pour
           combien de temps : voir la page{" "}
