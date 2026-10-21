@@ -43,5 +43,6 @@ export function useActiveSection<T extends string>(ids: readonly T[]): T {
     };
   }, [ids]);
 
-  return atBottom ? ids[ids.length - 1] : observed;
+  const last = ids.at(-1);
+  return atBottom && last ? last : observed;
 }

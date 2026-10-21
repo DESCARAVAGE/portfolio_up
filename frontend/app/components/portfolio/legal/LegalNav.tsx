@@ -13,7 +13,7 @@ import { rememberPortfolioOrigin, restorePortfolioScroll } from "@/app/component
  *   ramène toujours au portfolio, pas à la page légale précédente ;
  * - au retour sur le portfolio : on rétablit la position de défilement quittée.
  */
-export default function LegalNav({ className = "" }: { className?: string }) {
+export default function LegalNav({ className = "" }: Readonly<{ className?: string }>) {
   const pathname = usePathname();
   const onLegalPage = LEGAL_PAGES.some((p) => p.href === pathname);
 

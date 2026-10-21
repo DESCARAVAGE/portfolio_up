@@ -10,7 +10,7 @@ export type TocItem = { readonly id: string; readonly title: string };
  * bien celle qui s'allume. En bas de page, la dernière rubrique s'allume.
  */
 function useTocActive(items: readonly TocItem[]) {
-  const [active, setActive] = useState(items[0]?.id);
+  const [active, setActive] = useState<string | undefined>(items[0]?.id);
 
   useEffect(() => {
     let frame = 0;
@@ -23,7 +23,7 @@ function useTocActive(items: readonly TocItem[]) {
         const el = document.getElementById(it.id);
         if (el && el.getBoundingClientRect().top <= line) current = it.id;
       }
-      setActive(atBottom ? items[items.length - 1]?.id : current);
+      setActive(atBottom ? items.at(-1)?.id : current);
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -48,7 +48,10 @@ const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)"
  * Le clic fait défiler jusqu'à la rubrique et met à jour l'URL (#rubrique) SANS ajouter
  * d'entrée d'historique : « Retour au portfolio » ramène donc toujours au portfolio.
  */
-export default function LegalToc({ items, className = "" }: { items: readonly TocItem[]; className?: string }) {
+export default function LegalToc({
+  items,
+  className = "",
+}: Readonly<{ items: readonly TocItem[]; className?: string }>) {
   const active = useTocActive(items);
 
   const go = (e: MouseEvent<HTMLAnchorElement>, id: string) => {
