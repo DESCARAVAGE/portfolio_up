@@ -3,3 +3,6 @@ dbData
 .env.backend
 .env.db
 logs/*.log
+# CV : jamais dans le dépôt public (il est monté sur le serveur, voir docker-compose.prod.yml)
+backend/storage/*
+!backend/storage/.gitkeep

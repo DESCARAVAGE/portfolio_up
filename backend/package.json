@@ -11,8 +11,8 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "jest --runInBand"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Daniel Escaravage",
+  "license": "MIT",
   "description": "",
   "overrides": {
     "form-data": "^4.0.6",

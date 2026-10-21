@@ -228,3 +228,14 @@
     --glass-fill: rgba(18, 18, 18, 0.82);
   }
 }
+
+/* ----------------------------------------------------------------------------
+ * Bouton « Haut de page » (pages légales) : sur téléphone, il passe au-dessus du
+ * bandeau « Activer le fond 3D » quand celui-ci est affiché (pleine largeur).
+ * ------------------------------------------------------------------------- */
+
+@media (max-width: 639px) {
+  body:has(aside[aria-label="Fond animé"]) .back-to-top {
+    bottom: calc(9rem + env(safe-area-inset-bottom));
+  }
+}

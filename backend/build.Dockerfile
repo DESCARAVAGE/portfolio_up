@@ -9,7 +9,6 @@ RUN npm ci --ignore-scripts
 # Copy source and build
 COPY tsconfig*.json ./
 COPY src ./src
-COPY storage ./storage
 
 # Build TypeScript to JavaScript
 RUN npm run build
@@ -28,7 +27,10 @@ RUN npm ci --omit=dev --ignore-scripts
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/storage ./storage
+
+# Le CV n'est PAS dans l'image (elle est publique sur Docker Hub) : storage/ est
+# monté depuis le serveur, en lecture seule (voir docker-compose.prod.yml).
+RUN mkdir -p storage && chown 1000:1000 storage
 
 EXPOSE 3000
 
