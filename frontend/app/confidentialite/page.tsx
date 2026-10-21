@@ -68,8 +68,9 @@ export default function Confidentialite() {
       <LegalSection {...acces}>
         <p className="m-0">
           Seul l&apos;éditeur. Le site est hébergé par {h.name} ({h.address}), qui agit comme sous-traitant, sur un
-          serveur situé à {h.datacenter}. Les alertes techniques du serveur sont envoyées par e-mail via{" "}
-          {LEGAL.monitoringMail}. Aucune donnée n&apos;est vendue ni cédée.
+          serveur loué chez OVHcloud{LEGAL.datacenter ? `, situé à ${LEGAL.datacenter}` : ""}. Les alertes techniques du
+          serveur (qui peuvent contenir une adresse IP bloquée) sont envoyées par e-mail à l&apos;éditeur
+          {LEGAL.monitoringMail ? `, via ${LEGAL.monitoringMail}` : ""}. Aucune donnée n&apos;est vendue ni cédée.
         </p>
       </LegalSection>
 

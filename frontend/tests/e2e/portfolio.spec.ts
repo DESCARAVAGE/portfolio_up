@@ -552,10 +552,15 @@ test.describe("Pages légales", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Confidentialité" })).toBeFocused();
   });
 
-  test("les mentions légales identifient l'éditeur professionnel et l'hébergeur", async ({ page }) => {
+  test("les mentions légales identifient l'éditeur (particulier ou professionnel) et l'hébergeur", async ({ page }) => {
     await page.goto("/mentions-legales");
     const main = page.locator("main");
-    for (const text of ["entrepreneur individuel (EI)", "SIREN", "Directeur de la publication", "OVH SAS", "Roubaix"]) {
+    for (const text of ["Daniel Escaravage", "Directeur de la publication", "OVH SAS", "Roubaix"]) {
+      await expect(main, text).toContainText(text);
+    }
+    // Selon LEGAL.status : identification complète (pro) ou mention de l'article 1-1 II (particulier)
+    const pro = (await main.textContent())?.includes("entrepreneur individuel (EI)");
+    for (const text of pro ? ["SIREN", "Téléphone"] : ["non professionnel", "article 1-1 II"]) {
       await expect(main, text).toContainText(text);
     }
     await expect(main).toContainText("CC BY 4.0"); // crédit Font Awesome

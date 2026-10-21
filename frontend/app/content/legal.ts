@@ -2,11 +2,14 @@
  * Données des pages « Mentions légales » et « Confidentialité ».
  * Comme profile.ts : les pages n'ont aucun texte légal en dur, tout part d'ici.
  *
- * Statut : entrepreneur individuel (micro-entreprise). La loi impose alors une
- * identification complète de l'éditeur (LCEN, loi n° 2004-575, art. 1-1 I).
+ * Statut (LCEN, loi n° 2004-575, art. 1-1) :
+ * - "particulier" : site édité à titre non professionnel. L'éditeur peut taire son adresse
+ *   et son téléphone ; seul l'hébergeur (nom, adresse) doit être indiqué (art. 1-1 II).
+ * - "professionnel" : activité déclarée (SIREN). Identification complète obligatoire
+ *   (art. 1-1 I) : remplir le bloc `pro` avant de basculer.
  *
- * Les valeurs « [À COMPLÉTER …] » DOIVENT être remplacées avant la mise en ligne :
- * un test e2e échoue tant qu'il en reste une sur le site.
+ * Les valeurs « [À COMPLÉTER …] » ne doivent jamais être publiées : un test e2e échoue
+ * tant qu'il en reste une sur le site.
  */
 
 /** Les pages légales, dans l'ordre du pied de page (aussi listées dans le sitemap). */
@@ -15,25 +18,31 @@ export const LEGAL_PAGES = [
   { href: "/confidentialite", label: "Confidentialité" },
 ] as const;
 
+export type LegalStatus = "particulier" | "professionnel";
+
 export const LEGAL = {
+  /** Passer à "professionnel" une fois l'activité déclarée et le bloc `pro` rempli. */
+  status: "particulier" as LegalStatus,
+
   publisher: {
     name: "Daniel Escaravage",
-    status: "entrepreneur individuel (EI)",
-    /**
-     * Adresse de l'entreprise. Une adresse de domiciliation (société de domiciliation,
-     * espace de coworking) évite de publier son domicile.
-     */
-    address: "Tours",
-    /** Obligatoire pour un professionnel. Une ligne dédiée (2e SIM, numéro virtuel) protège le numéro personnel. */
-    phone: "[À COMPLÉTER : numéro de téléphone professionnel]",
     email: "danysk.epro@gmail.com",
-    siren: "[À COMPLÉTER : numéro SIREN (9 chiffres)]",
-    /** Registre où l'entreprise est immatriculée. */
-    register: "Registre national des entreprises (RNE)",
-    /** N° de TVA intracommunautaire : null si aucun n'a été attribué (la ligne n'est alors pas affichée). */
-    vat: null as string | null,
-    /** Directeur de la publication : l'éditeur lui-même pour un entrepreneur individuel. */
+    /** Directeur de la publication : l'éditeur lui-même. */
     publicationDirector: "Daniel Escaravage",
+
+    /** Utilisé seulement avec status: "professionnel". */
+    pro: {
+      /** Mention obligatoire de l'entrepreneur individuel (« EI » ou « entrepreneur individuel »). */
+      status: "entrepreneur individuel (EI)",
+      /** Adresse postale complète. Une domiciliation (société, coworking) évite de publier son domicile. */
+      address: "[À COMPLÉTER : adresse postale complète de l'entreprise ou de domiciliation]",
+      /** Une ligne dédiée (2e SIM, numéro virtuel) protège le numéro personnel. */
+      phone: "[À COMPLÉTER : numéro de téléphone professionnel]",
+      siren: "[À COMPLÉTER : numéro SIREN (9 chiffres)]",
+      register: "Registre national des entreprises (RNE)",
+      /** N° de TVA intracommunautaire : null si aucun n'a été attribué (la ligne n'est alors pas affichée). */
+      vat: null as string | null,
+    },
   },
 
   /** Hébergeur : coordonnées officielles d'OVHcloud (page « Mentions légales » d'ovhcloud.com). */
@@ -43,15 +52,20 @@ export const LEGAL = {
     rcs: "RCS Lille Métropole 424 761 419 00045",
     address: "2 rue Kellermann, 59100 Roubaix, France",
     /**
-     * La loi demande le téléphone de l'hébergeur, mais la page officielle d'OVHcloud n'en donne pas.
-     * Le relever dans l'espace client OVHcloud (rubrique Contact / Support) : ne pas recopier
-     * un numéro trouvé sur un forum.
+     * Facultatif pour un particulier (nom et adresse suffisent), obligatoire pour un professionnel.
+     * La page officielle d'OVHcloud n'en donne pas : le relever dans l'espace client OVHcloud
+     * (rubrique Contact / Support). null = ligne non affichée.
      */
-    phone: "Site Officiel",
+    phone: null as string | null,
     url: "https://www.ovhcloud.com/fr/",
-    /** Lieu du centre de données : visible dans l'espace client OVHcloud, fiche du VPS (ex. « Gravelines, France »). */
-    datacenter: "[À COMPLÉTER : ville et pays du centre de données du VPS]",
   },
+
+  /**
+   * Lieu du serveur, si on veut le préciser (ex. « Gravelines, France », visible dans l'espace
+   * client OVHcloud, fiche du VPS). null = phrase générique. Si le serveur est hors de l'Union
+   * européenne, le préciser ici : c'est une information due aux visiteurs (RGPD).
+   */
+  datacenter: null as string | null,
 
   /** Durées de conservation annoncées : elles doivent correspondre à la configuration du serveur. */
   retention: {
@@ -63,8 +77,8 @@ export const LEGAL = {
     emails: "3 ans après le dernier échange",
   },
 
-  /** Service qui envoie les alertes de supervision du serveur (ex. « Gmail (Google), via SMTP »). */
-  monitoringMail: "[À COMPLÉTER : service utilisé pour envoyer les alertes de supervision]",
+  /** Service qui transmet les alertes de supervision (ex. « Gmail (Google) »). null = non précisé. */
+  monitoringMail: null as string | null,
 
   /** Licence du code source publié sur GitHub (fichier LICENSE à la racine du dépôt). */
   codeLicense: "MIT",
