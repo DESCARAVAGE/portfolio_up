@@ -104,7 +104,8 @@ app/
 ├── icon.svg                Favicon
 │
 ├── content/
-│   └── profile.ts          TOUT le contenu du site (textes, projets, images, liens)
+│   ├── profile.ts          TOUT le contenu du site (textes, projets, images, liens)
+│   └── legal.ts            Données des pages Mentions légales et Confidentialité
 │
 ├── components/
 │   ├── portfolio/          Une section de la page par fichier (Hero, Experience, Projects…)

@@ -5,6 +5,7 @@ import ScrollSlide from "@/app/components/ui/motion/ScrollSlide";
 import CopyEmail from "@/app/components/ui/base/CopyEmail";
 import LinkedInButton from "@/app/components/ui/base/LinkedInButton";
 import GitHubButton from "@/app/components/ui/base/GitHubButton";
+import { LegalNav } from "@/app/components/portfolio/legal/LegalPage";
 import pkg from "@/package.json";
 
 const pill = "rounded-full px-5 py-3 font-medium transition-transform hover:-translate-y-0.5";
@@ -84,9 +85,12 @@ export default function ContactFooter() {
         </Surface>
       </Reveal>
 
-      <span className="text-mute font-mono text-xs">
-        © {PROFILE.year} {PROFILE.fullName} · v{pkg.version}
-      </span>
+      <div className="text-mute flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-xs">
+        <span>
+          © {PROFILE.year} {PROFILE.fullName} · v{pkg.version}
+        </span>
+        <LegalNav />
+      </div>
     </footer>
   );
 }

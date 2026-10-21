@@ -430,3 +430,67 @@ test.describe("LinkedIn et GitHub", () => {
     expect(Math.abs(middle - (bar!.x + bar!.width / 2))).toBeLessThan(4);
   });
 });
+
+test.describe("Pages légales", () => {
+  const PAGES = [
+    { path: "/mentions-legales", title: "Mentions légales" },
+    { path: "/confidentialite", title: "Confidentialité" },
+  ];
+
+  test("le pied de page mène aux deux pages, qui ramènent au portfolio", async ({ page }) => {
+    for (const { path, title } of PAGES) {
+      await page.goto("/");
+      await page.getByRole("navigation", { name: "Informations légales" }).getByRole("link", { name: title }).click();
+      await expect(page).toHaveURL(new RegExp(`${path}$`));
+      await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+      await page.getByRole("link", { name: /Retour au portfolio/ }).click();
+      await expect(page).toHaveURL(/\/$/);
+    }
+  });
+
+  test("les mentions légales identifient l'éditeur professionnel et l'hébergeur", async ({ page }) => {
+    await page.goto("/mentions-legales");
+    const main = page.locator("main");
+    for (const text of ["entrepreneur individuel (EI)", "SIREN", "Directeur de la publication", "OVH SAS", "Roubaix"]) {
+      await expect(main, text).toContainText(text);
+    }
+    await expect(main).toContainText("CC BY 4.0"); // crédit Font Awesome
+  });
+
+  test("la page Confidentialité annonce journaux, durées, droits et absence de cookie", async ({ page }) => {
+    await page.goto("/confidentialite");
+    const main = page.locator("main");
+    for (const text of ["Pas de cookie", "adresse IP", "6 mois", "fail2ban", "localStorage", "CNIL"]) {
+      await expect(main, text).toContainText(text);
+    }
+  });
+
+  test("les deux pages sont dans le sitemap", async ({ request }) => {
+    const sitemap = await (await request.get("/sitemap.xml")).text();
+    for (const { path } of PAGES) expect(sitemap).toContain(path);
+  });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    test(`aucune violation d'accessibilité en thème ${colorScheme === "light" ? "clair" : "sombre"}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+      for (const { path } of PAGES) {
+        await page.goto(path);
+        const results = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+          .analyze();
+        expect(results.violations.map((v) => `${path} : ${v.id} (${v.nodes.length})`)).toEqual([]);
+      }
+    });
+  }
+
+  // Garde-fou : tant qu'une donnée de app/content/legal.ts vaut « [À COMPLÉTER … »,
+  // ce test échoue et bloque la CI. Rien de provisoire ne part en production.
+  test("aucun champ « à compléter » n'est publié", async ({ page }) => {
+    for (const { path } of PAGES) {
+      await page.goto(path);
+      await expect(page.locator("main"), `${path} : remplir app/content/legal.ts`).not.toContainText("[À COMPLÉTER");
+    }
+  });
+});
