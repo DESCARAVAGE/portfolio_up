@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
  * du défilement possible si la page est courte (grand écran), pour qu'il apparaisse partout.
  * Ramène en haut et place le focus sur le titre (clavier, lecteur d'écran).
  */
-export default function BackToTop({ targetId }: { targetId: string }) {
+export default function BackToTop({ targetId }: Readonly<{ targetId: string }>) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

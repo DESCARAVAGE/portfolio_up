@@ -11,7 +11,7 @@ import { takePortfolioOrigin } from "@/app/components/portfolio/legal/legalRetur
  * L'entrée d'historique de la page légale est remplacée : « précédent » ne la rouvre pas.
  * Sinon (lien partagé, nouvel onglet), c'est un lien classique vers l'accueil.
  */
-export default function BackToPortfolio({ className = "" }: { className?: string }) {
+export default function BackToPortfolio({ className = "" }: Readonly<{ className?: string }>) {
   const router = useRouter();
 
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {

@@ -7,10 +7,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-module.exports = async () => {
+module.exports = async function createTestCv() {
   const dir = path.join(process.cwd(), "storage");
   const file = path.join(dir, "cv.pdf");
   if (fs.existsSync(file)) return;
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(file, "%PDF-1.4\n% CV de test, sans donnee personnelle\n1 0 obj << >> endobj\ntrailer << >>\n%%EOF\n");
+  fs.writeFileSync(
+    file,
+    "%PDF-1.4\n% CV de test, sans donnee personnelle\n1 0 obj << >> endobj\ntrailer << >>\n%%EOF\n",
+  );
 };

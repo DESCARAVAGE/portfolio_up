@@ -488,7 +488,14 @@ test.describe("Pages légales", () => {
     await instantScroll(page);
     await clickNav(page, isMobile, "Contact");
     await expect(page).toHaveURL(/\/#contact$/);
-    await page.waitForTimeout(800);
+    // Attend la fin du défilement : la position ne bouge plus d'une image à l'autre
+    await page.waitForFunction(
+      () =>
+        new Promise<boolean>((resolve) => {
+          const y = window.scrollY;
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve(y > 500 && window.scrollY === y)));
+        }),
+    );
     const before = await page.evaluate(() => window.scrollY);
     expect(before).toBeGreaterThan(500);
 
