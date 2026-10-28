@@ -58,6 +58,11 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
   lien de la barre (#contact) : l'adresse et la position quittées sont mémorisées, puis
   rétablies sans recharger la page.
 - Bouton « Haut de page » visible aussi sur les pages courtes affichées sur grand écran.
+- Mentions légales en version « particulier » (site non professionnel, LCEN art. 1-1 II) tant
+  que l'activité n'est pas déclarée ; bascule en version professionnelle (EI, SIREN, adresse,
+  téléphone) par `LEGAL.status` dans `frontend/app/content/legal.ts`.
+- Images Docker construites sur chaque PR (sans publication) : un Dockerfile cassé est vu avant le merge.
+- Avertissements SonarCloud de la PR 56 (props en lecture seule, `.at(-1)`, attente sans délai fixe).
 
 ## [2.0.0] — 2026-10-09
 

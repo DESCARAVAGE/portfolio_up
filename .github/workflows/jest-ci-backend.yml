@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "backend/**"
+      - ".github/workflows/jest-ci-backend.yml"
   #   branches:
   #     - dev
   # pull_request:
@@ -48,10 +49,15 @@ jobs:
           # JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         run: cd backend && npm i && npm run test
     
+  # Hors main : l'image est construite pour vérifier le Dockerfile, sans être publiée.
+  # Sur main : construite puis publiée sur Docker Hub.
   docker-back:
     needs: test-back
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      # Sans secrets (PR Dependabot, fork), un nom local : l'image n'est pas publiée de toute façon.
+      IMAGE: ${{ secrets.DOCKERHUB_USERNAME || 'local' }}/final-project-study-backend
+      PUBLISH: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -62,6 +68,7 @@ jobs:
         with:
           cleanup: false
       - name: Login to Docker Hub
+        if: env.PUBLISH == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -69,7 +76,15 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          push: true
+          push: ${{ env.PUBLISH == 'true' }}
+          load: ${{ env.PUBLISH != 'true' }}
           context: ./backend
           file: backend/build.Dockerfile
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/final-project-study-backend:latest
+          tags: ${{ env.IMAGE }}:latest
+
+      # L'image est publique : elle ne doit contenir aucun CV (il est monté depuis le serveur).
+      - name: Aucun CV dans l'image
+        if: env.PUBLISH != 'true'
+        run: |
+          docker run --rm --entrypoint sh ${{ env.IMAGE }}:latest \
+            -c 'test -d storage && test -z "$(ls -A storage)" && echo "storage/ vide"'

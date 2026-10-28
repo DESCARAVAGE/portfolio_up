@@ -26,11 +26,11 @@ export default function LegalPage({
   title,
   toc,
   children,
-}: {
+}: Readonly<{
   title: string;
   toc: readonly TocItem[];
   children: ReactNode;
-}) {
+}>) {
   return (
     <>
       <header className="px-4 pt-4">
@@ -74,7 +74,7 @@ export default function LegalPage({
 }
 
 /** Une rubrique : titre de niveau 2 et contenu. `id` = cible du sommaire. */
-export function LegalSection({ id, title, children }: TocItem & { children: ReactNode }) {
+export function LegalSection({ id, title, children }: Readonly<TocItem & { children: ReactNode }>) {
   return (
     <section
       id={id}
@@ -91,7 +91,7 @@ export function LegalSection({ id, title, children }: TocItem & { children: Reac
 }
 
 /** Liste « libellé : valeur » (coordonnées, identifiants). */
-export function LegalFacts({ items }: { items: { label: string; value: ReactNode }[] }) {
+export function LegalFacts({ items }: Readonly<{ items: readonly { label: string; value: ReactNode }[] }>) {
   return (
     <dl className="m-0 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-[max-content_1fr]">
       {items.map((it) => (
@@ -105,7 +105,7 @@ export function LegalFacts({ items }: { items: { label: string; value: ReactNode
 }
 
 /** Lien vers un autre site : nouvel onglet, annoncé aux lecteurs d'écran. */
-export function OutLink({ href, children }: { href: string; children: ReactNode }) {
+export function OutLink({ href, children }: Readonly<{ href: string; children: ReactNode }>) {
   return (
     <a href={href} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-[var(--accent)]">
       {children}
