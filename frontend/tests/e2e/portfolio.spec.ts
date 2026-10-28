@@ -193,6 +193,12 @@ test.describe("Mouvement réduit et robustesse", () => {
         }) as typeof document.startViewTransition;
       }
       window.addEventListener("fog:burst", (e) => (w.__burst = (e as CustomEvent).detail));
+      // Options de l'animation de l'onde (voir plus bas : fill)
+      const animate = document.documentElement.animate.bind(document.documentElement);
+      document.documentElement.animate = (keyframes, options) => {
+        (window as unknown as { __wave?: unknown }).__wave = options;
+        return animate(keyframes, options);
+      };
     });
     const button = page.getByRole("button", { name: /thème sombre/ });
     await button.click();
@@ -207,6 +213,11 @@ test.describe("Mouvement réduit et robustesse", () => {
     );
     expect(Math.abs(burst.clientX - (box.x + box.width / 2))).toBeLessThan(2);
     expect(Math.abs(burst.clientY - (box.y + box.height / 2))).toBeLessThan(2);
+    // L'onde garde son état final jusqu'au retrait de la transition : sans fill « forwards »,
+    // l'ancien thème réapparaissait une ou deux images à la fin (flash)
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __wave?: { fill?: string } }).__wave?.fill))
+      .toBe("forwards");
     // Une fois l'onde passée, plus aucune trace sur <html>
     await expect(page.locator("html")).not.toHaveAttribute("data-theme-wave");
     await expect.poll(() => page.evaluate(() => document.documentElement.style.getPropertyValue("--wave-x"))).toBe("");

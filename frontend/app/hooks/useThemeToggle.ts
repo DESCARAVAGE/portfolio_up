@@ -70,7 +70,9 @@ export function useThemeToggle() {
         .then(() => {
           root.animate(
             { "--wave-r": ["0px", `${radius}px`] },
-            { duration: WAVE_MS, easing: WAVE_EASE, pseudoElement: "::view-transition-new(root)" },
+            // fill: "forwards" : l'onde reste pleine jusqu'au retrait de la transition ; sans lui, le rayon
+            // retombe à 0 pendant une ou deux images et l'ancien thème réapparaît (flash)
+            { duration: WAVE_MS, easing: WAVE_EASE, fill: "forwards", pseudoElement: "::view-transition-new(root)" },
           );
         })
         .catch(() => {});
