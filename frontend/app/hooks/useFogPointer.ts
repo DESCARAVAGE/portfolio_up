@@ -3,6 +3,7 @@
 import { useEffect, type RefObject } from "react";
 import { FOG_INTERACTION } from "@/app/lib/fog/fogConfig";
 import type { FogInteraction } from "@/app/lib/fog/fogInteraction";
+import { onFogBurstRequest } from "@/app/lib/fog/fogEvents";
 
 /** Éléments sur lesquels un clic ne doit PAS déclencher d'onde. */
 const INTERACTIVE =
@@ -13,6 +14,7 @@ const INTERACTIVE =
  * - mouvement souris (ou doigt qui glisse) → remous
  * - clic gauche dans le fond → onde
  * - tap tactile (court, sans glisser) → onde ; un scroll n'en déclenche pas
+ * - onde demandée par un autre composant (requestFogBurst, ex. bouton de thème)
  * Les écouteurs sont sur window car le fond est derrière le contenu (-z-10).
  * Désactivé si l'utilisateur a demandé à réduire les animations.
  */
@@ -80,7 +82,9 @@ export function useFogPointer(el: RefObject<HTMLElement | null>, interaction: Re
     window.addEventListener("pointerdown", onDown, opts);
     window.addEventListener("pointerup", onUp, opts);
     window.addEventListener("pointercancel", onCancel, opts);
+    const offBurst = onFogBurstRequest(({ clientX, clientY }) => burstAt(clientX, clientY));
     return () => {
+      offBurst();
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);

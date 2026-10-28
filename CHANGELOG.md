@@ -20,6 +20,11 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
 
 ### Nouveau
 
+- Page 404 « Vous vous êtes perdu ? » pour toute adresse inconnue (code HTTP 404, non
+  indexée), avec un bouton de retour au portfolio et des raccourcis vers les projets et le contact.
+- Changement de thème progressif : le nouveau thème s'étend en cercle depuis le bouton, avec
+  un front flou, pendant que le brouillard lance une onde de choc depuis le même point.
+  Instantané avec « réduire les animations » ou sans l'API View Transitions.
 - Pages « Mentions légales » et « Confidentialité », liées depuis le pied de page et listées
   dans le sitemap. Éditeur en entrepreneur individuel, hébergeur OVH, crédits (Font Awesome
   CC BY 4.0, Vanta.js, Geist), journaux et durées de conservation, droits RGPD.

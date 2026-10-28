@@ -4,7 +4,7 @@ import { useMounted } from "@/app/hooks/useMounted";
 import { useThemeToggle } from "@/app/hooks/useThemeToggle";
 
 /** Bouton clair / sombre. Aucune logique ici : tout est dans useThemeToggle. Placé par le header. */
-export default function ThemeToggle({ className = "" }: { className?: string }) {
+export default function ThemeToggle({ className = "" }: Readonly<{ className?: string }>) {
   const mounted = useMounted();
   const { isDark, followsSystem, toggle } = useThemeToggle();
 
@@ -15,7 +15,8 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
   return (
     <button
       type="button"
-      onClick={toggle}
+      // Le bouton sert de centre à l'onde qui propage le nouveau thème
+      onClick={(e) => toggle(e.currentTarget)}
       aria-label={label}
       title={title}
       className={`grid h-11 w-11 place-items-center rounded-full border border-[var(--line)] text-[var(--ink)] transition hover:scale-105 hover:text-[var(--accent)] ${className}`}

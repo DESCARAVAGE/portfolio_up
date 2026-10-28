@@ -138,3 +138,32 @@ html {
     animation-delay: var(--delay, 0s);
   }
 }
+
+/* ----------------------------------------------------------------------------
+ * Changement de thème (useThemeToggle) : le nouveau thème s'étend en cercle depuis
+ * le bouton, avec un front flou comme l'onde du brouillard. Le rayon (--wave-r) est
+ * animé par le script ; le centre (--wave-x, --wave-y) et la largeur du fondu
+ * (--wave-soft) sont posés sur <html>.
+ * data-theme-wave n'est posé que pendant cette transition : les autres
+ * transitions de vue éventuelles gardent le fondu par défaut du navigateur.
+ * ------------------------------------------------------------------------- */
+
+@property --wave-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+html[data-theme-wave]::view-transition-old(root),
+html[data-theme-wave]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html[data-theme-wave]::view-transition-new(root) {
+  mask-image: radial-gradient(
+    circle at var(--wave-x) var(--wave-y),
+    #000 calc(var(--wave-r) - var(--wave-soft)),
+    transparent var(--wave-r)
+  );
+}
