@@ -2,15 +2,17 @@
 
 import { useMounted } from "@/app/hooks/useMounted";
 import { useThemeToggle } from "@/app/hooks/useThemeToggle";
+import { useUi } from "@/app/i18n/LocaleProvider";
 
 /** Bouton clair / sombre. Aucune logique ici : tout est dans useThemeToggle. Placé par le header. */
 export default function ThemeToggle({ className = "" }: Readonly<{ className?: string }>) {
   const mounted = useMounted();
   const { isDark, followsSystem, toggle } = useThemeToggle();
+  const { theme: t } = useUi();
 
   // Côté serveur le thème est inconnu : libellé neutre jusqu'au montage
-  const label = !mounted ? "Changer de thème" : isDark ? "Passer au thème clair" : "Passer au thème sombre";
-  const title = mounted && followsSystem ? `${label} (actuellement : thème système)` : label;
+  const label = !mounted ? t.change : isDark ? t.toLight : t.toDark;
+  const title = mounted && followsSystem ? `${label}${t.system}` : label;
 
   return (
     <button

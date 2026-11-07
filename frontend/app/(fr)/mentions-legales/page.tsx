@@ -3,11 +3,12 @@ import Link from "next/link";
 import LegalPage, { LegalFacts, LegalSection, OutLink } from "@/app/components/portfolio/legal/LegalPage";
 import { CREDITS, LEGAL } from "@/app/content/legal";
 import { PROFILE } from "@/app/content/profile";
+import { languageAlternates } from "@/app/i18n/config";
 
 export const metadata: Metadata = {
   title: `Mentions légales — ${PROFILE.fullName}`,
   description: "Éditeur, hébergeur, propriété intellectuelle et crédits du site de Daniel Escaravage.",
-  alternates: { canonical: "/mentions-legales" },
+  alternates: languageAlternates("legalNotice", "fr"),
 };
 
 /** Rubriques de la page : sommaire et ancres (#editeur…). */
@@ -31,7 +32,7 @@ export default function MentionsLegales() {
   const pro = LEGAL.status === "professionnel" ? p.pro : null;
 
   return (
-    <LegalPage title="Mentions légales" toc={TOC}>
+    <LegalPage locale="fr" title="Mentions légales" toc={TOC}>
       <LegalSection {...editeur}>
         <LegalFacts
           items={[

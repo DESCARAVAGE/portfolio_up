@@ -9,11 +9,16 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
   turbopack: { root: path.join(__dirname) },
   poweredByHeader: false,
+  // Page 404 commune aux deux mises en page racines (app/(fr) et app/en) : app/global-not-found.tsx
+  experimental: { globalNotFound: true },
   // Anciennes URL du portfolio Vite, conservées pour les liens déjà partagés et le référencement.
   async redirects() {
     return [
       { source: "/home", destination: "/", permanent: true },
       { source: "/xp-details/:id", destination: "/#experience", permanent: true },
+      // Même chose sous /en : une redirection ne change jamais de langue
+      { source: "/en/home", destination: "/en", permanent: true },
+      { source: "/en/xp-details/:id", destination: "/en#experience", permanent: true },
     ];
   },
 };

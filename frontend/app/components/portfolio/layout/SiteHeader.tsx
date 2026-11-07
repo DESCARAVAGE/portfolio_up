@@ -6,28 +6,36 @@ import Surface from "@/app/components/ui/base/Surface";
 import ThemeToggle from "@/app/components/ThemeToggle";
 import LinkedInButton from "@/app/components/ui/base/LinkedInButton";
 import GitHubButton from "@/app/components/ui/base/GitHubButton";
+import LanguageSwitch from "@/app/components/LanguageSwitch";
 import { useActiveSection } from "@/app/hooks/useActiveSection";
-import { NAV, SECTIONS, PROFILE } from "@/app/content/profile";
+import { useUi } from "@/app/i18n/LocaleProvider";
 import { EASE_OUT } from "@/app/lib/motion";
 
-const IDS = SECTIONS.map((s) => s.id);
-/** Sur ordinateur, les liens se répartissent de part et d'autre des boutons LinkedIn et GitHub. */
-const NAV_LEFT = NAV.slice(0, Math.floor(NAV.length / 2));
-const NAV_RIGHT = NAV.slice(Math.floor(NAV.length / 2));
+/** Lien de section : `target` est l'ancre dans la langue de la page (projets, projects…). */
+type NavItem = { label: string; target: string };
+
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
  * Barre flottante en verre, sur trois colonnes de même largeur autour des boutons
  * LinkedIn et GitHub, qui restent ainsi pile au centre :
- *   maison (→ haut de page), compteur | LinkedIn, GitHub | menu, thème
+ *   maison (→ haut de page), langue, compteur | LinkedIn, GitHub | menu, thème
  * Dès 1024 px, les liens des sections (lien actif souligné) entourent ces boutons,
  * moitié à gauche, moitié à droite ; en dessous, ils passent dans un menu déroulant.
  * Une seule <nav> : son `display: contents` place ses enfants dans la grille de la
  * barre, et l'ordre au clavier suit l'ordre à l'écran.
  */
-export default function SiteHeader() {
+export default function SiteHeader({
+  brand,
+  sections: IDS,
+  nav: NAV,
+}: Readonly<{ brand: string; sections: readonly string[]; nav: readonly NavItem[] }>) {
+  const ui = useUi();
   const active = useActiveSection(IDS);
   const index = Math.max(0, IDS.indexOf(active));
+  /** Sur ordinateur, les liens se répartissent de part et d'autre des boutons LinkedIn et GitHub. */
+  const NAV_LEFT = NAV.slice(0, Math.floor(NAV.length / 2));
+  const NAV_RIGHT = NAV.slice(Math.floor(NAV.length / 2));
   const [open, setOpen] = useState(false);
 
   // Échap ferme le menu mobile
@@ -54,18 +62,20 @@ export default function SiteHeader() {
       >
         {/* Maison dans un cercle, même style que le bouton de thème : la couleur suit le thème
             (currentColor = --ink). Pas de texte visible : le nom est donné par aria-label. */}
-        <div className="col-start-1 row-start-1 flex items-center gap-4 justify-self-start">
+        <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start">
           <a
             href="#top"
-            aria-label={`${PROFILE.brand} — retour en haut de page`}
+            aria-label={`${brand} — ${ui.header.homeSuffix}`}
             className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--line)] text-[var(--ink)] transition hover:scale-105 hover:text-[var(--accent)]"
             onClick={() => setOpen(false)}
           >
             <HomeIcon />
           </a>
+          {/* Langue : juste à droite de la maison ; la barre reste symétrique (deux ronds de chaque côté) */}
+          <LanguageSwitch section={active} />
 
           {/* Compteur : le numéro glisse à chaque changement de section */}
-          <span className="text-mute hidden items-center gap-2 font-mono text-xs xl:flex" aria-hidden>
+          <span className="text-mute ml-3 hidden items-center gap-2 font-mono text-xs xl:flex" aria-hidden>
             <span className="relative inline-flex h-4 w-5 overflow-hidden">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
@@ -84,7 +94,7 @@ export default function SiteHeader() {
           </span>
         </div>
 
-        <nav aria-label="Sections" className="contents text-[0.9375rem]">
+        <nav aria-label={ui.header.sections} className="contents text-[0.9375rem]">
           <div className="col-start-1 row-start-1 hidden items-center gap-0.5 justify-self-end lg:flex">
             {NAV_LEFT.map((item) => (
               <NavLink key={item.target} href={`#${item.target}`} active={active === item.target}>
@@ -114,7 +124,7 @@ export default function SiteHeader() {
             type="button"
             aria-expanded={open}
             aria-controls="menu-mobile"
-            aria-label={open ? "Fermer le menu" : "Menu"}
+            aria-label={open ? ui.header.closeMenu : ui.header.menu}
             onClick={() => setOpen((o) => !o)}
             className="grid h-11 w-11 place-items-center rounded-full border border-[var(--line)] text-[var(--ink)] transition hover:scale-105 hover:text-[var(--accent)] lg:hidden"
           >
@@ -136,7 +146,7 @@ export default function SiteHeader() {
             className="mx-auto mt-2 max-w-6xl lg:hidden"
           >
             <Surface variant="glass" density="dense" radius="1.5rem" contentClassName="p-2">
-              <nav aria-label="Sections">
+              <nav aria-label={ui.header.sections}>
                 <ul className="m-0 flex list-none flex-col p-0">
                   {NAV.map((item, i) => (
                     <li key={item.target}>

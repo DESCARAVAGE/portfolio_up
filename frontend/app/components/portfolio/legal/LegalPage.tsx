@@ -5,6 +5,10 @@ import BackToPortfolio from "@/app/components/portfolio/legal/BackToPortfolio";
 import BackToTop from "@/app/components/portfolio/legal/BackToTop";
 import LegalNav from "@/app/components/portfolio/legal/LegalNav";
 import LegalToc, { type TocItem } from "@/app/components/portfolio/legal/LegalToc";
+import LanguageSwitch from "@/app/components/LanguageSwitch";
+import NewTabNote from "@/app/components/ui/base/NewTabNote";
+import { MAIN_ANCHOR, type Locale } from "@/app/i18n/config";
+import { getUi } from "@/app/i18n/content";
 import { LEGAL } from "@/app/content/legal";
 import { PROFILE } from "@/app/content/profile";
 
@@ -16,27 +20,36 @@ const TITLE_ID = "titre";
 
 /**
  * Mise en page commune des pages légales :
- * - en haut : retour au portfolio (à l'endroit quitté) et thème ;
+ * - en haut : retour au portfolio (à l'endroit quitté), langue et thème ;
  * - sommaire : colonne collante sur ordinateur, bloc au-dessus du texte sur mobile ;
  * - texte dans une carte en verre dense (lisible sur le brouillard) ;
  * - bouton « Haut de page » une fois la page défilée.
  * Pas d'animation d'apparition : ces pages se lisent, elles ne se montrent pas.
  */
 export default function LegalPage({
+  locale,
   title,
   toc,
   children,
 }: Readonly<{
+  locale: Locale;
   title: string;
   toc: readonly TocItem[];
   children: ReactNode;
 }>) {
+  // Date de mise à jour écrite à la façon de chaque langue (21 octobre 2026 / October 21, 2026)
+  const updated = new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(
+    new Date(LEGAL.updatedAt),
+  );
   return (
     <>
       <header className="px-4 pt-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <BackToPortfolio className={pill} />
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <LanguageSwitch />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -46,7 +59,7 @@ export default function LegalPage({
           className="rounded-2xl border border-[var(--line)] bg-[var(--glass-fill-dense)] p-5 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:bg-transparent lg:p-0 lg:pt-2"
         />
 
-        <main id="contenu" className="min-w-0">
+        <main id={MAIN_ANCHOR[locale]} className="min-w-0">
           <Surface variant="glass" density="dense" radius="1.75rem" contentClassName="flex flex-col gap-10 p-7 sm:p-12">
             <h1
               id={TITLE_ID}
@@ -56,7 +69,10 @@ export default function LegalPage({
               {title}
             </h1>
             {children}
-            <p className="text-mute m-0 font-mono text-xs">Dernière mise à jour : {LEGAL.updatedAt}</p>
+            <p className="text-mute m-0 font-mono text-xs">
+              {getUi(locale).legal.updated}
+              {updated}
+            </p>
           </Surface>
         </main>
       </div>
@@ -109,7 +125,7 @@ export function OutLink({ href, children }: Readonly<{ href: string; children: R
   return (
     <a href={href} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-[var(--accent)]">
       {children}
-      <span className="sr-only"> (nouvel onglet)</span>
+      <NewTabNote />
     </a>
   );
 }

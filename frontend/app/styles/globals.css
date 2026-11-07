@@ -167,3 +167,10 @@ html[data-theme-wave]::view-transition-new(root) {
     transparent var(--wave-r)
   );
 }
+
+/* Page 404 (app/global-not-found.tsx) : les deux langues sont dans la page,
+   seule celle de <html lang> est affichée. */
+html:not([lang="en"]) [data-lang="en"],
+html[lang="en"] [data-lang="fr"] {
+  display: none;
+}

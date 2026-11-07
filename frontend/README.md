@@ -97,15 +97,25 @@ export CHROME_PATH=$(node -e "console.log(require('@playwright/test').chromium.e
 
 ```
 app/
-├── layout.tsx              Coquille HTML : polices, métadonnées, thème, fond 3D
-├── page.tsx                Assemblage des sections, dans l'ordre de lecture
-├── opengraph-image.tsx     Image d'aperçu générée au build (partage LinkedIn, Slack…)
-├── robots.ts, sitemap.ts   /robots.txt et /sitemap.xml
+├── (fr)/                   Site français, à la racine des adresses (le groupe n'apparaît pas dans l'URL)
+│   ├── layout.tsx          Mise en page racine : <html lang="fr">, métadonnées
+│   ├── page.tsx            /  (→ components/portfolio/HomePage)
+│   ├── mentions-legales/   /mentions-legales
+│   ├── confidentialite/    /confidentialite
+│   └── opengraph-image.tsx Image d'aperçu générée au build (partage LinkedIn, Slack…)
+├── en/                     Site anglais : /en, /en/legal-notice, /en/privacy (même structure)
+├── global-not-found.tsx    Page 404 de tout le site, dans la langue de l'adresse
+├── robots.ts, sitemap.ts   /robots.txt et /sitemap.xml (les deux langues, avec hreflang)
 ├── icon.svg                Favicon
 │
+├── i18n/                   Langues : adresses de chaque page (config.ts), accès au contenu
+│                           (content.ts), type des traductions (types.ts), contexte client
 ├── content/
-│   ├── profile.ts          TOUT le contenu du site (textes, projets, images, liens)
-│   └── legal.ts            Données des pages Mentions légales et Confidentialité
+│   ├── profile.ts          TOUT le contenu du site en français (textes, projets, images, liens)
+│   ├── profile.en.ts       Le même contenu en anglais (même forme, vérifiée par TypeScript)
+│   ├── ui.ts, ui.en.ts     Petits textes de l'interface (boutons, libellés d'accessibilité…)
+│   ├── legal.ts            Données des pages Mentions légales et Confidentialité
+│   └── legal.en.ts         Leurs textes à traduire (durées, crédits)
 │
 ├── components/
 │   ├── portfolio/          Une section de la page par fichier (Hero, Experience, Projects…)
@@ -115,7 +125,9 @@ app/
 │   │   ├── media/          Visuels interactifs : LoopVideo, CompareSlider
 │   │   └── scroll/         Indicateurs de défilement : ScrollProgress, ScrollRail
 │   ├── seo/                Données structurées (JSON-LD Person)
+│   ├── RootShell.tsx       Coquille HTML commune aux deux langues : polices, thème, fond 3D
 │   ├── FogBackground.tsx   Fond 3D plein écran
+│   ├── LanguageSwitch.tsx  Bouton drapeau de langue (à droite de la maison)
 │   └── ThemeToggle.tsx     Bouton clair / sombre
 │
 ├── hooks/                  Logique réutilisable (useFog, useMotionFactor, useActiveSection…)
@@ -148,7 +160,8 @@ est produit au build, sans JavaScript envoyé pour elles. Seuls les effets et le
 
 ## Modifier le contenu
 
-Tout se passe dans **`app/content/profile.ts`**. Aucun composant n'est à toucher pour :
+Tout se passe dans **`app/content/profile.ts`** (français) et **`app/content/profile.en.ts`**
+(anglais). Aucun composant n'est à toucher pour :
 
 | Changer…                                 | Où dans `profile.ts`                                                                     |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -166,6 +179,27 @@ servi par le backend (dernier CV enregistré en base, fichier dans
 
 `variant` choisit l'apparence d'une carte : `"glass"` (verre), `"solid"` (pleine)
 ou `"accent"` (orange).
+
+### Version anglaise
+
+Le site français reste à `/` ; l'anglais est sous `/en`, sans redirection selon la
+langue du navigateur : le bouton drapeau, à droite de la maison, mène à la même page
+dans l'autre langue (en gardant la section en cours sur l'accueil).
+
+- `profile.en.ts` a **exactement la forme** de `profile.ts` (type `Localized`) : une
+  entrée oubliée, en trop, ou un identifiant différent (`id` de section, `target`…)
+  fait échouer `tsc`. Les images et les données qui ne se traduisent pas sont reprises
+  de `profile.ts`.
+- Ajouter un texte d'interface : dans `ui.ts` puis `ui.en.ts` (même règle).
+- Un test e2e (`tests/e2e/i18n.spec.ts`) compare `/` et `/en` : un texte français
+  resté sur la page anglaise le fait échouer. Les deux se complètent : le type vérifie
+  la forme (rien d'oublié ni de renommé), le test vérifie que le texte est bien traduit
+  (une entrée reprise du français avec `...` passerait le type, pas le test).
+- Tout est traduit sous `/en`, ancres comprises (`/#projets` ↔ `/en#projects`) : la table
+  est `SECTION_ANCHORS` dans `app/i18n/config.ts`. Le bouton de langue et le retour des pages
+  légales traduisent l'ancre ; tous les autres liens restent dans la langue de la page.
+- La destination du bouton de langue est calculée par `switchLanguageHref` (fonction pure) :
+  testée par Vitest (`pnpm test:unit`) et, avec les mêmes cas, par Playwright.
 
 ### Images
 
@@ -371,4 +405,7 @@ une nouvelle : `npm pkg set version=2.1.0`, compléter le
   l'état, les effets ou les événements, isolé dans le plus petit composant possible.
 - **Animations** : tout effet lié au défilement passe par `useMotionFactor()`
   pour respecter le mouvement réduit.
-- **Contenu** : jamais de texte en dur dans un composant, tout vient de `profile.ts`.
+- **Contenu** : jamais de texte en dur dans un composant, tout vient de `profile.ts`
+  (et de sa traduction) ou de `ui.ts`.
+- **Langue** : les composants serveur reçoivent `locale` en prop (`getContent`, `getUi`) ;
+  les composants client reçoivent leurs données en props, ou leurs textes par `useUi()`.

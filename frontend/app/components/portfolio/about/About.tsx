@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { APPROACH } from "@/app/content/profile";
+import { anchorOf, type Locale } from "@/app/i18n/config";
+import { getContent } from "@/app/i18n/content";
 import SectionHeading from "@/app/components/portfolio/layout/SectionHeading";
 import Surface from "@/app/components/ui/base/Surface";
 import Parallax from "@/app/components/ui/motion/Parallax";
@@ -12,10 +13,11 @@ import ScrollWords from "@/app/components/ui/motion/ScrollWords";
  * - la carte pleine (photo + infos pratiques) dérive plus lentement ;
  * - les trois piliers montent en cascade dessous.
  */
-export default function About() {
+export default function About({ locale }: Readonly<{ locale: Locale }>) {
+  const { APPROACH } = getContent(locale);
   return (
-    <section id="approche" className="relative px-[4%] py-28 md:py-36">
-      <SectionHeading section="approche" />
+    <section id={anchorOf("approche", locale)} className="relative px-[4%] py-28 md:py-36">
+      <SectionHeading locale={locale} section="approche" />
       <div className="flex flex-wrap items-start gap-6">
         <Parallax speed={-0.12} className="flex-[2_1_34rem]">
           <Surface variant="glass" radius="1.75rem" contentClassName="p-8 sm:p-14">
