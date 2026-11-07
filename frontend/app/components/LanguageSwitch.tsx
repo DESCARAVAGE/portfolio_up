@@ -7,8 +7,8 @@ import { useLocale, useUi } from "@/app/i18n/LocaleProvider";
 import Flag from "@/app/components/ui/base/Flag";
 
 /**
- * Bouton rond au drapeau de l'autre langue (Royaume-Uni sur le site français, France sur
- * le site anglais) : la même page dans l'autre langue (accueil → /en,
+ * Bouton rond au drapeau de la langue affichée (France sur le site français, Royaume-Uni
+ * sur le site anglais) : un clic mène à la même page dans l'autre langue (accueil → /en,
  * mentions légales → /en/legal-notice…). Sur l'accueil, la section en cours suit, avec
  * son ancre traduite (/#projets → /en#projects) : voir switchLanguageHref (i18n/config.ts).
  * La destination est dans le `href` (pas calculée au clic) : clic du milieu, « copier le
@@ -44,7 +44,7 @@ export default function LanguageSwitch({
       data-language-switch
       className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--line)] transition hover:scale-105 hover:border-[var(--accent)] ${className}`}
     >
-      <Flag locale={to} className="h-6 w-6" />
+      <Flag locale={locale} className="h-6 w-6" />
     </a>
   );
 }

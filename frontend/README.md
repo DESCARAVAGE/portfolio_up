@@ -127,8 +127,8 @@ app/
 │   ├── seo/                Données structurées (JSON-LD Person)
 │   ├── RootShell.tsx       Coquille HTML commune aux deux langues : polices, thème, fond 3D
 │   ├── FogBackground.tsx   Fond 3D plein écran
-│   ├── LanguageSwitch.tsx  Bouton drapeau de langue (à droite de la maison)
-│   └── ThemeToggle.tsx     Bouton clair / sombre
+│   ├── LanguageSwitch.tsx  Bouton de langue : drapeau de la langue affichée (à droite de la maison)
+│   └── ThemeToggle.tsx     Bouton clair / sombre : soleil en clair, lune en sombre
 │
 ├── hooks/                  Logique réutilisable (useFog, useMotionFactor, useActiveSection…)
 ├── lib/
@@ -183,7 +183,7 @@ ou `"accent"` (orange).
 ### Version anglaise
 
 Le site français reste à `/` ; l'anglais est sous `/en`, sans redirection selon la
-langue du navigateur : le bouton drapeau, à droite de la maison, mène à la même page
+langue du navigateur : le bouton drapeau (celui de la langue affichée), à droite de la maison, mène à la même page
 dans l'autre langue (en gardant la section en cours sur l'accueil).
 
 - `profile.en.ts` a **exactement la forme** de `profile.ts` (type `Localized`) : une

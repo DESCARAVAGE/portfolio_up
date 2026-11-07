@@ -4,7 +4,11 @@ import { useMounted } from "@/app/hooks/useMounted";
 import { useThemeToggle } from "@/app/hooks/useThemeToggle";
 import { useUi } from "@/app/i18n/LocaleProvider";
 
-/** Bouton clair / sombre. Aucune logique ici : tout est dans useThemeToggle. Placé par le header. */
+/**
+ * Bouton clair / sombre. Aucune logique ici : tout est dans useThemeToggle. Placé par le header.
+ * L'icône montre le thème affiché (soleil = clair, lune = sombre) ; le libellé, lui, dit
+ * ce que fait le clic (« Passer au thème sombre »).
+ */
 export default function ThemeToggle({ className = "" }: Readonly<{ className?: string }>) {
   const mounted = useMounted();
   const { isDark, followsSystem, toggle } = useThemeToggle();
@@ -23,7 +27,7 @@ export default function ThemeToggle({ className = "" }: Readonly<{ className?: s
       title={title}
       className={`grid h-11 w-11 place-items-center rounded-full border border-[var(--line)] text-[var(--ink)] transition hover:scale-105 hover:text-[var(--accent)] ${className}`}
     >
-      {mounted && (isDark ? <SunIcon /> : <MoonIcon />)}
+      {mounted && (isDark ? <MoonIcon /> : <SunIcon />)}
     </button>
   );
 }
@@ -39,6 +43,7 @@ function SunIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       aria-hidden
+      data-icon="sun"
     >
       <circle cx="12" cy="12" r="4" />
       <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
@@ -58,6 +63,7 @@ function MoonIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
+      data-icon="moon"
     >
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
     </svg>

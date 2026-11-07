@@ -11,13 +11,14 @@ export default function Flag({ locale, className = "" }: Readonly<{ locale: Loca
   const common = {
     "aria-hidden": true,
     focusable: false,
+    "data-flag": locale,
     className: `block rounded-full ${className}`,
   } as const;
 
   return locale === "fr" ? <FrenchFlag {...common} /> : <BritishFlag {...common} />;
 }
 
-type SvgProps = Readonly<{ "aria-hidden": true; focusable: false; className: string }>;
+type SvgProps = Readonly<{ "aria-hidden": true; focusable: false; "data-flag": Locale; className: string }>;
 
 function FrenchFlag(props: SvgProps) {
   return (

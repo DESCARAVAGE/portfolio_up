@@ -82,14 +82,17 @@ test.describe("Version anglaise", () => {
     expect(l.x).toBeGreaterThan(h.x + h.width - 1);
     expect(Math.abs(l.y - h.y)).toBeLessThan(2);
     await expect(toEnglish).toHaveAttribute("hreflang", "en");
-    // Un drapeau (SVG, pas un emoji) et aucun texte visible : le nom vient de l'aria-label
+    // Le drapeau de la langue affichée (SVG, pas un emoji), aucun texte : le nom vient de l'aria-label
     await expect(toEnglish.locator("svg[aria-hidden='true']")).toHaveCount(1);
+    await expect(toEnglish.locator("svg")).toHaveAttribute("data-flag", "fr");
     await expect(toEnglish).toHaveText("");
 
     await toEnglish.click();
     await expect(page).toHaveURL(/\/en$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await page.getByRole("link", { name: /Lire cette page en français/ }).click();
+    const toFrench = page.getByRole("link", { name: /Lire cette page en français/ });
+    await expect(toFrench.locator("svg")).toHaveAttribute("data-flag", "en");
+    await toFrench.click();
     await expect(page).toHaveURL(/\/$/);
   });
 
