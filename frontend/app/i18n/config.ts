@@ -56,9 +56,20 @@ export const LEGAL_ROUTES = ["legalNotice", "privacy"] as const satisfies readon
 export const OG_LOCALE: Record<Locale, string> = { fr: "fr_FR", en: "en_US" };
 
 /** Langue d'une adresse : /en et tout ce qui est dessous = anglais. */
+/** Adresse du site anglais : /en et tout ce qui est dessous. */
+export const EN_PATH = /^\/en(\/|$)/;
+
 export function localeOfPath(pathname: string): Locale {
-  return pathname === "/en" || pathname.startsWith("/en/") ? "en" : "fr";
+  return EN_PATH.test(pathname) ? "en" : "fr";
 }
+
+/**
+ * Script en ligne, exécuté avant l'affichage : `<html lang>` suit l'adresse. Le HTML est
+ * commun aux deux langues (une seule mise en page racine, pour changer de langue sans
+ * recharger) et annonce le français ; sous /en, ce script passe à l'anglais avant que
+ * le contenu ne soit lu. Même règle que localeOfPath (EN_PATH, écrit dans le script au build).
+ */
+export const HTML_LANG_SCRIPT = `if(${EN_PATH}.test(location.pathname))document.documentElement.lang="en"`;
 
 /** Page correspondant à une adresse, dans n'importe quelle langue (null si inconnue). */
 export function routeOfPath(pathname: string): RouteKey | null {

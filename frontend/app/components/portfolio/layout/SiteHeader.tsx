@@ -17,6 +17,12 @@ type NavItem = { label: string; target: string };
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
+ * La barre glisse depuis le haut au premier affichage seulement : changer de langue
+ * recrée la page (donc la barre) sans recharger, elle doit alors être déjà en place.
+ */
+let entered = false;
+
+/**
  * Barre flottante en verre, sur trois colonnes de même largeur autour des boutons
  * LinkedIn et GitHub, qui restent ainsi pile au centre :
  *   maison (→ haut de page), langue, compteur | LinkedIn, GitHub | menu, thème
@@ -37,6 +43,10 @@ export default function SiteHeader({
   const NAV_LEFT = NAV.slice(0, Math.floor(NAV.length / 2));
   const NAV_RIGHT = NAV.slice(Math.floor(NAV.length / 2));
   const [open, setOpen] = useState(false);
+  const [skipEntrance] = useState(() => entered);
+  useEffect(() => {
+    entered = true;
+  }, []);
 
   // Échap ferme le menu mobile
   useEffect(() => {
@@ -48,7 +58,7 @@ export default function SiteHeader({
 
   return (
     <motion.header
-      initial={{ y: -80 }}
+      initial={skipEntrance ? false : { y: -80 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.2 }}
       className="fixed inset-x-0 top-4 z-50 px-4"

@@ -97,14 +97,15 @@ export CHROME_PATH=$(node -e "console.log(require('@playwright/test').chromium.e
 
 ```
 app/
+├── layout.tsx              Mise en page racine unique, commune aux deux langues (→ components/RootShell)
 ├── (fr)/                   Site français, à la racine des adresses (le groupe n'apparaît pas dans l'URL)
-│   ├── layout.tsx          Mise en page racine : <html lang="fr">, métadonnées
+│   ├── layout.tsx          Métadonnées du site français
 │   ├── page.tsx            /  (→ components/portfolio/HomePage)
 │   ├── mentions-legales/   /mentions-legales
 │   ├── confidentialite/    /confidentialite
 │   └── opengraph-image.tsx Image d'aperçu générée au build (partage LinkedIn, Slack…)
 ├── en/                     Site anglais : /en, /en/legal-notice, /en/privacy (même structure)
-├── global-not-found.tsx    Page 404 de tout le site, dans la langue de l'adresse
+├── not-found.tsx           Page 404 de tout le site, dans la langue de l'adresse
 ├── robots.ts, sitemap.ts   /robots.txt et /sitemap.xml (les deux langues, avec hreflang)
 ├── icon.svg                Favicon
 │
@@ -113,7 +114,7 @@ app/
 ├── content/
 │   ├── profile.ts          TOUT le contenu du site en français (textes, projets, images, liens)
 │   ├── profile.en.ts       Le même contenu en anglais (même forme, vérifiée par TypeScript)
-│   ├── ui.ts, ui.en.ts     Petits textes de l'interface (boutons, libellés d'accessibilité…)
+│   ├── ui.ts               Petits textes de l'interface, chacun en { fr, en } (boutons, libellés…)
 │   ├── legal.ts            Données des pages Mentions légales et Confidentialité
 │   └── legal.en.ts         Leurs textes à traduire (durées, crédits)
 │
@@ -183,14 +184,24 @@ ou `"accent"` (orange).
 ### Version anglaise
 
 Le site français reste à `/` ; l'anglais est sous `/en`, sans redirection selon la
-langue du navigateur : le bouton drapeau (celui de la langue affichée), à droite de la maison, mène à la même page
-dans l'autre langue (en gardant la section en cours sur l'accueil).
+langue du navigateur : le bouton drapeau (celui de la langue affichée), à droite de la
+maison, mène à la même page dans l'autre langue (en gardant la section en cours sur
+l'accueil), **sans recharger la page** : le fond 3D et le thème restent en place, la
+barre ne rejoue pas son entrée.
+
+- Une seule mise en page racine (`app/layout.tsx`) pour les deux langues : c'est ce qui
+  permet la navigation sans rechargement (Next recharge tout entre deux mises en page
+  racines). Le HTML commun annonce `lang="fr"` ; sous `/en`, un script en ligne
+  (`HTML_LANG_SCRIPT`, `i18n/config.ts`) passe à `lang="en"` avant l'affichage, puis
+  `PathLocaleProvider` le suit à chaque changement de langue. Sans JavaScript, `<html>`
+  reste en `fr`, mais `app/en/layout.tsx` marque tout le contenu anglais `lang="en"`.
 
 - `profile.en.ts` a **exactement la forme** de `profile.ts` (type `Localized`) : une
   entrée oubliée, en trop, ou un identifiant différent (`id` de section, `target`…)
   fait échouer `tsc`. Les images et les données qui ne se traduisent pas sont reprises
   de `profile.ts`.
-- Ajouter un texte d'interface : dans `ui.ts` puis `ui.en.ts` (même règle).
+- Ajouter un texte d'interface : dans `ui.ts`, sous la forme `{ fr: "…", en: "…" }` ; une
+  langue oubliée fait échouer `tsc`. `getUi(locale)` rend les textes d'une langue.
 - Un test e2e (`tests/e2e/i18n.spec.ts`) compare `/` et `/en` : un texte français
   resté sur la page anglaise le fait échouer. Les deux se complètent : le type vérifie
   la forme (rien d'oublié ni de renommé), le test vérifie que le texte est bien traduit

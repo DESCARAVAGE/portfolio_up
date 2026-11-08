@@ -1,10 +1,17 @@
 import type { ReactNode } from "react";
-import RootShell, { rootMetadata, rootViewport } from "@/app/components/RootShell";
+import { languageMetadata } from "@/app/components/RootShell";
 
-/** Mise en page racine du site anglais : tout ce qui est sous /en. */
-export const metadata = rootMetadata("en");
-export const viewport = rootViewport;
+/**
+ * Site anglais : tout ce qui est sous /en. Le HTML commun est dans app/layout.tsx.
+ * Le contenu est marqué lang="en" ici aussi : sans JavaScript, <html> reste en "fr"
+ * (HTML commun aux deux langues), mais les lecteurs d'écran lisent quand même l'anglais.
+ */
+export const metadata = languageMetadata("en");
 
 export default function EnglishLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return <RootShell locale="en">{children}</RootShell>;
+  return (
+    <div lang="en" className="contents">
+      {children}
+    </div>
+  );
 }

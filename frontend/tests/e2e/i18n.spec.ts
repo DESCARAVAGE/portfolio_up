@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { LANGUAGE_SWITCH_CASES } from "../e2e/shared/languageSwitch.cases";
+import { LANGUAGE_SWITCH_CASES } from "./shared/languageSwitch.cases";
 import { SECTION_ANCHORS } from "@/app/i18n/config";
 
 /**
@@ -74,17 +74,73 @@ test.describe("Version anglaise", () => {
     expect(await res.text()).toContain('<html lang="fr"');
   });
 
+  test("changer de langue ne recharge pas la page : le fond 3D reste en place, titre et canonique suivent", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    // Repères posés dans la page : un rechargement les effacerait
+    await page.evaluate(() => {
+      Object.assign(window, { sansRechargement: true });
+      document.querySelector<HTMLElement>(".fog")!.dataset.repere = "1";
+    });
+    const kept = () =>
+      page.evaluate(() => "sansRechargement" in window && document.querySelector<HTMLElement>(".fog")?.dataset.repere);
+
+    await page.getByRole("link", { name: /Read this page in English/ }).click();
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/developer/i);
+    await expect(page).toHaveTitle(/Frontend Developer/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/en$/);
+    expect(await kept()).toBe("1");
+
+    await page.getByRole("link", { name: /Lire cette page en français/ }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+    expect(await kept()).toBe("1");
+  });
+
+  test("la langue est annoncée avant l'affichage, et le contenu anglais l'est même sans JavaScript", async ({
+    page,
+    browser,
+  }) => {
+    // HTML commun aux deux langues (lang="fr") : le script le passe à "en" avant l'hydratation
+    await page.route("**/_next/static/**/*.js", (route) => route.abort());
+    await page.goto("/en");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
+    const noJs = await browser.newContext({ javaScriptEnabled: false });
+    const plain = await noJs.newPage();
+    for (const path of ["/en", "/en/legal-notice"]) {
+      await plain.goto(path);
+      const lang = await plain
+        .locator("h1")
+        .first()
+        .evaluate((h) => h.closest("[lang]")?.getAttribute("lang"));
+      expect(lang, path).toBe("en");
+    }
+    await noJs.close();
+  });
+
   test("le bouton de langue est juste à droite de la maison et mène à la même page", async ({ page }) => {
     await page.goto("/");
     const home = page.getByRole("link", { name: /retour en haut de page/ });
     const toEnglish = page.getByRole("link", { name: /Read this page in English/ });
-    const [h, l] = [(await home.boundingBox())!, (await toEnglish.boundingBox())!];
+    await expect(home).toBeVisible();
+    await expect(toEnglish).toBeVisible();
+    // Les deux positions dans la même image : la barre glisse encore depuis le haut au chargement
+    const [h, l] = await page.evaluate(() =>
+      [document.querySelector('header a[href="#top"]')!, document.querySelector("header [data-language-switch]")!].map(
+        (el) => el.getBoundingClientRect().toJSON() as DOMRect,
+      ),
+    );
     expect(l.x).toBeGreaterThan(h.x + h.width - 1);
     expect(Math.abs(l.y - h.y)).toBeLessThan(2);
     await expect(toEnglish).toHaveAttribute("hreflang", "en");
     // Le drapeau de la langue affichée (SVG, pas un emoji), aucun texte : le nom vient de l'aria-label
     await expect(toEnglish.locator("svg[aria-hidden='true']")).toHaveCount(1);
     await expect(toEnglish.locator("svg")).toHaveAttribute("data-flag", "fr");
+    await expect(toEnglish).toHaveAttribute("title", "Français");
     await expect(toEnglish).toHaveText("");
 
     await toEnglish.click();
@@ -92,6 +148,7 @@ test.describe("Version anglaise", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     const toFrench = page.getByRole("link", { name: /Lire cette page en français/ });
     await expect(toFrench.locator("svg")).toHaveAttribute("data-flag", "en");
+    await expect(toFrench).toHaveAttribute("title", "English");
     await toFrench.click();
     await expect(page).toHaveURL(/\/$/);
   });
@@ -235,8 +292,11 @@ test.describe("Version anglaise", () => {
     await expect(page).toHaveTitle(/Page not found/);
     await expect(page.getByRole("link", { name: "projects", exact: true })).toHaveAttribute("href", "/en#projects");
     await expect(page.getByRole("link", { name: "contact section" })).toHaveAttribute("href", "/en#contact");
+    // Retour sans rechargement : la page d'accueil reprend son titre et sa langue
     await page.getByRole("link", { name: "Back to the portfolio" }).click();
     await expect(page).toHaveURL(/\/en$/);
+    await expect(page).toHaveTitle(/Frontend Developer/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
     const fr = await page.goto("/rien-par-ici");
     expect(fr?.status()).toBe(404);

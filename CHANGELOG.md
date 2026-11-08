@@ -17,9 +17,16 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
   barre d'adresse d'iOS bouge, retour au fond CSS si le système reprend le contexte WebGL.
 - Écrans tactiles : l'anneau et le reflet des cartes en verre deviennent une bordure fixe
   (un calque de flou par carte au lieu de trois).
+- Bouton de thème : l'icône montre le thème affiché (soleil en clair, lune en sombre) ;
+  son libellé dit toujours ce que fait le clic.
 
 ### Nouveau
 
+- Version anglaise du site sous `/en` (accueil, `/en/legal-notice`, `/en/privacy`) ; le
+  site français ne change pas d'adresse. Bouton au drapeau de la langue affichée (France / Royaume-Uni) à droite de la maison, qui mène à
+  la même page dans l'autre langue. `<html lang>`, canonique, hreflang et sitemap par langue.
+  Traduction vérifiée par TypeScript (même forme que le français) et par un test e2e qui
+  détecte tout texte français resté sur la version anglaise.
 - Page 404 « Vous vous êtes perdu ? » pour toute adresse inconnue (code HTTP 404, non
   indexée), avec un bouton de retour au portfolio et des raccourcis vers les projets et le contact.
 - Changement de thème progressif : le nouveau thème s'étend en cercle depuis le bouton, avec

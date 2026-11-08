@@ -6,8 +6,8 @@ import { useUi } from "@/app/i18n/LocaleProvider";
 
 /**
  * Bouton clair / sombre. Aucune logique ici : tout est dans useThemeToggle. Placé par le header.
- * L'icône montre le thème affiché (soleil = clair, lune = sombre) ; le libellé, lui, dit
- * ce que fait le clic (« Passer au thème sombre »).
+ * L'icône et l'infobulle montrent le thème affiché (soleil, « Thème clair ») ; le libellé
+ * lu par les lecteurs d'écran dit ce que fait le clic (« Passer au thème sombre »).
  */
 export default function ThemeToggle({ className = "" }: Readonly<{ className?: string }>) {
   const mounted = useMounted();
@@ -16,7 +16,8 @@ export default function ThemeToggle({ className = "" }: Readonly<{ className?: s
 
   // Côté serveur le thème est inconnu : libellé neutre jusqu'au montage
   const label = !mounted ? t.change : isDark ? t.toLight : t.toDark;
-  const title = mounted && followsSystem ? `${label}${t.system}` : label;
+  const shown = isDark ? t.dark : t.light;
+  const title = !mounted ? t.change : followsSystem ? `${shown}${t.system}` : shown;
 
   return (
     <button

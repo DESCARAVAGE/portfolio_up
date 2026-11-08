@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { switchLanguageHref, type Locale } from "@/app/i18n/config";
 import { useLocale, useUi } from "@/app/i18n/LocaleProvider";
@@ -14,9 +15,12 @@ import Flag from "@/app/components/ui/base/Flag";
  * La destination est dans le `href` (pas calculée au clic) : clic du milieu, « copier le
  * lien » et nouvel onglet gardent la section. Sur l'accueil, `section` est la section
  * affichée (barre de navigation) ; ailleurs, l'ancre de l'adresse.
- * Simple lien : chaque langue a sa mise en page racine, la page se recharge.
+ * Lien Next : les deux langues partagent la mise en page racine, le changement se fait
+ * sans recharger la page : le fond 3D et le thème restent en place, la barre ne rejoue pas
+ * son entrée.
  * Son libellé est dans la langue d'arrivée (lang/hrefLang), pour les lecteurs d'écran ;
- * le drapeau est décoratif (le libellé donne le nom du lien), le title l'affiche au survol.
+ * le drapeau est décoratif (le libellé donne le nom du lien). L'infobulle, comme le
+ * drapeau, montre la langue affichée (« Français »).
  */
 export default function LanguageSwitch({
   section,
@@ -35,17 +39,17 @@ export default function LanguageSwitch({
   const href = switchLanguageHref(pathname, current, to);
 
   return (
-    <a
+    <Link
       href={href}
       hrefLang={to}
       lang={t.lang}
       aria-label={t.label}
-      title={t.label}
+      title={t.current}
       data-language-switch
       className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--line)] transition hover:scale-105 hover:border-[var(--accent)] ${className}`}
     >
       <Flag locale={locale} className="h-6 w-6" />
-    </a>
+    </Link>
   );
 }
 

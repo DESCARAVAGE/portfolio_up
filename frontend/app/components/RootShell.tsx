@@ -4,8 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import ThemeProvider from "@/app/providers/ThemeProvider";
 import MotionProvider from "@/app/providers/MotionProvider";
 import FogBackground from "@/app/components/FogBackground";
-import { LocaleProvider, PathLocaleProvider } from "@/app/i18n/LocaleProvider";
-import { LOCALES, OG_LOCALE, ROUTES, languageAlternates, type Locale } from "@/app/i18n/config";
+import { PathLocaleProvider } from "@/app/i18n/LocaleProvider";
+import { HTML_LANG_SCRIPT, LOCALES, OG_LOCALE, ROUTES, languageAlternates, type Locale } from "@/app/i18n/config";
 import { getContent, getUi } from "@/app/i18n/content";
 import { PROFILE } from "@/app/content/profile";
 import "@/app/styles/globals.css";
@@ -15,11 +15,12 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 /*
- * Métadonnées communes d'une langue (accueil). metadataBase rend absolues les URL
- * de partage (image Open Graph, canonique, hreflang). L'image de partage est générée
- * par opengraph-image.tsx dans le dossier de chaque langue.
+ * Métadonnées communes d'une langue (accueil), posées par app/(fr)/layout.tsx et
+ * app/en/layout.tsx. metadataBase rend absolues les URL de partage (image Open Graph,
+ * canonique, hreflang). L'image de partage est générée par opengraph-image.tsx dans le
+ * dossier de chaque langue.
  */
-export function rootMetadata(locale: Locale): Metadata {
+export function languageMetadata(locale: Locale): Metadata {
   const { PROFILE: p } = getContent(locale);
   const { meta } = getUi(locale);
   const title = `${p.fullName} — ${p.role}`;
@@ -54,37 +55,26 @@ export const rootViewport: Viewport = {
 };
 
 /*
- * Base HTML commune aux deux langues (app/(fr)/layout.tsx et app/en/layout.tsx) :
- * chaque langue a sa propre mise en page racine, donc le bon <html lang> sans
- * rendu dynamique. Changer de langue recharge la page, ce qui est attendu.
+ * Base HTML commune aux deux langues : une seule mise en page racine (app/layout.tsx),
+ * pour que changer de langue soit une navigation sans rechargement : le fond 3D et le
+ * thème restent en place (la page, elle, est recréée dans l'autre langue), 404 comprise
+ * (app/not-found.tsx).
+ *
+ * La langue vient de l'adresse : HTML_LANG_SCRIPT règle <html lang> avant l'affichage,
+ * PathLocaleProvider le suit ensuite à chaque changement de langue, et donne aux
+ * composants client les textes de la langue affichée.
  *
  * Le bouton de thème est dans le header (SiteHeader) : il ne doit PAS être ici.
  * data-scroll-behavior="smooth" : Next garde le défilement fluide sur les ancres
  * et le coupe seulement le temps d'un changement de page.
  */
-export default function RootShell({
-  locale,
-  localeFromPath = false,
-  children,
-}: Readonly<{
-  locale: Locale;
-  /** Page 404 commune : la langue des composants client suit l'adresse (/en…). */
-  localeFromPath?: boolean;
-  children: ReactNode;
-}>) {
-  const page = (
-    <ThemeProvider>
-      <MotionProvider>
-        <FogBackground />
-        {children}
-      </MotionProvider>
-    </ThemeProvider>
-  );
-
+export default function RootShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    // suppressHydrationWarning : next-themes ajoute la classe `dark` avant l'hydratation
-    <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
+    // suppressHydrationWarning : next-themes ajoute la classe `dark`, et HTML_LANG_SCRIPT
+    // passe lang à "en" sous /en, avant l'hydratation
+    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} text-[var(--ink)] antialiased`}>
+        <script dangerouslySetInnerHTML={{ __html: HTML_LANG_SCRIPT }} />
         {/* Sans JavaScript, les animations d'apparition ne se lancent jamais :
             on affiche directement le contenu dans son état final. */}
         <noscript>
@@ -95,13 +85,14 @@ export default function RootShell({
             }}
           />
         </noscript>
-        {localeFromPath ? (
-          <PathLocaleProvider uis={{ fr: getUi("fr"), en: getUi("en") }}>{page}</PathLocaleProvider>
-        ) : (
-          <LocaleProvider locale={locale} ui={getUi(locale)}>
-            {page}
-          </LocaleProvider>
-        )}
+        <PathLocaleProvider uis={{ fr: getUi("fr"), en: getUi("en") }}>
+          <ThemeProvider>
+            <MotionProvider>
+              <FogBackground />
+              {children}
+            </MotionProvider>
+          </ThemeProvider>
+        </PathLocaleProvider>
       </body>
     </html>
   );

@@ -7,7 +7,7 @@ import { getUi } from "@/app/i18n/content";
 const link = "text-[var(--ink)] underline underline-offset-4 hover:text-[var(--accent)]";
 
 /**
- * Contenu de la page 404 dans une langue (app/global-not-found.tsx affiche les deux
+ * Contenu de la page 404 dans une langue (app/not-found.tsx affiche les deux
  * et ne montre que celle de l'adresse demandée).
  * Le brouillard du layout reste derrière : on s'est « perdu » dedans.
  * Une sortie principale (l'accueil) et deux raccourcis vers ce qu'on vient en général chercher.

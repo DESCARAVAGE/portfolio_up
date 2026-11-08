@@ -236,8 +236,10 @@ test.describe("Mouvement réduit et robustesse", () => {
       .toBe("");
     const dark = await page.evaluate(() => document.documentElement.classList.contains("dark"));
     await expect(button).toHaveAttribute("aria-label", dark ? "Passer au thème clair" : "Passer au thème sombre");
-    // L'icône montre le thème affiché : soleil en clair, lune en sombre
+    // L'icône et l'infobulle montrent le thème affiché : soleil en clair, lune en sombre
     await expect(button.locator("svg")).toHaveAttribute("data-icon", dark ? "moon" : "sun");
+    await expect(button).toHaveAttribute("title", dark ? "Thème sombre" : "Thème clair");
+    await expect(button).toHaveCSS("cursor", "pointer");
   });
 
   test("avec mouvement réduit, le thème change d'un coup, sans transition", async ({ page }) => {

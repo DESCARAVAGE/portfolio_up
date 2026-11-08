@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
-import RootShell, { rootMetadata, rootViewport } from "@/app/components/RootShell";
+import { languageMetadata } from "@/app/components/RootShell";
 
 /*
- * Mise en page racine du site français. Le groupe (fr) n'apparaît pas dans les
- * adresses : les pages françaises restent à /, /mentions-legales, /confidentialite.
+ * Site français. Le groupe (fr) n'apparaît pas dans les adresses : les pages restent à
+ * /, /mentions-legales, /confidentialite. Le HTML commun est dans app/layout.tsx.
  */
-export const metadata = rootMetadata("fr");
-export const viewport = rootViewport;
+export const metadata = languageMetadata("fr");
 
 export default function FrenchLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return <RootShell locale="fr">{children}</RootShell>;
+  return children;
 }
