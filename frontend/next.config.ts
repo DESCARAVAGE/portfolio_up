@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
     return [
       { source: "/home", destination: "/", permanent: true },
       { source: "/xp-details/:id", destination: "/#experience", permanent: true },
+      // Même chose sous /en : une redirection ne change jamais de langue
+      { source: "/en/home", destination: "/en", permanent: true },
+      { source: "/en/xp-details/:id", destination: "/en#experience", permanent: true },
     ];
   },
 };

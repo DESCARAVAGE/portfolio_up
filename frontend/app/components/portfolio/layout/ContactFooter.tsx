@@ -1,4 +1,5 @@
-import { CONTACT, PROFILE } from "@/app/content/profile";
+import { anchorOf, type Locale } from "@/app/i18n/config";
+import { getContent, getUi } from "@/app/i18n/content";
 import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
 import ScrollSlide from "@/app/components/ui/motion/ScrollSlide";
@@ -14,10 +15,12 @@ const pill = "rounded-full px-5 py-3 font-medium transition-transform hover:-tra
  * Effet — l'énorme « on en parle ? » entre par la droite au rythme du scroll ;
  * la carte pleine (pitch, infos pratiques, liens) monte en dessous.
  */
-export default function ContactFooter() {
+export default function ContactFooter({ locale }: Readonly<{ locale: Locale }>) {
+  const { CONTACT, PROFILE } = getContent(locale);
+  const ui = getUi(locale);
   return (
     <footer
-      id="contact"
+      id={anchorOf("contact", locale)}
       className="relative flex flex-col gap-12 overflow-hidden border-t border-[var(--line)] px-[4%] pt-20 pb-10 md:gap-16 md:pt-24"
     >
       <h2 className="m-0 font-[inherit]">
@@ -44,14 +47,14 @@ export default function ContactFooter() {
                 href={`mailto:${PROFILE.email}`}
                 className={`${pill} bg-[var(--accent-surface)] text-[var(--accent-ink)]`}
               >
-                M&apos;écrire
+                {ui.contact.write}
               </a>
               <a
                 href={PROFILE.cv}
                 download={PROFILE.cvFileName}
                 className={`${pill} border border-[color-mix(in_srgb,currentColor_35%,transparent)]`}
               >
-                Mon CV <span aria-hidden>↓</span>
+                {ui.contact.cv} <span aria-hidden>↓</span>
               </a>
               {/* Les deux profils restent côte à côte, même quand la ligne se coupe */}
               <div className="flex gap-3">

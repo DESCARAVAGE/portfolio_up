@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import { animate, useInView, useMotionValue, useMotionValueEvent } from "motion/react";
 import type { Img } from "@/app/content/profile";
+import { useUi } from "@/app/i18n/LocaleProvider";
 
 type Props = {
   before: Img;
@@ -31,6 +32,7 @@ export default function CompareSlider({
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
   const pos = useMotionValue(50);
+  const { compare: t } = useUi();
   const [value, setValue] = useState(50);
   const [touched, setTouched] = useState(false);
 
@@ -64,10 +66,10 @@ export default function CompareSlider({
 
       {/* Étiquettes */}
       <span className="pointer-events-none absolute top-3 left-3 rounded-full bg-black/60 px-3 py-1 font-mono text-xs text-white backdrop-blur">
-        avant
+        {t.before}
       </span>
       <span className="pointer-events-none absolute top-3 right-3 rounded-full bg-black/60 px-3 py-1 font-mono text-xs text-white backdrop-blur">
-        après
+        {t.after}
       </span>
 
       {/* Trait + poignée */}
@@ -82,7 +84,7 @@ export default function CompareSlider({
       </div>
 
       <label htmlFor={id} className="sr-only">
-        Comparer l&apos;ancienne et la nouvelle version
+        {t.label}
       </label>
       <input
         id={id}

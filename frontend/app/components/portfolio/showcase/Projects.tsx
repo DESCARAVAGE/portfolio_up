@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
-import { PROJECTS, type Project } from "@/app/content/profile";
+import type { Project } from "@/app/content/profile";
+import { anchorOf, type Locale } from "@/app/i18n/config";
+import { getContent, getUi, type Ui } from "@/app/i18n/content";
 import SectionHeading from "@/app/components/portfolio/layout/SectionHeading";
 import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
@@ -29,23 +31,25 @@ const DEPTHS = [0.1, -0.16, 0.22];
  * cartes basculent vers l'avant puis dérivent à des vitesses différentes.
  * Composant serveur : seuls les effets et les lecteurs (vidéo, comparateur) sont envoyés au navigateur.
  */
-export default function Projects() {
+export default function Projects({ locale }: Readonly<{ locale: Locale }>) {
+  const { PROJECTS } = getContent(locale);
+  const ui = getUi(locale);
   const featured = PROJECTS.find((p) => p.featured) ?? PROJECTS[0];
   const others = PROJECTS.filter((p) => p !== featured && !p.minor);
   const minors = PROJECTS.filter((p) => p !== featured && p.minor);
 
   return (
-    <section id="projets" className="relative px-[4%] pt-8 pb-32 md:pb-48">
-      <SectionHeading section="projets" />
+    <section id={anchorOf("projets", locale)} className="relative px-[4%] pt-8 pb-32 md:pb-48">
+      <SectionHeading locale={locale} section="projets" />
 
-      {featured && <Featured project={featured} />}
+      {featured && <Featured project={featured} ui={ui} />}
 
       <div className="mt-10 grid grid-cols-1 items-start gap-6 md:mt-16 md:grid-cols-2">
         {others.map((p, i) => (
           <Parallax key={`${p.title}-${i}`} speed={DEPTHS[i % DEPTHS.length]} className={i % 3 === 1 ? "md:mt-24" : ""}>
             <Reveal effect={p.variant === "glass" ? "lift" : "fade-up"} delay={i * 0.1} amount={0.25}>
               <Surface variant={p.variant} contentClassName="flex flex-col gap-6 p-6">
-                <ProjectMedia media={p.media} sizes={SIZES.grid} className="aspect-[16/10] rounded-xl" />
+                <ProjectMedia media={p.media} sizes={SIZES.grid} ui={ui} className="aspect-[16/10] rounded-xl" />
                 <ProjectInfo project={p} />
               </Surface>
             </Reveal>
@@ -57,7 +61,7 @@ export default function Projects() {
       {minors.length > 0 && (
         <div className="mt-16 flex flex-col gap-4 md:mt-40">
           {minors.map((p, i) => (
-            <MinorProject key={`${p.title}-${i}`} project={p} />
+            <MinorProject key={`${p.title}-${i}`} project={p} ui={ui} />
           ))}
         </div>
       )}
@@ -65,11 +69,12 @@ export default function Projects() {
   );
 }
 
-function MinorProject({ project: p }: { project: Project }) {
+function MinorProject({ project: p, ui }: Readonly<{ project: Project; ui: Ui }>) {
   return (
     <Reveal effect="fade-up" amount={0.4}>
       <Surface variant={p.variant} radius="1.25rem" contentClassName="flex flex-wrap items-center gap-x-6 gap-y-4 p-4">
         <ProjectMedia
+          ui={ui}
           media={p.media}
           sizes={SIZES.minor}
           className="aspect-[16/10] w-full max-w-[13rem] flex-[0_1_13rem] rounded-xl"
@@ -94,7 +99,7 @@ function MinorProject({ project: p }: { project: Project }) {
   );
 }
 
-function Featured({ project }: { project: Project }) {
+function Featured({ project, ui }: Readonly<{ project: Project; ui: Ui }>) {
   // Un visuel avec un format connu (ex. la vidéo) garde ses proportions : rien n'est rogné
   const ratio = "ratio" in project.media ? project.media.ratio : undefined;
   const steps = project.media.type === "video" ? project.media.steps : undefined;
@@ -109,6 +114,7 @@ function Featured({ project }: { project: Project }) {
         <div className="flex flex-[3_1_28rem] flex-col gap-4">
           <Curtain from="right" radius="1rem" className={ratio ? "" : "h-full"} frameClassName={ratio ? "" : "h-full"}>
             <ProjectMedia
+              ui={ui}
               media={project.media}
               sizes={SIZES.featured}
               className={ratio ? "w-full rounded-2xl" : "h-full min-h-[22rem] rounded-2xl"}
@@ -131,7 +137,7 @@ function Featured({ project }: { project: Project }) {
         </div>
         <div className="flex flex-[2_1_20rem] flex-col justify-end gap-6 py-2">
           <span className="w-fit rounded-full bg-[var(--accent-surface)] px-3 py-1 font-mono text-xs text-[var(--accent-ink)]">
-            projet phare
+            {ui.projects.featured}
           </span>
           <ProjectInfo project={project} large />
         </div>
@@ -149,8 +155,10 @@ function ProjectMedia({
   sizes,
   className = "",
   style,
+  ui,
 }: {
   media: Project["media"];
+  ui: Ui;
   sizes: string;
   className?: string;
   style?: CSSProperties;
@@ -168,7 +176,9 @@ function ProjectMedia({
   if (!media.src) {
     return (
       <div style={style} className={`${box} grid place-items-center p-6 text-center font-mono text-sm opacity-70`}>
-        [{media.type === "video" ? "Vidéo" : "Capture"} : {media.alt}]
+        [{media.type === "video" ? ui.projects.video : ui.projects.image}
+        {ui.colon}
+        {media.alt}]
       </div>
     );
   }

@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { EXPERIENCES, type Experience as Exp } from "@/app/content/profile";
+import type { Experience as Exp } from "@/app/content/profile";
+import { anchorOf, type Locale } from "@/app/i18n/config";
+import { getContent, getUi } from "@/app/i18n/content";
 import SectionHeading from "@/app/components/portfolio/layout/SectionHeading";
 import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
@@ -14,13 +16,15 @@ import { Stagger, StaggerItem } from "@/app/components/ui/motion/Stagger";
  * (contexte → pivot → réalisation → leçon) puis les réalisations défilent.
  * Les autres expériences suivent en cartes.
  */
-export default function Experience() {
+export default function Experience({ locale }: Readonly<{ locale: Locale }>) {
+  const { EXPERIENCES } = getContent(locale);
+  const ui = getUi(locale);
   const featured = EXPERIENCES.find((e) => e.featured) ?? EXPERIENCES[0];
   const others = EXPERIENCES.filter((e) => e !== featured);
 
   return (
-    <section id="experience" className="relative px-[4%] pt-8 pb-28 md:pb-36">
-      <SectionHeading section="experience" />
+    <section id={anchorOf("experience", locale)} className="relative px-[4%] pt-8 pb-28 md:pb-36">
+      <SectionHeading locale={locale} section="experience" />
 
       {featured && (
         <Reveal effect="lift" amount={0.15}>
@@ -82,7 +86,7 @@ export default function Experience() {
               )}
 
               <h4 className="text-mute m-0 mt-4 font-mono text-xs font-normal tracking-wider uppercase">
-                Réalisations
+                {ui.experience.achievements}
               </h4>
               <Stagger as="ul" step={0.09} className="m-0 flex list-none flex-col p-0">
                 {featured.bullets.map((b, i) => (

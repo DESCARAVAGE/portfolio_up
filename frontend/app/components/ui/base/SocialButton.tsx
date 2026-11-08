@@ -1,4 +1,5 @@
 import type { IconType } from "react-icons";
+import NewTabNote from "@/app/components/ui/base/NewTabNote";
 
 const STYLES = {
   /** Orange plein, comme « M'écrire » : se détache dans la barre de navigation. */
@@ -14,7 +15,7 @@ export type SocialVariant = keyof typeof STYLES;
 
 /**
  * Bouton rond vers un profil (LinkedIn, GitHub…), logo seul, ouvert dans un
- * nouvel onglet. Le nom est donné aux lecteurs d'écran par aria-label.
+ * nouvel onglet. Le nom est donné aux lecteurs d'écran par un texte masqué (sr-only).
  * Le logo vient de react-icons (Font Awesome) : un SVG en currentColor,
  * qui prend la couleur du texte du bouton dans les deux thèmes.
  */
@@ -36,11 +37,13 @@ export default function SocialButton({
       href={href}
       target="_blank"
       rel="noreferrer"
-      aria-label={`${label} (nouvel onglet)`}
       title={label}
       className={`grid shrink-0 place-items-center rounded-full transition hover:-translate-y-0.5 hover:scale-105 ${STYLES[variant]} ${className}`}
     >
       <Icon className="h-5 w-5" aria-hidden />
+      {/* Nom pour les lecteurs d'écran : « LinkedIn (nouvel onglet) », dans la langue de la page */}
+      <span className="sr-only">{label}</span>
+      <NewTabNote />
     </a>
   );
 }

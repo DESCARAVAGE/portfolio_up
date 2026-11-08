@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LEGAL_PAGES } from "@/app/content/legal";
+import { LEGAL_ROUTES, ROUTES } from "@/app/i18n/config";
+import { useLocale, useUi } from "@/app/i18n/LocaleProvider";
 import { rememberPortfolioOrigin, restorePortfolioScroll } from "@/app/components/portfolio/legal/legalReturn";
 
 /**
@@ -15,16 +16,19 @@ import { rememberPortfolioOrigin, restorePortfolioScroll } from "@/app/component
  */
 export default function LegalNav({ className = "" }: Readonly<{ className?: string }>) {
   const pathname = usePathname();
-  const onLegalPage = LEGAL_PAGES.some((p) => p.href === pathname);
+  const locale = useLocale();
+  const { legal } = useUi();
+  const pages = LEGAL_ROUTES.map((key) => ({ href: ROUTES[key][locale], label: legal.pages[key] }));
+  const onLegalPage = pages.some((p) => p.href === pathname);
 
   useEffect(() => {
     if (!onLegalPage) restorePortfolioScroll();
   }, [onLegalPage]);
 
   return (
-    <nav aria-label="Informations légales" className={className}>
+    <nav aria-label={legal.nav} className={className}>
       <ul className="m-0 flex list-none flex-wrap gap-x-6 gap-y-2 p-0">
-        {LEGAL_PAGES.map((p) => (
+        {pages.map((p) => (
           <li key={p.href}>
             <Link
               href={p.href}

@@ -236,6 +236,10 @@ test.describe("Mouvement réduit et robustesse", () => {
       .toBe("");
     const dark = await page.evaluate(() => document.documentElement.classList.contains("dark"));
     await expect(button).toHaveAttribute("aria-label", dark ? "Passer au thème clair" : "Passer au thème sombre");
+    // L'icône et l'infobulle montrent le thème affiché : soleil en clair, lune en sombre
+    await expect(button.locator("svg")).toHaveAttribute("data-icon", dark ? "moon" : "sun");
+    await expect(button).toHaveAttribute("title", dark ? "Thème sombre" : "Thème clair");
+    await expect(button).toHaveCSS("cursor", "pointer");
   });
 
   test("avec mouvement réduit, le thème change d'un coup, sans transition", async ({ page }) => {
@@ -281,7 +285,9 @@ test.describe("Référencement et partage", () => {
     const jsonLd = await page.locator('script[type="application/ld+json"]').first().textContent();
     expect(JSON.parse(jsonLd!)).toMatchObject({ "@type": "Person", name: "Daniel Escaravage" });
 
-    for (const path of ["/robots.txt", "/sitemap.xml", "/opengraph-image"]) {
+    // L'image de partage : son adresse exacte est celle de la balise (Next y ajoute un suffixe)
+    const og = new URL((await page.locator('meta[property="og:image"]').getAttribute("content"))!);
+    for (const path of ["/robots.txt", "/sitemap.xml", og.pathname + og.search]) {
       expect((await request.get(path)).status(), path).toBe(200);
     }
   });
@@ -683,7 +689,8 @@ test.describe("Pages légales", () => {
   // Garde-fou : tant qu'une donnée de app/content/legal.ts vaut « [À COMPLÉTER … »,
   // ce test échoue et bloque la CI. Rien de provisoire ne part en production.
   test("aucun champ « à compléter » n'est publié", async ({ page }) => {
-    for (const { path } of PAGES) {
+    // Aussi les traductions anglaises (/en/legal-notice, /en/privacy)
+    for (const path of [...PAGES.map((p) => p.path), "/en/legal-notice", "/en/privacy"]) {
       await page.goto(path);
       await expect(page.locator("main"), `${path} : remplir app/content/legal.ts`).not.toContainText("[À COMPLÉTER");
     }

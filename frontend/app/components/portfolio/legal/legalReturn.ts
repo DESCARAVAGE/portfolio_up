@@ -25,14 +25,17 @@ export function rememberPortfolioOrigin() {
   }
 }
 
-/** Au clic sur « Retour » : l'origine mémorisée (et la position à rétablir), ou null. */
-export function takePortfolioOrigin(): Origin | null {
+/**
+ * Au clic sur « Retour » : l'origine mémorisée, ou null. La position n'est rétablie que si
+ * `samePage` accepte l'adresse d'origine (ex. même langue) : sinon, rien à rétablir.
+ */
+export function takePortfolioOrigin(samePage: (href: string) => boolean = () => true): Origin | null {
   try {
     const raw = sessionStorage.getItem(ORIGIN);
     sessionStorage.removeItem(ORIGIN);
     if (!raw) return null;
     const origin = JSON.parse(raw) as Origin;
-    sessionStorage.setItem(RESTORE, String(origin.y));
+    if (samePage(origin.href)) sessionStorage.setItem(RESTORE, String(origin.y));
     return origin;
   } catch {
     return null;

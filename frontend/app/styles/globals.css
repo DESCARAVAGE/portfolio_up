@@ -11,6 +11,14 @@
    et non la préférence du système : le bouton de thème a donc toujours le dernier mot. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Tailwind v4 rend aux boutons le curseur par défaut : la main sur tout bouton cliquable
+   (thème, menu, copie, vidéo…), comme sur les liens. */
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 /* ----------------------------------------------------------------------------
  * Couleurs (tokens)
  * Une seule source de vérité : chaque couleur change avec la classe `dark`.
@@ -166,4 +174,11 @@ html[data-theme-wave]::view-transition-new(root) {
     #000 calc(var(--wave-r) - var(--wave-soft)),
     transparent var(--wave-r)
   );
+}
+
+/* Page 404 (app/not-found.tsx) : les deux langues sont dans la page,
+   seule celle de <html lang> est affichée. */
+html:not([lang="en"]) [data-lang="en"],
+html[lang="en"] [data-lang="fr"] {
+  display: none;
 }

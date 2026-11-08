@@ -1,4 +1,5 @@
-import { HIGHLIGHTS } from "@/app/content/profile";
+import { anchorOf, type Locale } from "@/app/i18n/config";
+import { getContent } from "@/app/i18n/content";
 import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
 import Parallax from "@/app/components/ui/motion/Parallax";
@@ -11,11 +12,16 @@ const DEPTHS = [0.06, -0.1, 0.12, -0.06];
  * hauteurs différentes. Placés juste après le hero : la preuve avant le discours.
  * Composant serveur : seuls Reveal, Parallax et Surface s'exécutent dans le navigateur.
  */
-export default function Highlights() {
+export default function Highlights({ locale }: Readonly<{ locale: Locale }>) {
+  const { HIGHLIGHTS, SECTIONS } = getContent(locale);
   return (
-    <section id="en-bref" aria-labelledby="en-bref-titre" className="relative px-[4%] pt-10 pb-24 md:pb-32">
+    <section
+      id={anchorOf("en-bref", locale)}
+      aria-labelledby="en-bref-titre"
+      className="relative px-[4%] pt-10 pb-24 md:pb-32"
+    >
       <h2 id="en-bref-titre" className="sr-only">
-        En bref
+        {SECTIONS.find((s) => s.id === "en-bref")?.title}
       </h2>
       <ul className="m-0 grid list-none grid-cols-1 gap-x-5 gap-y-5 p-0 sm:grid-cols-2 lg:grid-cols-4">
         {HIGHLIGHTS.map((h, i) => (
