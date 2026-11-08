@@ -1,31 +1,32 @@
-import { CERTIFICATIONS, EDUCATION } from "@/app/content/profile";
+import { anchorOf, type Locale } from "@/app/i18n/config";
+import { getContent, getUi } from "@/app/i18n/content";
 import SectionHeading from "@/app/components/portfolio/layout/SectionHeading";
 import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
 import LogoTile from "@/app/components/ui/base/LogoTile";
 import ScrollLine from "@/app/components/ui/motion/ScrollLine";
 
-const KIND = {
-  formation: { label: "formation", variant: "glass" as const },
-  avant: { label: "avant la tech", variant: "solid" as const },
-};
+/** Style de chaque étape ; son libellé est dans le dictionnaire (ui.journey, même clé). */
+const VARIANT = { formation: "glass", avant: "solid" } as const;
 
 /**
  * Section « formation » — frise : la ligne d'accent se trace au fil du scroll ;
  * les diplômes (verre) basculent vers l'avant, l'étape « avant la tech » (pleine)
  * glisse depuis la gauche. Les certifications ferment la frise.
  */
-export default function Journey() {
+export default function Journey({ locale }: Readonly<{ locale: Locale }>) {
+  const { CERTIFICATIONS, EDUCATION } = getContent(locale);
+  const ui = getUi(locale);
   return (
-    <section id="formation" className="relative px-[4%] pt-8 pb-28 md:pb-36">
-      <SectionHeading section="formation" className="mb-14" />
+    <section id={anchorOf("formation", locale)} className="relative px-[4%] pt-8 pb-28 md:pb-36">
+      <SectionHeading locale={locale} section="formation" className="mb-14" />
 
       {/* Le trait est hors de la liste : un <ol> ne doit contenir que des <li> */}
       <div className="relative">
         <ScrollLine className="absolute top-2 bottom-2 left-[0.6875rem] w-px md:left-[1.4375rem]" />
         <ol className="relative m-0 flex list-none flex-col gap-10 p-0 pl-10 md:pl-16">
           {EDUCATION.map((step, i) => {
-            const kind = KIND[step.kind];
+            const kind = { label: ui.journey[step.kind], variant: VARIANT[step.kind] };
             return (
               <li key={`${step.period}-${i}`} className="relative">
                 <span

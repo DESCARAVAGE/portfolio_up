@@ -9,8 +9,9 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "ci": "pnpm lint && pnpm format:check && pnpm build && pnpm test:e2e && pnpm dlx @lhci/cli@0.15.x autorun"
+    "ci": "pnpm lint && pnpm format:check && pnpm test:unit && pnpm build && pnpm test:e2e && pnpm dlx @lhci/cli@0.15.x autorun"
   },
   "dependencies": {
     "motion": "^14.0.0",
@@ -32,7 +33,8 @@
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.5"
   },
   "packageManager": "pnpm@10.33.2"
 }

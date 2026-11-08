@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent } from "react";
+import { useUi } from "@/app/i18n/LocaleProvider";
 
 export type TocItem = { readonly id: string; readonly title: string };
 
@@ -53,6 +54,7 @@ export default function LegalToc({
   className = "",
 }: Readonly<{ items: readonly TocItem[]; className?: string }>) {
   const active = useTocActive(items);
+  const { legal } = useUi();
 
   const go = (e: MouseEvent<HTMLAnchorElement>, id: string) => {
     const target = document.getElementById(id);
@@ -66,8 +68,8 @@ export default function LegalToc({
   };
 
   return (
-    <nav aria-label="Sommaire" className={className}>
-      <p className="text-mute m-0 mb-3 font-mono text-xs tracking-wider uppercase">Sur cette page</p>
+    <nav aria-label={legal.toc} className={className}>
+      <p className="text-mute m-0 mb-3 font-mono text-xs tracking-wider uppercase">{legal.tocTitle}</p>
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {items.map((it) => (
           <li key={it.id}>

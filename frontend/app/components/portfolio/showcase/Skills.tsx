@@ -1,4 +1,5 @@
-import { SKILLS } from "@/app/content/profile";
+import { anchorOf, type Locale } from "@/app/i18n/config";
+import { getContent, getUi } from "@/app/i18n/content";
 import SectionHeading from "@/app/components/portfolio/layout/SectionHeading";
 import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
@@ -8,10 +9,12 @@ import TagList from "@/app/components/ui/base/Tag";
  * Effet — bento de spécialités : le verre bascule vers l'avant (lift),
  * les cartes pleines glissent de côté ; au survol la carte se soulève.
  */
-export default function Skills() {
+export default function Skills({ locale }: Readonly<{ locale: Locale }>) {
+  const { SKILLS } = getContent(locale);
+  const ui = getUi(locale);
   return (
-    <section id="competences" className="relative px-[4%] pt-8 pb-28 md:pb-36">
-      <SectionHeading section="competences" />
+    <section id={anchorOf("competences", locale)} className="relative px-[4%] pt-8 pb-28 md:pb-36">
+      <SectionHeading locale={locale} section="competences" />
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {SKILLS.map((s, i) => (
@@ -35,7 +38,7 @@ export default function Skills() {
                   {s.title}
                 </h3>
                 <p className="text-mute m-0 max-w-md leading-relaxed">{s.text}</p>
-                <TagList items={s.tools} label="Outils" />
+                <TagList items={s.tools} label={ui.skills.tools} />
               </div>
             </Surface>
           </Reveal>

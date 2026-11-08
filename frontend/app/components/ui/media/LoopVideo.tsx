@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import { AnimatePresence, motion, useInView } from "motion/react";
 import { EASE_OUT } from "@/app/lib/motion";
+import { useUi } from "@/app/i18n/LocaleProvider";
 
 type Props = {
   /** Fichier MP4 (H.264) : lu partout sauf par certains Chromium Linux sans codec propriétaire. */
@@ -45,6 +46,7 @@ export default function LoopVideo({
   const inView = useInView(box, { amount: 0.3 });
 
   /** L'utilisateur a-t-il lancé la vidéo au moins une fois ? */
+  const { video: t, colon } = useUi();
   const [started, setStarted] = useState(false);
   /** Lecture voulue par l'utilisateur (indépendamment du défilement). */
   const [wantPlay, setWantPlay] = useState(false);
@@ -131,9 +133,12 @@ export default function LoopVideo({
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                 <path d="M7 4v16l13-8z" />
               </svg>
-              Voir la démo
+              {t.play}
             </span>
-            <span className="sr-only"> : {label}</span>
+            <span className="sr-only">
+              {colon}
+              {label}
+            </span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -143,22 +148,22 @@ export default function LoopVideo({
         <button
           type="button"
           onClick={() => setWantPlay(!playing)}
-          aria-label={playing ? "Mettre la vidéo en pause" : "Reprendre la lecture"}
+          aria-label={playing ? t.pause : t.resume}
           className={controlClass("left-3")}
         >
           {playing ? <PauseIcon /> : <PlayIcon />}
-          {playing ? "pause" : "lecture"}
+          {playing ? t.pauseShort : t.resumeShort}
         </button>
       )}
 
       <button
         type="button"
         onClick={toggleFullscreen}
-        aria-label={fullscreen ? "Réduire : quitter le plein écran" : "Afficher la vidéo en plein écran"}
+        aria-label={fullscreen ? t.exitFullscreen : t.enterFullscreen}
         className={controlClass("right-3")}
       >
         {fullscreen ? <ShrinkIcon /> : <ExpandIcon />}
-        {fullscreen ? "réduire" : "plein écran"}
+        {fullscreen ? t.exitShort : t.enterShort}
       </button>
     </div>
   );

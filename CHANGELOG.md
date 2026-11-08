@@ -17,9 +17,21 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
   barre d'adresse d'iOS bouge, retour au fond CSS si le système reprend le contexte WebGL.
 - Écrans tactiles : l'anneau et le reflet des cartes en verre deviennent une bordure fixe
   (un calque de flou par carte au lieu de trois).
+- Bouton de thème : l'icône montre le thème affiché (soleil en clair, lune en sombre) ;
+  son libellé dit toujours ce que fait le clic.
 
 ### Nouveau
 
+- Version anglaise du site sous `/en` (accueil, `/en/legal-notice`, `/en/privacy`) ; le
+  site français ne change pas d'adresse. Bouton au drapeau de la langue affichée (France / Royaume-Uni) à droite de la maison, qui mène à
+  la même page dans l'autre langue. `<html lang>`, canonique, hreflang et sitemap par langue.
+  Traduction vérifiée par TypeScript (même forme que le français) et par un test e2e qui
+  détecte tout texte français resté sur la version anglaise.
+- Page 404 « Vous vous êtes perdu ? » pour toute adresse inconnue (code HTTP 404, non
+  indexée), avec un bouton de retour au portfolio et des raccourcis vers les projets et le contact.
+- Changement de thème progressif : le nouveau thème s'étend en cercle depuis le bouton, avec
+  un front flou, pendant que le brouillard lance une onde de choc depuis le même point.
+  Instantané avec « réduire les animations » ou sans l'API View Transitions.
 - Pages « Mentions légales » et « Confidentialité », liées depuis le pied de page et listées
   dans le sitemap. Éditeur en entrepreneur individuel, hébergeur OVH, crédits (Font Awesome
   CC BY 4.0, Vanta.js, Geist), journaux et durées de conservation, droits RGPD.
@@ -61,8 +73,11 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
 - Mentions légales en version « particulier » (site non professionnel, LCEN art. 1-1 II) tant
   que l'activité n'est pas déclarée ; bascule en version professionnelle (EI, SIREN, adresse,
   téléphone) par `LEGAL.status` dans `frontend/app/content/legal.ts`.
+<<<<<<< Updated upstream
 - Images Docker construites sur chaque PR (sans publication) : un Dockerfile cassé est vu avant le merge.
 - Avertissements SonarCloud de la PR 56 (props en lecture seule, `.at(-1)`, attente sans délai fixe).
+=======
+>>>>>>> Stashed changes
 
 ## [2.0.0] — 2026-10-09
 

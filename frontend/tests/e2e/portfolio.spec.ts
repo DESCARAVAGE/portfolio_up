@@ -177,6 +177,89 @@ test.describe("Mouvement réduit et robustesse", () => {
     await expect(page.locator("html")).not.toHaveClass(/dark/);
   });
 
+  test("le changement de thème se propage en onde depuis le bouton, puis s'efface", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light", reducedMotion: "no-preference" });
+    await page.goto("/");
+    // Espions : transition de vue lancée, onde du brouillard demandée depuis le centre du bouton
+    await page.evaluate(() => {
+      const w = window as unknown as { __vt: number; __burst: { clientX: number; clientY: number } | null };
+      w.__vt = 0;
+      w.__burst = null;
+      const start = document.startViewTransition?.bind(document);
+      if (start) {
+        document.startViewTransition = ((cb: () => void) => {
+          w.__vt++;
+          return start(cb);
+        }) as typeof document.startViewTransition;
+      }
+      window.addEventListener("fog:burst", (e) => (w.__burst = (e as CustomEvent).detail));
+      // Options de l'animation de l'onde (voir plus bas : fill)
+      const animate = document.documentElement.animate.bind(document.documentElement);
+      document.documentElement.animate = (keyframes, options) => {
+        (window as unknown as { __wave?: unknown }).__wave = options;
+        return animate(keyframes, options);
+      };
+    });
+    const button = page.getByRole("button", { name: /thème sombre/ });
+    await button.click();
+    // Mesuré après le clic : la barre a fini d'entrer (Playwright attend qu'elle soit immobile)
+    const box = (await page.getByRole("button", { name: /thème clair/ }).boundingBox())!;
+
+    await expect(page.locator("html")).toHaveClass(/dark/);
+    const spy = await page.evaluate(() => (window as unknown as { __vt: number; __burst: unknown }).__vt);
+    expect(spy).toBe(1);
+    const burst = await page.evaluate(
+      () => (window as unknown as { __burst: { clientX: number; clientY: number } }).__burst,
+    );
+    expect(Math.abs(burst.clientX - (box.x + box.width / 2))).toBeLessThan(2);
+    expect(Math.abs(burst.clientY - (box.y + box.height / 2))).toBeLessThan(2);
+    // L'onde garde son état final jusqu'au retrait de la transition : sans fill « forwards »,
+    // l'ancien thème réapparaissait une ou deux images à la fin (flash)
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __wave?: { fill?: string } }).__wave?.fill))
+      .toBe("forwards");
+    // Une fois l'onde passée, plus aucune trace sur <html>
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme-wave");
+    await expect.poll(() => page.evaluate(() => document.documentElement.style.getPropertyValue("--wave-x"))).toBe("");
+  });
+
+  test("deux clics rapides sur le thème : rien ne reste de l'onde, et le bouton suit le thème", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light", reducedMotion: "no-preference" });
+    await page.goto("/");
+    const button = page.locator('button[aria-label^="Passer au thème"]');
+    await button.click();
+    // Second clic pendant l'onde (sur mobile, le navigateur peut l'ignorer : pas grave)
+    await button.click({ force: true });
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme-wave");
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.style.getPropertyValue("--wave-soft")))
+      .toBe("");
+    const dark = await page.evaluate(() => document.documentElement.classList.contains("dark"));
+    await expect(button).toHaveAttribute("aria-label", dark ? "Passer au thème clair" : "Passer au thème sombre");
+    // L'icône et l'infobulle montrent le thème affiché : soleil en clair, lune en sombre
+    await expect(button.locator("svg")).toHaveAttribute("data-icon", dark ? "moon" : "sun");
+    await expect(button).toHaveAttribute("title", dark ? "Thème sombre" : "Thème clair");
+    await expect(button).toHaveCSS("cursor", "pointer");
+  });
+
+  test("avec mouvement réduit, le thème change d'un coup, sans transition", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.evaluate(() => {
+      (window as unknown as { __vt: number }).__vt = 0;
+      const start = document.startViewTransition?.bind(document);
+      if (start) {
+        document.startViewTransition = ((cb: () => void) => {
+          (window as unknown as { __vt: number }).__vt++;
+          return start(cb);
+        }) as typeof document.startViewTransition;
+      }
+    });
+    await page.getByRole("button", { name: /thème sombre/ }).click();
+    await expect(page.locator("html")).toHaveClass(/dark/);
+    expect(await page.evaluate(() => (window as unknown as { __vt: number }).__vt)).toBe(0);
+  });
+
   test("sans JavaScript, le titre et les projets restent lisibles", async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
@@ -202,7 +285,9 @@ test.describe("Référencement et partage", () => {
     const jsonLd = await page.locator('script[type="application/ld+json"]').first().textContent();
     expect(JSON.parse(jsonLd!)).toMatchObject({ "@type": "Person", name: "Daniel Escaravage" });
 
-    for (const path of ["/robots.txt", "/sitemap.xml", "/opengraph-image"]) {
+    // L'image de partage : son adresse exacte est celle de la balise (Next y ajoute un suffixe)
+    const og = new URL((await page.locator('meta[property="og:image"]').getAttribute("content"))!);
+    for (const path of ["/robots.txt", "/sitemap.xml", og.pathname + og.search]) {
       expect((await request.get(path)).status(), path).toBe(200);
     }
   });
@@ -604,9 +689,44 @@ test.describe("Pages légales", () => {
   // Garde-fou : tant qu'une donnée de app/content/legal.ts vaut « [À COMPLÉTER … »,
   // ce test échoue et bloque la CI. Rien de provisoire ne part en production.
   test("aucun champ « à compléter » n'est publié", async ({ page }) => {
-    for (const { path } of PAGES) {
+    // Aussi les traductions anglaises (/en/legal-notice, /en/privacy)
+    for (const path of [...PAGES.map((p) => p.path), "/en/legal-notice", "/en/privacy"]) {
       await page.goto(path);
       await expect(page.locator("main"), `${path} : remplir app/content/legal.ts`).not.toContainText("[À COMPLÉTER");
     }
   });
+});
+
+test.describe("Page 404", () => {
+  test("une adresse inconnue répond 404 et propose de revenir au portfolio", async ({ page }) => {
+    const res = await page.goto("/une-page-qui-n-existe-pas");
+    expect(res?.status()).toBe(404);
+    await expect(page.getByRole("heading", { level: 1, name: "Vous vous êtes perdu ?" })).toBeVisible();
+    // Next pose noindex lui-même : une seule balise, pas de doublon
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(1);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+
+    await page.getByRole("link", { name: "Revenir au portfolio" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole("heading", { level: 1 })).not.toHaveText("Vous vous êtes perdu ?");
+  });
+
+  test("les raccourcis mènent aux projets et au contact", async ({ page }) => {
+    await page.goto("/rien-ici");
+    await expect(page.getByRole("link", { name: "projets" })).toHaveAttribute("href", "/#projets");
+    await expect(page.getByRole("link", { name: "contact" })).toHaveAttribute("href", "/#contact");
+  });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    test(`aucune violation d'accessibilité en thème ${colorScheme === "light" ? "clair" : "sombre"}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+      await page.goto("/rien-ici");
+      const results = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(results.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([]);
+    });
+  }
 });

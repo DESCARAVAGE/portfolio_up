@@ -1,4 +1,5 @@
-import { VISION } from "@/app/content/profile";
+import { anchorOf, type Locale } from "@/app/i18n/config";
+import { getContent } from "@/app/i18n/content";
 import SectionHeading from "@/app/components/portfolio/layout/SectionHeading";
 import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
@@ -11,10 +12,11 @@ import { Stagger, StaggerItem } from "@/app/components/ui/motion/Stagger";
  * - à droite, deux cartes à des hauteurs différentes : « pourquoi le code » (pleine)
  *   et la conviction sur l'IA (accent), qui grandit en apparaissant.
  */
-export default function Vision() {
+export default function Vision({ locale }: Readonly<{ locale: Locale }>) {
+  const { VISION } = getContent(locale);
   return (
-    <section id="vision" className="relative px-[4%] pt-8 pb-28 md:pb-36">
-      <SectionHeading section="vision" />
+    <section id={anchorOf("vision", locale)} className="relative px-[4%] pt-8 pb-28 md:pb-36">
+      <SectionHeading locale={locale} section="vision" />
 
       <div className="flex flex-wrap items-start gap-6">
         <Parallax speed={-0.08} className="flex-[3_1_32rem]">
@@ -57,7 +59,7 @@ export default function Vision() {
                 </h3>
                 <p className="m-0 text-xl leading-snug">{VISION.conviction.text}</p>
                 <a
-                  href={`#${VISION.conviction.link.target}`}
+                  href={`#${anchorOf(VISION.conviction.link.target, locale)}`}
                   className="w-fit rounded-full border border-[color-mix(in_srgb,currentColor_40%,transparent)] px-4 py-2.5 text-sm font-medium transition-transform hover:-translate-y-0.5"
                 >
                   {VISION.conviction.link.label} <span aria-hidden>↑</span>

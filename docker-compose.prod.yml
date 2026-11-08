@@ -10,18 +10,26 @@ services:
     image: descaravage/final-project-study-backend:latest
     pull_policy: always
     env_file: .env.backend
+    restart: unless-stopped
     logging: *logging
     # Le CV vit sur le serveur, pas dans l'image publique. Chemin à adapter si besoin.
     volumes:
       - /home/debian/cv-storage:/app/storage:ro
     depends_on:
-      - db
-    # backend doit gérer sa propre attente de la DB (retries/wait-for)
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   frontend:
     image: descaravage/final-project-study-frontend:latest
     pull_policy: always
     env_file: .env.frontend
+    restart: unless-stopped
     logging: *logging
     depends_on:
       - backend
@@ -41,10 +49,10 @@ services:
 
   nginx:
     image: nginx:1.28.2
+    restart: unless-stopped
     depends_on:
       - frontend
       - backend
-    restart: always
     logging: *logging
     ports:
       - ${GATEWAY_PORT:-8000}:80

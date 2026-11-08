@@ -1,15 +1,21 @@
 import { ImageResponse } from "next/og";
-import { HERO, PROFILE } from "@/app/content/profile";
+import type { Locale } from "@/app/i18n/config";
+import { getContent } from "@/app/i18n/content";
 
 /**
- * Image d'aperçu quand le lien est partagé (LinkedIn, Slack, iMessage…).
+ * Image d'aperçu quand le lien est partagé (LinkedIn, Slack, iMessage…), dans une langue.
+ * Utilisée par app/(fr)/opengraph-image.tsx et app/en/opengraph-image.tsx.
  * Générée une fois au build : 1200 × 630, le format attendu par les réseaux.
  */
-export const alt = `${PROFILE.fullName}, ${PROFILE.role}`;
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const OG_SIZE = { width: 1200, height: 630 };
 
-export default function OpengraphImage() {
+export function ogAlt(locale: Locale) {
+  const { PROFILE } = getContent(locale);
+  return `${PROFILE.fullName}, ${PROFILE.role}`;
+}
+
+export function renderOgImage(locale: Locale) {
+  const { HERO } = getContent(locale);
   return new ImageResponse(
     <div
       style={{
@@ -46,6 +52,6 @@ export default function OpengraphImage() {
         {HERO.availability} · {HERO.location}
       </div>
     </div>,
-    size,
+    OG_SIZE,
   );
 }

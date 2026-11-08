@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import LegalPage, { LegalSection, OutLink } from "@/app/components/portfolio/legal/LegalPage";
 import { LEGAL } from "@/app/content/legal";
 import { PROFILE } from "@/app/content/profile";
+import { languageAlternates } from "@/app/i18n/config";
 
 export const metadata: Metadata = {
   title: `Confidentialité — ${PROFILE.fullName}`,
   description: "Données enregistrées par le site de Daniel Escaravage : journaux du serveur, aucun cookie, vos droits.",
-  alternates: { canonical: "/confidentialite" },
+  alternates: languageAlternates("privacy", "fr"),
 };
 
 /** Rubriques de la page : sommaire et ancres (#responsable…). */
@@ -32,7 +33,7 @@ export default function Confidentialite() {
   const mail = <a href={`mailto:${p.email}`}>{p.email}</a>;
 
   return (
-    <LegalPage title="Confidentialité" toc={TOC}>
+    <LegalPage locale="fr" title="Confidentialité" toc={TOC}>
       <LegalSection {...responsable}>
         <p className="m-0">
           {p.name}, éditeur de ce site. Contact : {mail}.

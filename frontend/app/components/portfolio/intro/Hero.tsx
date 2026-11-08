@@ -2,7 +2,7 @@
 
 import { useRef, type CSSProperties } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
-import { HERO, PROFILE } from "@/app/content/profile";
+import type { Content } from "@/app/i18n/content";
 import { useMotionFactor } from "@/app/hooks/useMotionFactor";
 import Surface from "@/app/components/ui/base/Surface";
 
@@ -15,7 +15,12 @@ const delay = (s: number) => ({ "--delay": `${s}s` }) as CSSProperties;
  * Défilement : le titre recule, la carte part plus vite (elle paraît plus proche),
  * l'indice « faites défiler » s'efface. Rien ne bouge si l'utilisateur réduit les animations.
  */
-export default function Hero() {
+export default function Hero({
+  hero: HERO,
+  ctaHref,
+  cv,
+  cvFileName,
+}: Readonly<{ hero: Content["HERO"]; ctaHref: string; cv: string; cvFileName: string }>) {
   const ref = useRef<HTMLElement>(null);
   const k = useMotionFactor();
   const { scrollYProgress: p } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -72,14 +77,14 @@ export default function Hero() {
               <p className="m-0 text-lg leading-relaxed">{HERO.intro}</p>
               <div className="flex flex-wrap gap-3">
                 <a
-                  href={`#${HERO.ctaPrimary.target}`}
+                  href={ctaHref}
                   className="rounded-full bg-[var(--accent-surface)] px-5 py-3 font-medium text-[var(--accent-ink)] transition-transform hover:-translate-y-0.5"
                 >
                   {HERO.ctaPrimary.label}
                 </a>
                 <a
-                  href={PROFILE.cv}
-                  download={PROFILE.cvFileName}
+                  href={cv}
+                  download={cvFileName}
                   className="rounded-full border border-[var(--line)] px-5 py-3 font-medium transition-colors hover:border-[var(--ink)]"
                 >
                   {HERO.ctaSecondary.label} <span aria-hidden>↓</span>

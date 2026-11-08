@@ -1,6 +1,6 @@
 /**
- * Données des pages « Mentions légales » et « Confidentialité ».
- * Comme profile.ts : les pages n'ont aucun texte légal en dur, tout part d'ici.
+ * Données des pages « Mentions légales » et « Confidentialité » (et de leur traduction
+ * anglaise, /en/legal-notice et /en/privacy). Les adresses des pages sont dans app/i18n/config.ts.
  *
  * Statut (LCEN, loi n° 2004-575, art. 1-1) :
  * - "particulier" : site édité à titre non professionnel. L'éditeur peut taire son adresse
@@ -11,12 +11,6 @@
  * Les valeurs « [À COMPLÉTER …] » ne doivent jamais être publiées : un test e2e échoue
  * tant qu'il en reste une sur le site.
  */
-
-/** Les pages légales, dans l'ordre du pied de page (aussi listées dans le sitemap). */
-export const LEGAL_PAGES = [
-  { href: "/mentions-legales", label: "Mentions légales" },
-  { href: "/confidentialite", label: "Confidentialité" },
-] as const;
 
 export type LegalStatus = "particulier" | "professionnel";
 
@@ -84,8 +78,8 @@ export const LEGAL = {
   codeLicense: "MIT",
   repository: "https://github.com/DESCARAVAGE/portfolio_up",
 
-  /** À changer à chaque modification d'une des deux pages. */
-  updatedAt: "21 octobre 2026",
+  /** À changer à chaque modification d'une des pages légales (format AAAA-MM-JJ, affiché selon la langue). */
+  updatedAt: "2026-10-21",
 } as const;
 
 /** Crédits : œuvres de tiers utilisées sur le site, avec leur licence. */

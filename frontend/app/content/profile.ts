@@ -11,6 +11,7 @@
  */
 
 import type { StaticImageData } from "next/image";
+import { LINKS } from "@/app/content/links";
 import logoEnedis from "@/app/assets/images/logos/enedis.webp";
 import ecransReemployes from "@/app/assets/images/enedis/ecrans-reemployes.webp";
 import logoSplitScreen from "@/app/assets/images/logos/split-screen.webp";
@@ -49,8 +50,8 @@ export const PROFILE = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   year: "2026",
   /** Profils : boutons ronds au centre de la barre de navigation et dans le pied de page. */
-  linkedin: "https://www.linkedin.com/in/escaravage-daniel",
-  github: "https://github.com/descaravage",
+  linkedin: LINKS.linkedin,
+  github: LINKS.github,
 } as const;
 
 /**

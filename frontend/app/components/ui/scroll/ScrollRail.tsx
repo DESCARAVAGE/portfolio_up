@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { motion, useMotionValueEvent, useScroll, useSpring } from "motion/react";
-import { SECTIONS } from "@/app/content/profile";
 import { EASE_OUT } from "@/app/lib/motion";
 
 type Tick = { id: string; label: string; at: number };
@@ -17,7 +16,7 @@ type Tick = { id: string; label: string; at: number };
  * Affichée seulement avec une souris (`pointer: fine`) : sur mobile, l'indicateur natif reste.
  * Purement visuelle pour les lecteurs d'écran (aria-hidden) : molette, clavier et tactile marchent sans elle.
  */
-export default function ScrollRail() {
+export default function ScrollRail({ sections }: Readonly<{ sections: readonly { id: string; label: string }[] }>) {
   const rail = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState(0.2); // part de la page visible (0..1)
   const [ticks, setTicks] = useState<Tick[]>([]);
@@ -34,7 +33,7 @@ export default function ScrollRail() {
       const max = Math.max(1, doc.scrollHeight - window.innerHeight);
       setThumb(Math.min(1, Math.max(0.06, window.innerHeight / doc.scrollHeight)));
       setTicks(
-        SECTIONS.flatMap((s) => {
+        sections.flatMap((s) => {
           const el = document.getElementById(s.id);
           if (!el || s.id === "top") return [];
           const top = el.getBoundingClientRect().top + window.scrollY;
@@ -50,7 +49,7 @@ export default function ScrollRail() {
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, []);
+  }, [sections]);
 
   /** Position verticale du pointeur sur le rail → défilement de la page. */
   const scrollToPointer = (clientY: number, smooth: boolean) => {

@@ -1,5 +1,5 @@
 # Frontend Next.js : contrôle qualité puis publication de l'image Docker.
-# Repris du workflow de Refont : lint + format, build, tests de bout en bout
+# Repris du workflow de Refont : lint + format, tests unitaires, build, tests de bout en bout
 # (Playwright + axe), Lighthouse. L'image n'est publiée que sur main, après les tests.
 name: frontend-ci
 
@@ -46,6 +46,9 @@ jobs:
         run: |
           pnpm lint
           pnpm format:check
+
+      - name: Tests unitaires (Vitest)
+        run: pnpm test:unit
 
       - name: Build (vérifie aussi les types)
         run: pnpm build

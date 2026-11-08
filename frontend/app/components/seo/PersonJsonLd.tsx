@@ -1,10 +1,12 @@
-import { HERO, PROFILE } from "@/app/content/profile";
+import { ROUTES, type Locale } from "@/app/i18n/config";
+import { getContent, getUi } from "@/app/i18n/content";
 
 /**
  * Données structurées schema.org « Person » : Google peut relier ce site à ton
  * nom, ton poste et tes profils (sameAs), ce qui aide une recherche sur « Daniel Escaravage ».
  */
-export default function PersonJsonLd() {
+export default function PersonJsonLd({ locale }: Readonly<{ locale: Locale }>) {
+  const { PROFILE, HERO } = getContent(locale);
   const data = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -12,11 +14,11 @@ export default function PersonJsonLd() {
     alternateName: PROFILE.brand,
     jobTitle: PROFILE.role,
     description: HERO.intro,
-    url: PROFILE.siteUrl,
+    url: `${PROFILE.siteUrl}${locale === "fr" ? "" : ROUTES.home[locale]}`,
     email: `mailto:${PROFILE.email}`,
     address: { "@type": "PostalAddress", addressLocality: "Tours", addressCountry: "FR" },
     sameAs: [PROFILE.linkedin, PROFILE.github],
-    knowsAbout: ["React", "TypeScript", "Next.js", "Accessibilité web", "Tests end-to-end", "Agents IA"],
+    knowsAbout: getUi(locale).meta.knowsAbout,
   };
 
   return (
