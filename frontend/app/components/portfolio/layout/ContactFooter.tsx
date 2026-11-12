@@ -3,6 +3,7 @@ import { getContent, getUi } from "@/app/i18n/content";
 import Surface from "@/app/components/ui/base/Surface";
 import Reveal from "@/app/components/ui/motion/Reveal";
 import ScrollSlide from "@/app/components/ui/motion/ScrollSlide";
+import ContactActionLink from "@/app/components/portfolio/layout/ContactActionLink";
 import CopyEmail from "@/app/components/ui/base/CopyEmail";
 import LinkedInButton from "@/app/components/ui/base/LinkedInButton";
 import GitHubButton from "@/app/components/ui/base/GitHubButton";
@@ -25,12 +26,14 @@ export default function ContactFooter({ locale }: Readonly<{ locale: Locale }>) 
     >
       <h2 className="m-0 font-[inherit]">
         <ScrollSlide>
-          <a
+          <ContactActionLink
+            action="email"
             href={`mailto:${PROFILE.email}`}
+            placement="footer_headline"
             className="block text-[clamp(3.5rem,12vw,12rem)] leading-[0.9] font-semibold tracking-[-0.055em] whitespace-nowrap lowercase transition-colors hover:text-[var(--accent)]"
           >
             {CONTACT.headline}
-          </a>
+          </ContactActionLink>
         </ScrollSlide>
       </h2>
 
@@ -43,19 +46,23 @@ export default function ContactFooter({ locale }: Readonly<{ locale: Locale }>) 
           <div className="flex max-w-lg flex-[1_1_20rem] flex-col gap-6">
             <p className="m-0 text-xl leading-snug">{CONTACT.pitch}</p>
             <div className="flex flex-wrap items-center gap-3">
-              <a
+              <ContactActionLink
+                action="email"
                 href={`mailto:${PROFILE.email}`}
+                placement="footer_button"
                 className={`${pill} bg-[var(--accent-surface)] text-[var(--accent-ink)]`}
               >
                 {ui.contact.write}
-              </a>
-              <a
+              </ContactActionLink>
+              <ContactActionLink
+                action="resume"
                 href={PROFILE.cv}
                 download={PROFILE.cvFileName}
+                placement="footer"
                 className={`${pill} border border-[color-mix(in_srgb,currentColor_35%,transparent)]`}
               >
                 {ui.contact.cv} <span aria-hidden>↓</span>
-              </a>
+              </ContactActionLink>
               {/* Les deux profils restent côte à côte, même quand la ligne se coupe */}
               <div className="flex gap-3">
                 <LinkedInButton variant="outline" />
@@ -75,9 +82,14 @@ export default function ContactFooter({ locale }: Readonly<{ locale: Locale }>) 
             </dl>
             <div className="flex flex-col gap-3 font-mono text-sm">
               <span className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <a href={`mailto:${PROFILE.email}`} className="underline-offset-4 hover:underline">
+                <ContactActionLink
+                  action="email"
+                  href={`mailto:${PROFILE.email}`}
+                  placement="footer_address"
+                  className="underline-offset-4 hover:underline"
+                >
                   {PROFILE.email}
-                </a>
+                </ContactActionLink>
                 <CopyEmail
                   email={PROFILE.email}
                   className="rounded-full border border-[color-mix(in_srgb,currentColor_30%,transparent)] px-3 py-1.5 text-xs transition-colors hover:border-current"

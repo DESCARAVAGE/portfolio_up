@@ -1,3 +1,5 @@
+"use client";
+
 import { FaGithub } from "react-icons/fa6";
 import { LINKS } from "@/app/content/links";
 import SocialButton, { type SocialVariant } from "@/app/components/ui/base/SocialButton";

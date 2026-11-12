@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import posthog from "posthog-js";
 import { useUi } from "@/app/i18n/LocaleProvider";
 
 /**
@@ -21,6 +22,7 @@ export default function CopyEmail({ email, className = "" }: Readonly<{ email: s
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(email);
+      posthog.capture("contact_email_copied");
       setCopied(true);
     } catch {
       // Presse-papiers refusé (contexte non sécurisé…) : on sélectionne l'adresse à la place
