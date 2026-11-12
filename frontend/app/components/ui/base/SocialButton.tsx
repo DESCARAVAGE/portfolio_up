@@ -1,4 +1,7 @@
+"use client";
+
 import type { IconType } from "react-icons";
+import posthog from "posthog-js";
 import NewTabNote from "@/app/components/ui/base/NewTabNote";
 
 const STYLES = {
@@ -38,6 +41,7 @@ export default function SocialButton({
       target="_blank"
       rel="noreferrer"
       title={label}
+      onClick={() => posthog.capture("social_profile_opened", { platform: label.toLowerCase() })}
       className={`grid shrink-0 place-items-center rounded-full transition hover:-translate-y-0.5 hover:scale-105 ${STYLES[variant]} ${className}`}
     >
       <Icon className="h-5 w-5" aria-hidden />

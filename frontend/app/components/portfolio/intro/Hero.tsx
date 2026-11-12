@@ -2,6 +2,7 @@
 
 import { useRef, type CSSProperties } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
+import posthog from "posthog-js";
 import type { Content } from "@/app/i18n/content";
 import { useMotionFactor } from "@/app/hooks/useMotionFactor";
 import Surface from "@/app/components/ui/base/Surface";
@@ -85,6 +86,7 @@ export default function Hero({
                 <a
                   href={cv}
                   download={cvFileName}
+                  onClick={() => posthog.capture("resume_downloaded", { placement: "hero" })}
                   className="rounded-full border border-[var(--line)] px-5 py-3 font-medium transition-colors hover:border-[var(--ink)]"
                 >
                   {HERO.ctaSecondary.label} <span aria-hidden>↓</span>

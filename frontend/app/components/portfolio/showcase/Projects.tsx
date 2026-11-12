@@ -11,7 +11,7 @@ import Curtain from "@/app/components/ui/motion/Curtain";
 import CompareSlider from "@/app/components/ui/media/CompareSlider";
 import LoopVideo from "@/app/components/ui/media/LoopVideo";
 import TagList from "@/app/components/ui/base/Tag";
-import ExternalLink from "@/app/components/ui/base/ExternalLink";
+import ProjectExternalLink from "@/app/components/portfolio/showcase/ProjectExternalLink";
 
 /**
  * `sizes` : largeur réelle d'affichage de chaque visuel, pour que le navigateur
@@ -89,9 +89,9 @@ function MinorProject({ project: p, ui }: Readonly<{ project: Project; ui: Ui }>
         <div className="flex flex-wrap items-center gap-2">
           <TagList items={p.stack} />
           {p.links.map((l, i) => (
-            <ExternalLink key={`${l.label}-${i}`} href={l.href}>
+            <ProjectExternalLink key={`${l.label}-${i}`} href={l.href} projectTitle={p.title} linkLabel={l.label}>
               {l.label}
-            </ExternalLink>
+            </ProjectExternalLink>
           ))}
         </div>
       </Surface>
@@ -232,9 +232,9 @@ function ProjectInfo({ project: p, large = false }: { project: Project; large?: 
       {p.links.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2">
           {p.links.map((l, i) => (
-            <ExternalLink key={`${l.label}-${i}`} href={l.href}>
+            <ProjectExternalLink key={`${l.label}-${i}`} href={l.href} projectTitle={p.title} linkLabel={l.label}>
               {l.label}
-            </ExternalLink>
+            </ProjectExternalLink>
           ))}
         </div>
       )}
