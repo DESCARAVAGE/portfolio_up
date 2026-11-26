@@ -625,6 +625,23 @@ test.describe("Pages légales", () => {
     }
   });
 
+  test("les liens « Autres pages » du pied de page font au moins 24 px de haut, dans les deux langues", async ({
+    page,
+  }) => {
+    // WCAG 2.5.8 (taille des cibles) : sur téléphone, les liens passent sur deux lignes
+    for (const [path, name] of [
+      ["/", "Autres pages"],
+      ["/en", "Other pages"],
+    ]) {
+      await page.goto(path);
+      const links = page.getByRole("navigation", { name }).getByRole("link");
+      await expect(links).toHaveCount(3);
+      for (const box of await links.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height))) {
+        expect(box, path).toBeGreaterThanOrEqual(24);
+      }
+    }
+  });
+
   test("« Retour au portfolio » ramène à l'endroit quitté, pas en haut de page", async ({ page, isMobile }) => {
     // Parcours réel : clic sur « Contact » dans la barre (lien d'ancre, sans état de Next dans l'historique)
     await page.goto("/");

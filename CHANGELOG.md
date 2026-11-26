@@ -51,6 +51,9 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
 
 #### Corrigé
 
+- Accessibilité (Lighthouse 97 → 100 sur `/`) : sur téléphone, les liens « Autres pages » du
+  pied de page passent sur deux lignes en français et faisaient 16 px de haut, trop serrés
+  (WCAG 2.5.8, taille des cibles). Ils font maintenant 24 px ; un test e2e le vérifie.
 - SonarCloud, duplication sur le nouveau code (PR des MAJ 18–19) : les données de la
   chronologie passent de `timeline.ts` à `timeline.json`. Les 19 chantiers de même forme
   étaient comptés comme du code copié ; `timeline.ts` les type et les contrôle au build.
