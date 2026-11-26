@@ -90,6 +90,9 @@ La version affichée sur le site (pied de page) et celle des images Docker sont 
 
 ### Corrigé
 
+- SonarCloud, duplication sur le nouveau code (PR des MAJ 18–19) : les données de la
+  chronologie passent de `timeline.ts` à `timeline.json`. Les 19 chantiers de même forme
+  étaient comptés comme du code copié ; `timeline.ts` les type et les contrôle au build.
 - Version anglaise, sur téléphone : le bouton « Back to top » ne passe plus sous le bandeau
   « Turn on the 3D background » (le style visait le libellé français du bandeau).
 - Page Confidentialité : mention du stockage de session utilisé par « Retour au portfolio ».
