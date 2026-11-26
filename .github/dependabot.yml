@@ -1,0 +1,43 @@
+# Mises à jour proposées chaque semaine, en pull request (construites et testées par la CI,
+# sans publication d'image). Les mises à jour mineures et correctives sont groupées
+# pour limiter le nombre de PR ; une version majeure arrive seule.
+version: 2
+updates:
+  - package-ecosystem: npm # pnpm est pris en charge par l'écosystème npm
+    directory: /frontend
+    schedule: { interval: weekly, day: monday }
+    target-branch: dev
+    groups:
+      frontend-mineures:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /backend
+    schedule: { interval: weekly, day: monday }
+    target-branch: dev
+    groups:
+      backend-mineures:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    target-branch: dev
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Images de base des Dockerfiles : pas de saut de version majeure de Node (LTS paires seulement)
+  - package-ecosystem: docker
+    directories: [/frontend, /backend]
+    schedule: { interval: weekly, day: monday }
+    target-branch: dev
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
+
+  # Images des docker-compose (nginx, postgres)
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    target-branch: dev

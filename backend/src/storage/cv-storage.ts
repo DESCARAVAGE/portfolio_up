@@ -17,7 +17,6 @@ export function getCvFilePath(urlOrFilename: string): string {
 
   // Otherwise treat as filename inside storage dir
   const filePath = path.join(STORAGE_PATH, urlOrFilename);
-  console.log("Looking for CV at:", filePath);
   if (!fs.existsSync(filePath)) {
     throw new Error("CV file not found");
   }

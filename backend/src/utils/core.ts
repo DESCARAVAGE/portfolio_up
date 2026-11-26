@@ -1,4 +1,5 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
+import helmet from "helmet";
 import dotenv from "dotenv";
 import { dataSource } from "./db";
 import cvRoutes from "../routes/cv-routes";
@@ -12,6 +13,17 @@ import health from "../routes/health-routes";
  */
 function createApp(): Express {
     const app: Express = express();
+
+    // En-têtes de sécurité (nosniff, CSP stricte pour l'API, pas de framing…) ;
+    // helmet retire aussi X-Powered-By, qui annonçait Express.
+    app.use(helmet());
+
+    // Les réponses de l'API (CV compris) ne doivent pas apparaître dans les moteurs.
+    // robots.txt les laisse accessibles exprès : c'est ainsi que les robots voient cette consigne.
+    app.use("/api/", (_req: Request, res: Response, next: NextFunction) => {
+        res.setHeader("X-Robots-Tag", "noindex, nofollow");
+        next();
+    });
 
     app.use("/api/", health);
 
@@ -49,9 +61,26 @@ async function runServer(): Promise<void> {
 
         /* Start the Express app and listen
          for incoming requests on the specified port */
-        app.listen(port, () => {
+        const server = app.listen(port, () => {
             console.log(`[server]: Server is running at http://localhost:${port}`);
         });
+
+        /*
+         * Arrêt propre (docker stop, redéploiement) : node, lancé directement dans
+         * l'image, ne s'arrête pas tout seul sur SIGTERM. On finit les requêtes en
+         * cours, on ferme la connexion à la base, puis on sort.
+         */
+        const shutdown = (signal: string) => {
+            console.log(`[server]: ${signal} reçu, arrêt en cours`);
+            server.close(() => {
+                dataSource
+                    .destroy()
+                    .catch((error) => console.error(error))
+                    .finally(() => process.exit(0));
+            });
+        };
+        process.once("SIGTERM", () => shutdown("SIGTERM"));
+        process.once("SIGINT", () => shutdown("SIGINT"));
     };
 };
 

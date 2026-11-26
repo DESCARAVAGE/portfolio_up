@@ -275,7 +275,65 @@ test.describe("Mouvement réduit et robustesse", () => {
   });
 });
 
+test.describe("Sécurité", () => {
+  test("en-têtes de sécurité : CSP, pas de cadre, pas de détection de type", async ({ request }) => {
+    for (const path of ["/", "/en", "/mentions-legales", "/rien-par-ici"]) {
+      const h = (await request.get(path)).headers();
+      expect(h["content-security-policy"], path).toContain("default-src 'self'");
+      expect(h["content-security-policy"], path).toContain("frame-ancestors 'none'");
+      expect(h["content-security-policy"], path).toContain("object-src 'none'");
+      expect(h["x-content-type-options"], path).toBe("nosniff");
+      expect(h["referrer-policy"], path).toBe("strict-origin-when-cross-origin");
+      expect(h["x-powered-by"], path).toBeUndefined();
+    }
+  });
+
+  test("la CSP ne bloque rien : fond 3D, vidéo, images et changement de langue", async ({ page }) => {
+    const blocked: string[] = [];
+    page.on("console", (m) => {
+      if (/Content Security Policy|Permissions-Policy/i.test(m.text())) blocked.push(m.text());
+    });
+    await page.goto("/");
+    await page.mouse.move(200, 200); // déclenche le chargement du fond 3D
+    await page
+      .getByRole("button", { name: /^Voir la démo/ })
+      .first()
+      .click();
+    await page.getByRole("link", { name: /Read this page in English/ }).click();
+    // La section en cours (les projets, après la vidéo) est gardée dans l'adresse
+    await expect(page).toHaveURL(/\/en(#[a-z-]+)?$/);
+    await page.goto("/en/privacy");
+    expect(blocked).toEqual([]);
+  });
+});
+
 test.describe("Référencement et partage", () => {
+  test("robots.txt : site indexable, aperçus et moteurs de réponse IA admis, entraînement des IA refusé", async ({
+    request,
+  }) => {
+    const txt = await (await request.get("/robots.txt")).text();
+    // Un groupe par famille de robots : son en-tête, puis ses règles
+    const group = (agent: string) => {
+      const lines = txt.split("\n");
+      const i = lines.findIndex((l) => l.trim().toLowerCase() === `user-agent: ${agent}`.toLowerCase());
+      expect(i, `groupe ${agent}`).toBeGreaterThanOrEqual(0);
+      let j = i;
+      while (j < lines.length && /^user-agent:/i.test(lines[j])) j++;
+      const rules: string[] = [];
+      while (j < lines.length && lines[j].trim() && !/^user-agent:/i.test(lines[j])) rules.push(lines[j++].trim());
+      return rules;
+    };
+    expect(group("*")).toEqual(["Allow: /", "Disallow: /api/health"]);
+    expect(group("LinkedInBot")).toEqual(["Allow: /", "Disallow: /api/health"]);
+    expect(group("OAI-SearchBot")).toEqual(["Allow: /", "Disallow: /api/health"]);
+    for (const bot of ["GPTBot", "ClaudeBot", "Google-Extended", "CCBot"]) expect(group(bot)).toEqual(["Disallow: /"]);
+    // Le CV n'est pas bloqué ici : le backend le marque noindex, ce que les robots doivent pouvoir lire
+    expect(txt).not.toMatch(/Disallow: \/api\/cv/);
+    const sitemaps = txt.match(/^Sitemap: .+$/gm) ?? [];
+    expect(sitemaps).toHaveLength(1);
+    expect(sitemaps[0]).toMatch(/^Sitemap: https?:\/\/[^\s]+\/sitemap\.xml$/);
+  });
+
   test("métadonnées de partage, données structurées, robots et sitemap", async ({ page, request }) => {
     await page.goto("/");
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /opengraph-image/);
@@ -559,11 +617,28 @@ test.describe("Pages légales", () => {
   test("le pied de page mène aux deux pages, qui ramènent au portfolio", async ({ page }) => {
     for (const { path, title } of PAGES) {
       await page.goto("/");
-      await page.getByRole("navigation", { name: "Informations légales" }).getByRole("link", { name: title }).click();
+      await page.getByRole("navigation", { name: "Autres pages" }).getByRole("link", { name: title }).click();
       await expect(page).toHaveURL(new RegExp(`${path}$`));
       await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
       await page.getByRole("link", { name: /Retour au portfolio/ }).click();
       await expect(page).toHaveURL(/\/$/);
+    }
+  });
+
+  test("les liens « Autres pages » du pied de page font au moins 24 px de haut, dans les deux langues", async ({
+    page,
+  }) => {
+    // WCAG 2.5.8 (taille des cibles) : sur téléphone, les liens passent sur deux lignes
+    for (const [path, name] of [
+      ["/", "Autres pages"],
+      ["/en", "Other pages"],
+    ]) {
+      await page.goto(path);
+      const links = page.getByRole("navigation", { name }).getByRole("link");
+      await expect(links).toHaveCount(3);
+      for (const box of await links.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height))) {
+        expect(box, path).toBeGreaterThanOrEqual(24);
+      }
     }
   });
 
@@ -585,15 +660,12 @@ test.describe("Pages légales", () => {
     expect(before).toBeGreaterThan(500);
 
     await page
-      .getByRole("navigation", { name: "Informations légales" })
+      .getByRole("navigation", { name: "Autres pages" })
       .getByRole("link", { name: "Mentions légales" })
       .click();
     await expect(page.getByRole("heading", { level: 1, name: "Mentions légales" })).toBeVisible();
     // D'une page légale à l'autre, puis un saut dans le sommaire : rien de tout ça ne doit compter dans « Retour »
-    await page
-      .getByRole("navigation", { name: "Informations légales" })
-      .getByRole("link", { name: "Confidentialité" })
-      .click();
+    await page.getByRole("navigation", { name: "Autres pages" }).getByRole("link", { name: "Confidentialité" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Confidentialité" })).toBeVisible();
     await page.getByRole("navigation", { name: "Sommaire" }).getByRole("link", { name: "Vos droits" }).click();
     await expect(page).toHaveURL(/\/confidentialite#droits$/);
@@ -616,6 +688,32 @@ test.describe("Pages légales", () => {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await expect(page.getByRole("button", { name: "Haut de page" })).toBeVisible();
   });
+
+  for (const [path, name] of [
+    ["/mentions-legales", "Haut de page"],
+    ["/en/legal-notice", "Back to top"],
+  ]) {
+    test(`sur téléphone, « ${name} » passe au-dessus du bandeau du fond 3D (${path})`, async ({ page, isMobile }) => {
+      test.skip(!isMobile, "le bandeau n'est en pleine largeur que sur téléphone");
+      await page.addInitScript(() => Object.defineProperty(Navigator.prototype, "deviceMemory", { get: () => 1 }));
+      await page.goto(path);
+      const banner = page.locator("[data-fog-offer]");
+      await expect(banner).toBeVisible();
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      const top = page.getByRole("button", { name });
+      await expect(top).toBeVisible();
+      // Le bouton apparaît en transition : on attend sa position finale
+      await expect
+        .poll(
+          async () => {
+            const [bb, tb] = [(await banner.boundingBox())!, (await top.boundingBox())!];
+            return tb.y + tb.height <= bb.y;
+          },
+          { message: "le bouton reste au-dessus du bandeau" },
+        )
+        .toBe(true);
+    });
+  }
 
   test("sans passage par le portfolio (lien direct), « Retour » mène à l'accueil", async ({ page }) => {
     await page.goto("/mentions-legales");
@@ -695,6 +793,49 @@ test.describe("Pages légales", () => {
       await expect(page.locator("main"), `${path} : remplir app/content/legal.ts`).not.toContainText("[À COMPLÉTER");
     }
   });
+});
+
+test.describe("Chronologie du projet (/gantt)", () => {
+  test("l'adresse /gantt montre le diagramme de Gantt et la chronologie en tableau", async ({ page }) => {
+    const res = await page.goto("/gantt");
+    expect(res?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 1, name: "Chronologie du projet" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Diagramme de Gantt" })).toBeVisible();
+    await expect(page.getByRole("img", { name: /Diagramme de Gantt des chantiers/ })).toBeVisible();
+    // Une barre et une ligne de tableau par chantier
+    const bars = await page.locator("svg rect[fill^='var(--tl-']").count();
+    await expect(page.getByRole("heading", { level: 2, name: "Chronologie en tableau" })).toBeVisible();
+    await expect(page.locator("table tbody tr")).toHaveCount(bars);
+    expect(bars).toBeGreaterThan(10);
+  });
+
+  test("/Gantt (avec une majuscule) mène aussi à la chronologie", async ({ page }) => {
+    await page.goto("/Gantt");
+    await expect(page).toHaveURL(/\/gantt$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Chronologie du projet" })).toBeVisible();
+  });
+
+  test("le pied de page du portfolio mène à la chronologie, qui ramène au portfolio", async ({ page }) => {
+    await page.goto("/");
+    await page
+      .getByRole("navigation", { name: "Autres pages" })
+      .getByRole("link", { name: "Chronologie du projet" })
+      .click();
+    await expect(page).toHaveURL(/\/gantt$/);
+    await page.getByRole("link", { name: /Retour au portfolio/ }).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  for (const theme of ["light", "dark"] as const) {
+    test(`aucune violation d'accessibilité en thème ${theme === "light" ? "clair" : "sombre"}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+      await page.goto("/gantt");
+      const results = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(results.violations).toEqual([]);
+    });
+  }
 });
 
 test.describe("Page 404", () => {

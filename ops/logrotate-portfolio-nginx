@@ -1,0 +1,26 @@
+# Rotation des journaux nginx de la passerelle (dossier ./logs de la stack de production).
+# La page Confidentialité annonce 6 mois de conservation : au-delà, les journaux sont supprimés.
+#
+# Installation sur le VPS (une fois) :
+#   sudo cp ops/logrotate-portfolio-nginx /etc/logrotate.d/portfolio-nginx
+#   sudo chown root:root /etc/logrotate.d/portfolio-nginx && sudo chmod 644 /etc/logrotate.d/portfolio-nginx
+#   sudo logrotate --debug /etc/logrotate.d/portfolio-nginx   # simulation, ne modifie rien
+# logrotate tourne ensuite chaque jour (timer systemd ou cron de Debian).
+
+/home/debian/apps/production/logs/*.log {
+    daily
+    # 180 fichiers quotidiens au plus, et rien de plus vieux que 180 jours
+    rotate 180
+    maxage 180
+    dateext
+    compress
+    delaycompress
+    missingok
+    notifempty
+    # nginx tourne dans un conteneur : on vide le fichier en place au lieu de le renommer,
+    # sans avoir à lui envoyer de signal
+    copytruncate
+    # Les fichiers sont créés par nginx (root) ; si le dossier est modifiable par un groupe
+    # autre que root, logrotate refuse d'agir sans cette ligne
+    su root root
+}

@@ -3,22 +3,25 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LEGAL_ROUTES, ROUTES } from "@/app/i18n/config";
+import { ANNEX_ROUTES, ROUTES } from "@/app/i18n/config";
 import { useLocale, useUi } from "@/app/i18n/LocaleProvider";
 import { rememberPortfolioOrigin, restorePortfolioScroll } from "@/app/components/portfolio/legal/legalReturn";
 
 /**
- * Liens vers les pages légales, dans le pied de page du portfolio et des pages légales.
+ * Liens vers les pages annexes (légales, chronologie), dans le pied de page du portfolio
+ * et de ces pages.
  * - depuis le portfolio : on mémorise l'origine, pour que « Retour » y ramène au même endroit ;
  * - d'une page légale à l'autre : on remplace l'entrée d'historique, pour que « Retour »
  *   ramène toujours au portfolio, pas à la page légale précédente ;
  * - au retour sur le portfolio : on rétablit la position de défilement quittée.
+ * Chaque lien fait au moins 24 px de haut (WCAG 2.5.8) : sur téléphone, les trois liens
+ * passent sur deux lignes, et des liens de 16 px y seraient trop serrés.
  */
 export default function LegalNav({ className = "" }: Readonly<{ className?: string }>) {
   const pathname = usePathname();
   const locale = useLocale();
   const { legal } = useUi();
-  const pages = LEGAL_ROUTES.map((key) => ({ href: ROUTES[key][locale], label: legal.pages[key] }));
+  const pages = ANNEX_ROUTES.map((key) => ({ href: ROUTES[key][locale], label: legal.pages[key] }));
   const onLegalPage = pages.some((p) => p.href === pathname);
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export default function LegalNav({ className = "" }: Readonly<{ className?: stri
               replace={onLegalPage}
               onClick={onLegalPage ? undefined : rememberPortfolioOrigin}
               aria-current={p.href === pathname ? "page" : undefined}
-              className="underline-offset-4 hover:text-[var(--accent)] hover:underline aria-[current=page]:text-[var(--ink)]"
+              className="inline-flex min-h-6 items-center underline-offset-4 hover:text-[var(--accent)] hover:underline aria-[current=page]:text-[var(--ink)]"
             >
               {p.label}
             </Link>

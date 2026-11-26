@@ -88,6 +88,11 @@ export default function Confidentialite() {
           appareil et servent une fonction que vous demandez : elles sont exemptées de consentement. Vous pouvez les
           effacer depuis les réglages de votre navigateur.
         </p>
+        <p className="m-0">
+          Quand vous ouvrez une page annexe (pages légales, chronologie) depuis le portfolio, l&apos;adresse et la
+          position que vous quittez sont gardées le temps de l&apos;onglet (sessionStorage), pour que « Retour au
+          portfolio » vous y ramène. Elles s&apos;effacent dès votre retour, ou à la fermeture de l&apos;onglet.
+        </p>
       </LegalSection>
 
       <LegalSection {...droits}>

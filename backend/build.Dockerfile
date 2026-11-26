@@ -36,4 +36,6 @@ EXPOSE 3000
 
 USER 1000
 
-ENTRYPOINT ["npm", "run", "start"]
+# node directement (pas npm) : SIGTERM lui arrive sans relais, et runServer() s'arrête
+# proprement (requêtes en cours terminées, base fermée) au redéploiement
+ENTRYPOINT ["node", "dist/app.js"]

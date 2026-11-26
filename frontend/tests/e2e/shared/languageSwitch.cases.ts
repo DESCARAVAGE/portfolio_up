@@ -28,4 +28,5 @@ export const LANGUAGE_SWITCH_CASES: readonly LanguageSwitchCase[] = [
   { from: "/en", hash: "#contact", to: "fr", expected: "/#contact", heading: /on en parle/ },
   { from: "/mentions-legales", hash: "#hebergeur", to: "en", expected: "/en/legal-notice", heading: /^Legal notice$/ },
   { from: "/en/privacy", hash: "#your-rights", to: "fr", expected: "/confidentialite", heading: /^Confidentialité$/ },
+  { from: "/gantt", hash: "#tableau", to: "en", expected: "/en/gantt", heading: /^Project timeline$/ },
 ];

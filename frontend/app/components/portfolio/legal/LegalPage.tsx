@@ -19,9 +19,10 @@ const pill =
 const TITLE_ID = "titre";
 
 /**
- * Mise en page commune des pages légales :
+ * Mise en page commune des pages annexes (légales, chronologie) :
  * - en haut : retour au portfolio (à l'endroit quitté), langue et thème ;
- * - sommaire : colonne collante sur ordinateur, bloc au-dessus du texte sur mobile ;
+ * - sommaire (s'il y en a un) : colonne collante sur ordinateur, bloc au-dessus du texte sur
+ *   mobile ; sans sommaire, le contenu prend toute la largeur ;
  * - texte dans une carte en verre dense (lisible sur le brouillard) ;
  * - bouton « Haut de page » une fois la page défilée.
  * Pas d'animation d'apparition : ces pages se lisent, elles ne se montrent pas.
@@ -30,17 +31,18 @@ export default function LegalPage({
   locale,
   title,
   toc,
+  updatedAt = LEGAL.updatedAt,
   children,
 }: Readonly<{
   locale: Locale;
   title: string;
-  toc: readonly TocItem[];
+  toc?: readonly TocItem[];
+  /** Date de mise à jour affichée en bas (AAAA-MM-JJ) ; par défaut celle des pages légales. */
+  updatedAt?: string;
   children: ReactNode;
 }>) {
   // Date de mise à jour écrite à la façon de chaque langue (21 octobre 2026 / October 21, 2026)
-  const updated = new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(
-    new Date(LEGAL.updatedAt),
-  );
+  const updated = new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(updatedAt));
   return (
     <>
       <header className="px-4 pt-4">
@@ -53,11 +55,15 @@ export default function LegalPage({
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-5xl gap-6 px-4 py-10 sm:py-14 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10">
-        <LegalToc
-          items={toc}
-          className="rounded-2xl border border-[var(--line)] bg-[var(--glass-fill-dense)] p-5 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:bg-transparent lg:p-0 lg:pt-2"
-        />
+      <div
+        className={`mx-auto grid max-w-5xl gap-6 px-4 py-10 sm:py-14 ${toc ? "lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10" : ""}`}
+      >
+        {toc && (
+          <LegalToc
+            items={toc}
+            className="rounded-2xl border border-[var(--line)] bg-[var(--glass-fill-dense)] p-5 lg:sticky lg:top-6 lg:self-start lg:border-0 lg:bg-transparent lg:p-0 lg:pt-2"
+          />
+        )}
 
         <main id={MAIN_ANCHOR[locale]} className="min-w-0">
           <Surface variant="glass" density="dense" radius="1.75rem" contentClassName="flex flex-col gap-10 p-7 sm:p-12">

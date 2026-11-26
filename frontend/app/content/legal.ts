@@ -79,7 +79,7 @@ export const LEGAL = {
   repository: "https://github.com/DESCARAVAGE/portfolio_up",
 
   /** À changer à chaque modification d'une des pages légales (format AAAA-MM-JJ, affiché selon la langue). */
-  updatedAt: "2026-10-21",
+  updatedAt: "2026-11-08",
 } as const;
 
 /** Crédits : œuvres de tiers utilisées sur le site, avec leur licence. */

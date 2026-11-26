@@ -93,7 +93,8 @@ export const UI = {
     cv: { fr: "Mon CV", en: "My résumé (French)" },
   },
   legal: {
-    nav: { fr: "Informations légales", en: "Legal information" },
+    /** Liens du pied de page vers les pages annexes (légales et chronologie). */
+    nav: { fr: "Autres pages", en: "Other pages" },
     back: { fr: "Retour au portfolio", en: "Back to portfolio" },
     top: { fr: "Haut de page", en: "Back to top" },
     toc: { fr: "Sommaire", en: "Contents" },
@@ -102,6 +103,51 @@ export const UI = {
     pages: {
       legalNotice: { fr: "Mentions légales", en: "Legal notice" },
       privacy: { fr: "Confidentialité", en: "Privacy" },
+      gantt: { fr: "Chronologie du projet", en: "Project timeline" },
+    },
+  },
+  /** Page /gantt : chronologie du dépôt (données dans timeline.ts). */
+  timeline: {
+    description: {
+      fr: "Chronologie du portfolio de Daniel Escaravage : diagramme de Gantt des chantiers et tableau des étapes, tirés de l'historique git.",
+      en: "Timeline of Daniel Escaravage's portfolio: Gantt chart of the work and table of milestones, drawn from the git history.",
+    },
+    intro: {
+      fr: "L'histoire de ce site, reconstituée depuis son dépôt git : chaque chantier, dans l'ordre où il a commencé, avec ses pull requests et ses commits clés.",
+      en: "The story of this website, rebuilt from its git repository: every piece of work, in the order it started, with its pull requests and key commits.",
+    },
+    chart: { fr: "Diagramme de Gantt", en: "Gantt chart" },
+    chartLabel: {
+      fr: "Diagramme de Gantt des chantiers du site, de janvier à novembre 2026. Le même contenu est dans le tableau qui suit.",
+      en: "Gantt chart of the website's work, January to November 2026. The same content is in the table that follows.",
+    },
+    table: { fr: "Chronologie en tableau", en: "Timeline as a table" },
+    weekly: { fr: "Commits par semaine", en: "Commits per week" },
+    milestones: { fr: "Jalons", en: "Milestones" },
+    pause: { fr: "Pause : {n} jours sans commit", en: "Break: {n} days without a commit" },
+    scroll: {
+      fr: "Sur un petit écran, le diagramme défile à l'horizontale.",
+      en: "On a small screen, the chart scrolls sideways.",
+    },
+    figures: {
+      fr: "{commits} commits, {prs} pull requests fusionnées, {versions} versions publiées.",
+      en: "{commits} commits, {prs} merged pull requests, {versions} published versions.",
+    },
+    cols: {
+      task: { fr: "Chantier", en: "Work" },
+      type: { fr: "Type", en: "Type" },
+      dates: { fr: "Dates", en: "Dates" },
+      prs: { fr: "PR", en: "PR" },
+      commits: { fr: "Commits clés", en: "Key commits" },
+    },
+    inProgress: { fr: "en cours", en: "in progress" },
+    cats: {
+      front: { fr: "Frontend & fonctionnalités", en: "Frontend & features" },
+      back: { fr: "Backend & données", en: "Backend & data" },
+      ci: { fr: "CI/CD & Docker", en: "CI/CD & Docker" },
+      qual: { fr: "Tests, qualité & sécurité", en: "Testing, quality & security" },
+      infra: { fr: "Infra & mise en prod", en: "Infrastructure & go-live" },
+      docs: { fr: "Docs, légal & contenu", en: "Docs, legal & content" },
     },
   },
   notFound: {

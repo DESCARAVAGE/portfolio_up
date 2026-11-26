@@ -35,6 +35,15 @@
   --accent-surface: #c8361f; /* fond orange sous du texte blanc : 4,7:1 */
   --accent-text: #b02f1a; /* petit texte orange sur le clair : 6:1 sur une carte en verre */
   --accent-ink: #ffffff; /* texte sur fond orange */
+
+  /* Chronologie (/gantt) : une couleur par type de chantier, palette vérifiée pour les
+     daltonismes (ordre fixe) ; chaque barre a aussi son nom écrit, la couleur n'est jamais seule. */
+  --tl-front: #2a78d6;
+  --tl-back: #eb6834;
+  --tl-ci: #1baf7a;
+  --tl-qual: #eda100;
+  --tl-infra: #e87ba4;
+  --tl-docs: #008300;
 }
 
 .dark {
@@ -44,6 +53,13 @@
   --line: rgba(242, 242, 240, 0.14);
   --paper: #0b0b0b;
   --accent-text: var(--accent);
+
+  --tl-front: #3987e5;
+  --tl-back: #d95926;
+  --tl-ci: #199e70;
+  --tl-qual: #c98500;
+  --tl-infra: #d55181;
+  --tl-docs: #008300;
 }
 
 /*

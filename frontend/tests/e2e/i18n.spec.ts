@@ -12,6 +12,7 @@ const PAGES = [
   { fr: "/", en: "/en" },
   { fr: "/mentions-legales", en: "/en/legal-notice" },
   { fr: "/confidentialite", en: "/en/privacy" },
+  { fr: "/gantt", en: "/en/gantt" },
 ] as const;
 
 /** Textes visibles et attributs lus par les lecteurs d'écran (sans scripts ni styles). */
@@ -21,7 +22,8 @@ async function texts(page: Page) {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
       const node = walker.currentNode;
-      if (node.parentElement?.closest("script, style, noscript, [data-lang]")) continue;
+      // [translate=no] : citations laissées telles quelles (messages de commit de la chronologie)
+      if (node.parentElement?.closest("script, style, noscript, [data-lang], [translate=no]")) continue;
       const t = node.textContent!.replace(/\s+/g, " ").trim();
       if (t) out.add(t);
     }
@@ -53,6 +55,8 @@ const SAME_IN_BOTH = new Set([
   "Building Effective Human-Agent Teams",
   "AI for App Building",
   "Wild Code School · Orléans",
+  // Chronologie : catégorie au nom technique, identique dans les deux langues
+  "CI/CD & Docker",
 ]);
 
 test.describe("Version anglaise", () => {
@@ -176,10 +180,12 @@ test.describe("Version anglaise", () => {
     "/",
     "/mentions-legales",
     "/confidentialite",
+    "/gantt",
     "/rien-ici",
     "/en",
     "/en/legal-notice",
     "/en/privacy",
+    "/en/gantt",
     "/en/nothing-here",
   ]) {
     test(`on reste dans sa langue : aucun lien de ${path} ne change de langue, sauf le bouton`, async ({ page }) => {
@@ -243,7 +249,7 @@ test.describe("Version anglaise", () => {
   }) => {
     await page.goto("/#projets");
     await page
-      .getByRole("navigation", { name: "Informations légales" })
+      .getByRole("navigation", { name: "Autres pages" })
       .getByRole("link", { name: "Mentions légales" })
       .click();
     await expect(page).toHaveURL(/\/mentions-legales$/);
@@ -266,7 +272,7 @@ test.describe("Version anglaise", () => {
     await expect(page).toHaveURL(/\/en#projects$/);
     await expect(page.locator("#projects")).toBeInViewport();
 
-    const legal = page.getByRole("navigation", { name: "Legal information" });
+    const legal = page.getByRole("navigation", { name: "Other pages" });
     await expect(legal.getByRole("link", { name: "Legal notice" })).toHaveAttribute("href", "/en/legal-notice");
     await expect(legal.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/en/privacy");
   });
@@ -305,17 +311,17 @@ test.describe("Version anglaise", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Are you lost?" })).toBeHidden();
   });
 
-  test("le sitemap liste les six pages avec leurs équivalents", async ({ request }) => {
+  test("le sitemap liste les huit pages avec leurs équivalents", async ({ request }) => {
     const xml = await (await request.get("/sitemap.xml")).text();
     const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
     for (const p of PAGES) {
       for (const path of [p.fr, p.en]) expect(locs, path).toContain(path);
     }
-    expect(xml.match(/<loc>/g)).toHaveLength(6);
-    expect(xml.match(/hreflang="en"/g)).toHaveLength(6);
+    expect(xml.match(/<loc>/g)).toHaveLength(8);
+    expect(xml.match(/hreflang="en"/g)).toHaveLength(8);
   });
 
-  for (const path of ["/en", "/en/legal-notice", "/en/privacy", "/en/nothing-here"]) {
+  for (const path of ["/en", "/en/legal-notice", "/en/privacy", "/en/gantt", "/en/nothing-here"]) {
     test(`aucune violation d'accessibilité sur ${path}`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto(path);

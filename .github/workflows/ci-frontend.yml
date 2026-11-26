@@ -1,10 +1,13 @@
 # Frontend Next.js : contrôle qualité puis publication de l'image Docker.
-# Repris du workflow de Refont : lint + format, tests unitaires, build, tests de bout en bout
-# (Playwright + axe), Lighthouse. L'image n'est publiée que sur main, après les tests.
+# Repris du workflow de Refont : audit, lint + format, tests unitaires, build, tests de bout en
+# bout (Playwright + axe), Lighthouse. L'image est construite sur chaque PR et publiée
+# seulement sur main, après les tests.
 name: frontend-ci
 
 on:
+  # Push : main et dev seulement (les autres branches passent par leur pull request)
   push:
+    branches: [main, dev]
     paths:
       - "frontend/**"
       - ".github/workflows/ci-frontend.yml"
@@ -12,6 +15,10 @@ on:
     paths:
       - "frontend/**"
       - ".github/workflows/ci-frontend.yml"
+
+# Lecture seule : le workflow ne peut rien modifier dans le dépôt
+permissions:
+  contents: read
 
 concurrency:
   group: frontend-${{ github.ref }}
@@ -28,19 +35,23 @@ jobs:
     env:
       NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'http://localhost:3100' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           package_json_file: frontend/package.json
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
+
+      # Une faille élevée ou critique dans une dépendance livrée au site bloque la CI
+      - name: Audit des dépendances
+        run: pnpm audit --prod --audit-level high
 
       - name: Lint et format
         run: |
@@ -64,7 +75,7 @@ jobs:
 
       - name: Rapport Playwright (si échec)
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: playwright-report
           path: frontend/playwright-report
@@ -81,7 +92,7 @@ jobs:
       IMAGE: ${{ secrets.DOCKERHUB_USERNAME || 'local' }}/final-project-study-frontend
       PUBLISH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
@@ -95,15 +106,31 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Version du site lue dans frontend/package.json (2.0.0 → tags 2.0.0, 2.0 et 2)
-      - name: Version
+      # Version du site lue dans frontend/package.json (2.0.0 → tags 2.0.0, 2.0 et 2).
+      # Une version publiée ne change plus : ses tags ne sont posés qu'à sa première
+      # publication ; ensuite, seuls latest et sha-… suivent main. Nouvelle version =
+      # monter `version` dans frontend/package.json.
+      - name: Version et tags
         id: version
         run: |
           VERSION=$(node -p "require('./frontend/package.json').version")
+          SHA=${GITHUB_SHA::7}
+          TAGS="$IMAGE:latest,$IMAGE:sha-$SHA"
+          NEW_VERSION=true
+          if [ "$PUBLISH" = "true" ]; then
+            if docker manifest inspect "$IMAGE:$VERSION" > /dev/null 2> manifest.err; then
+              NEW_VERSION=false
+              echo "::notice::Version $VERSION déjà publiée : seuls latest et sha-$SHA sont mis à jour"
+            elif ! grep -qiE "no such manifest|manifest unknown|not found" manifest.err; then
+              # Réseau, limite de requêtes… : on ne sait pas, on ne risque pas d'écraser la version
+              cat manifest.err; echo "::error::Impossible de vérifier si $VERSION est déjà publiée"; exit 1
+            fi
+          fi
+          if [ "$NEW_VERSION" = "true" ]; then
+            TAGS="$TAGS,$IMAGE:$VERSION,$IMAGE:${VERSION%.*},$IMAGE:${VERSION%%.*}"
+          fi
           echo "full=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "minor=${VERSION%.*}" >> "$GITHUB_OUTPUT"
-          echo "major=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
-          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
@@ -112,12 +139,7 @@ jobs:
           context: ./frontend
           file: frontend/build.Dockerfile
           # latest reste utilisé par fetch-and-deploy.sh ; les autres tags permettent un retour arrière précis
-          tags: |
-            ${{ env.IMAGE }}:latest
-            ${{ env.IMAGE }}:${{ steps.version.outputs.full }}
-            ${{ env.IMAGE }}:${{ steps.version.outputs.minor }}
-            ${{ env.IMAGE }}:${{ steps.version.outputs.major }}
-            ${{ env.IMAGE }}:sha-${{ steps.version.outputs.sha }}
+          tags: ${{ steps.version.outputs.tags }}
           build-args: |
             NEXT_PUBLIC_SITE_URL=https://www.dany-sk-fsp.com
           labels: |

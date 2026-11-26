@@ -16,7 +16,8 @@ export const dataSource = new DataSource({
   database: process.env.DATABASE,
 
   synchronize: false, //false en prod ou si tu utilise les migrations
-  logging: true,
+  // Requêtes SQL journalisées en développement seulement ; en prod, les erreurs
+  logging: isDevelopment ? true : ["error"],
 
   entities: [Cv],
   migrations: isDevelopment

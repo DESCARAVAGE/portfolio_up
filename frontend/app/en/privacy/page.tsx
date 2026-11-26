@@ -102,6 +102,11 @@ export default function Privacy() {
           you turn it on, your choice to show the 3D background. They never leave your device and serve a function you
           asked for, so no consent is required. You can clear them in your browser settings.
         </p>
+        <p className="m-0">
+          When you open another page (legal pages, timeline) from the portfolio, the address and position you leave are
+          kept for the life of the tab (sessionStorage), so that “Back to portfolio” takes you back there. They are
+          cleared as soon as you return, or when you close the tab.
+        </p>
       </LegalSection>
 
       <LegalSection {...rights}>
