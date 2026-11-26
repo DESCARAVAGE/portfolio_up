@@ -1,137 +1,439 @@
 # Portfolio — Dany SK
 
-[![Version](https://img.shields.io/github/v/tag/DESCARAVAGE/portfolio_up?sort=semver&label=version&color=c8361f)](CHANGELOG.md)
-[![Site](https://img.shields.io/website?url=https%3A%2F%2Fwww.dany-sk-fsp.com&label=site&up_message=en%20ligne&down_message=hors%20ligne)](https://www.dany-sk-fsp.com/)
+[![Version](https://img.shields.io/github/v/tag/DESCARAVAGE/portfolio_up?sort=semver&label=version&color=c8361f)](../CHANGELOG.md)
+[![CI frontend](https://img.shields.io/github/actions/workflow/status/DESCARAVAGE/portfolio_up/ci-frontend.yml?branch=main&label=CI%20frontend&logo=githubactions&logoColor=white)](https://github.com/DESCARAVAGE/portfolio_up/actions/workflows/ci-frontend.yml)
+[![Image frontend](https://img.shields.io/docker/v/descaravage/final-project-study-frontend?sort=semver&label=image%20frontend&logo=docker&logoColor=white)](https://hub.docker.com/r/descaravage/final-project-study-frontend/tags)
 
-|              | Intégration continue (CI)                                                                                                                                                                                                                                                | Déploiement continu (CD)                                                                                                                                                                                                             |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Frontend** | [![CI frontend](https://img.shields.io/github/actions/workflow/status/DESCARAVAGE/portfolio_up/ci-frontend.yml?branch=main&label=CI%20frontend&logo=githubactions&logoColor=white)](https://github.com/DESCARAVAGE/portfolio_up/actions/workflows/ci-frontend.yml)       | [![Image frontend](https://img.shields.io/docker/v/descaravage/final-project-study-frontend?sort=semver&label=image%20frontend&logo=docker&logoColor=white)](https://hub.docker.com/r/descaravage/final-project-study-frontend/tags) |
-| **Backend**  | [![CI backend](https://img.shields.io/github/actions/workflow/status/DESCARAVAGE/portfolio_up/jest-ci-backend.yml?branch=main&label=CI%20backend&logo=githubactions&logoColor=white)](https://github.com/DESCARAVAGE/portfolio_up/actions/workflows/jest-ci-backend.yml) | [![Image backend](https://img.shields.io/docker/v/descaravage/final-project-study-backend?sort=semver&label=image%20backend&logo=docker&logoColor=white)](https://hub.docker.com/r/descaravage/final-project-study-backend/tags)     |
+Portfolio de développeur frontend React / TypeScript : une page unique, un fond
+en brouillard 3D interactif, des cartes en verre qui réfractent le décor, et un
+thème clair / sombre synchronisé avec le système.
 
-**Version 2** : le frontend est reconstruit avec Next.js. Le détail des versions est dans le [CHANGELOG](CHANGELOG.md).
+C'est le frontend de la **version 2** du site. Il vit dans le dépôt
+[`portfolio_up`](../README.md), à côté de l'API (`backend/`) qui sert le CV, et
+tourne derrière la même passerelle nginx que la version 1.
 
-## 🎯 Pourquoi ce projet
+## Sommaire
 
-Après 3 années de Faculté de sport, je me suis reconverti dans la programmation — d'abord en autodidacte, puis en suivant des formations de professionnalisation pour des clients et en entreprise.
+1. [En bref](#en-bref)
+2. [Démarrage rapide](#démarrage-rapide)
+3. [Scripts](#scripts)
+4. [Structure du projet](#structure-du-projet)
+5. [Modifier le contenu](#modifier-le-contenu)
+6. [Styles et thème](#styles-et-thème)
+7. [Le fond 3D](#le-fond-3d)
+8. [Qualité : tests, accessibilité, performance](#qualité--tests-accessibilité-performance)
+9. [Intégration continue](#intégration-continue)
+10. [Mise en production](#mise-en-production)
+11. [Version](#version)
+12. [Conventions](#conventions)
 
-Ce portfolio répond à un manque concret : l'absence de présence en ligne construite et maîtrisée de bout en bout. Plutôt que de passer par une plateforme clé-en-main, j'ai fait le choix de tout gérer moi-même, « à l'ancienne » : provisionnement et configuration d'un VPS OVH, conteneurisation avec Docker, mise en place d'un reverse proxy, sécurisation du serveur, et supervision manuelle des services — sans dashboard automatisé qui fait le travail à ma place.
+## En bref
 
-L'objectif : démontrer une compréhension réelle de la chaîne complète, du code jusqu'à l'infrastructure qui le fait tourner.
+|              |                                                                     |
+| ------------ | ------------------------------------------------------------------- |
+| Framework    | Next.js 16 (App Router, Turbopack), React 19, TypeScript            |
+| Styles       | Tailwind CSS v4, deux feuilles CSS (`globals.css`, `portfolio.css`) |
+| Animations   | Motion (`motion/react`), animations CSS pour le premier écran       |
+| Fond 3D      | WebGL sans bibliothèque, shader FOG (remous et ondes au clic)       |
+| Thème        | next-themes (clair / sombre / système)                              |
+| Qualité      | ESLint, Prettier, Playwright + axe-core, Lighthouse CI              |
+| Gestionnaire | pnpm 10                                                             |
+| Hébergement  | VPS OVH : Docker (serveur Next.js), nginx, Caddy                    |
 
-## 🔗 Lien du projet
+Mesures sur le build de production (Lighthouse) : performance 86 sur mobile et
+100 sur ordinateur, accessibilité, bonnes pratiques et SEO à 100.
 
-👉 [www.dany-sk-fsp.com](https://www.dany-sk-fsp.com/)
+## Démarrage rapide
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/apercu-v2-sombre.png">
-  <img src="docs/apercu-v2-clair.png" alt="Page d'accueil du portfolio v2 : « partir du besoin, livrer une interface résiliente et maintenable. » sur un fond de brouillard">
-</picture>
-
-## 🧭 Architecture
-
-```
-Visiteur ──HTTPS──▶ Caddy (VPS OVH, certificats TLS)
-                      │
-                      ▼
-                    nginx (passerelle, port 8000)
-                      ├── /      ──▶ frontend : serveur Next.js (port 8080)
-                      └── /api   ──▶ backend  : API Express (port 3000) ──▶ PostgreSQL 16
-```
-
-Chaque service tourne dans son conteneur Docker. Le frontend et le backend sont publiés sur Docker Hub par la CI, puis récupérés par le VPS.
-
-| Dossier                           | Contenu                                       | Gestionnaire |
-| --------------------------------- | --------------------------------------------- | ------------ |
-| [`frontend/`](frontend/README.md) | Le site (Next.js)                             | pnpm         |
-| `backend/`                        | L'API : CV téléchargeable, santé du service   | npm          |
-| `nginx.conf`                      | La passerelle entre le frontend et le backend | —            |
-| `docker-compose*.yml`             | Développement, production locale, production  | —            |
-
-## 🛠️ Technologies
-
-### Frontend
-
-- **[Next.js](https://nextjs.org/) 16 (App Router, Turbopack) + [React](https://react.dev/) 19 + [TypeScript](https://www.typescriptlang.org/)** — Les sections sont rendues côté serveur au moment du build : la page arrive déjà prête, et seuls les éléments interactifs envoient du JavaScript.
-- **[Tailwind CSS](https://tailwindcss.com/) v4** — Styles utilitaires et thème clair / sombre piloté par des variables CSS.
-- **[Motion](https://motion.dev/)** — Animations au défilement, qui respectent le réglage « réduire les animations » du système.
-- **WebGL** — Fond en brouillard interactif, sans bibliothèque (~4 Ko compressés) : un shader inspiré de l'effet FOG de [Vanta.js](https://www.vantajs.com/), chargé seulement au premier geste du visiteur. Sa qualité s'adapte à l'appareil (complète, allégée, ou proposée par un bouton dans les navigateurs d'Instagram et consorts).
-- **[next-themes](https://github.com/pacocoursey/next-themes)** — Thème clair / sombre synchronisé avec le système.
-- **[Playwright](https://playwright.dev/) + [axe-core](https://github.com/dequelabs/axe-core)** — Tests de bout en bout sur ordinateur et mobile, dont l'accessibilité (WCAG 2.2 AA), le téléchargement du CV et le contact.
-- **[Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci)** — Contrôle de la performance, de l'accessibilité et du SEO à chaque build.
-- **[pnpm](https://pnpm.io/)** — Gestionnaire de paquets, à la version fixée dans `frontend/package.json`.
-
-### Backend
-
-- **[Node.js](https://nodejs.org/) + [Express](https://expressjs.com/fr/)** — Serveur HTTP léger et flexible, avec un écosystème mature pour construire une API REST rapidement tout en gardant le contrôle sur chaque middleware.
-- **[TypeScript](https://www.typescriptlang.org/)** — Typage statique pour fiabiliser le code et limiter les erreurs à l'exécution, particulièrement utile en solo sur un projet qui grandit.
-- **[TypeORM](https://typeorm.io/)** — ORM pour gérer les entités et les migrations PostgreSQL sans écrire du SQL brut à chaque requête, tout en gardant la possibilité de descendre au SQL quand c'est nécessaire.
-- **[PostgreSQL](https://www.postgresql.org/)** — Base de données relationnelle robuste et éprouvée, adaptée à un modèle de données structuré.
-- **[Jest](https://jestjs.io/) + [Supertest](https://github.com/forwardemail/supertest)** — Tests de l'API : les requêtes traversent la vraie application Express (routes, contrôleurs, en-têtes) ; seul l'accès à la base est simulé, la CI n'a donc pas besoin de PostgreSQL.
-- **[helmet](https://helmetjs.github.io/)** — En-têtes de sécurité HTTP de l'API (et `X-Powered-By` retiré).
-
-### Infrastructure & déploiement
-
-- **[Docker](https://www.docker.com/) / Docker Compose** — Conteneurisation de chaque service (frontend, backend, base de données, passerelle) pour des environnements reproductibles et un déploiement cohérent entre local et production.
-- **[Nginx](https://nginx.org/)** — Passerelle interne : `/api` vers le backend, tout le reste vers le serveur Next.js.
-- **[Caddy](https://caddyserver.com/)** — Proxy en périphérie avec gestion automatique du HTTPS (certificats TLS renouvelés sans intervention manuelle).
-- **[Fail2ban](https://github.com/fail2ban/fail2ban)** — Protection du serveur contre les tentatives de connexion SSH par force brute.
-- **VPS [OVHcloud](https://www.ovhcloud.com/fr/)** — Hébergement géré manuellement : configuration système, sécurité et supervision faites à la main plutôt que via une plateforme managée.
-
-## 🔄 CI/CD
-
-- **[GitHub Actions](https://docs.github.com/fr/actions)** — Deux pipelines indépendants, un pour le frontend et un pour le backend, déclenchés uniquement quand le dossier concerné change (pas de build inutile si un seul des deux évolue).
-- **[Docker Build](https://docs.docker.com/build/ci/github-actions/)** — Construction et publication des images sur [Docker Hub](https://hub.docker.com/).
-- **[Dependabot](https://docs.github.com/fr/code-security/dependabot)** — Mises à jour hebdomadaires des dépendances, des actions et des images, proposées en PR vers `dev`.
-
-Les deux workflows n'ont que le droit de lire le dépôt, leurs actions sont épinglées par SHA, et une faille élevée ou critique dans une dépendance de production bloque la CI (`pnpm audit` / `npm audit`).
-
-Chaque pipeline suit le même principe : **tester avant de construire**.
-
-| Étape           | Frontend ([`ci-frontend.yml`](.github/workflows/ci-frontend.yml))                                                                 | Backend ([`jest-ci-backend.yml`](.github/workflows/jest-ci-backend.yml))                    |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| 1. Contrôles    | Audit, ESLint, Prettier, build Next.js (types compris)                                                                            | Audit, build TypeScript                                                                     |
-| 2. Tests        | Vitest, Playwright + axe sur ordinateur et mobile, puis Lighthouse                                                                | Jest + Supertest (application réelle, base simulée)                                         |
-| 3. Image Docker | Construite sur chaque PR ; publiée sur `main` : `latest`, `sha-…`, et `2.0.0`, `2.0`, `2` à la première publication de la version | Construite sur chaque PR et contrôlée (aucun CV) ; publiée sur `main` : `latest` et `sha-…` |
-| 4. Déploiement  | Le VPS lance `fetch-and-deploy.sh` : récupération des images `latest` et relance de la stack                                      | idem                                                                                        |
-
-Ce découplage garantit qu'aucune image cassée n'atteint jamais Docker Hub : si les tests échouent, le build s'arrête avant la publication. Une version publiée ne change plus (ses tags ne sont posés qu'une fois), et les tags `sha-…` permettent de revenir à un commit précis en cas de problème.
-
-### Journaux du serveur
-
-La page Confidentialité annonce 6 mois de conservation des journaux nginx. Leur rotation se fait sur le VPS avec [`ops/logrotate-portfolio-nginx`](ops/logrotate-portfolio-nginx) : à copier dans `/etc/logrotate.d/` (instructions en tête du fichier).
-
-## 🏷️ Versions
-
-| Version | Frontend                                                               | Statut                  |
-| ------- | ---------------------------------------------------------------------- | ----------------------- |
-| **2.x** | Next.js 16, Tailwind CSS, brouillard 3D, tests Playwright + Lighthouse | En ligne                |
-| 1.x     | React + Vite, MUI, servi par nginx ([aperçu](docs/promo.png))          | Archivée (tag `v1.0.0`) |
-
-La version suit le [Semantic Versioning](https://semver.org/lang/fr/) et se lit dans `frontend/package.json`. Elle s'affiche dans le pied de page du site et sert de tag aux images Docker du frontend. Pour publier une nouvelle version :
-
-1. Mettre à jour la version : `cd frontend && npm pkg set version=2.1.0`
-2. Décrire les changements dans le [CHANGELOG](CHANGELOG.md).
-3. Merger sur `main`, puis créer le tag Git : `git tag v2.1.0 && git push origin v2.1.0`
-
-## 💻 Lancer le projet en local
-
-Les fichiers `.env.backend`, `.env.db` et `.env.frontend` doivent exister à la racine (ils ne sont pas versionnés).
+**Prérequis :** Node.js 22 et pnpm 10 (`corepack enable` active la version
+déclarée dans `package.json`).
 
 ```bash
-# Développement : frontend sur http://localhost:5173, backend sur http://localhost:3001
-docker compose up --build
-
-# Production en local : toute la stack derrière la passerelle, sur http://localhost:8000
-docker compose -f docker-compose.prod-local.yml up -d --build
-
-# Tests de bout en bout contre la stack complète (y compris le téléchargement du CV)
-cd frontend && BASE_URL=http://localhost:8000 pnpm test:e2e
+pnpm install                          # dépendances
+pnpm exec playwright install chromium # navigateur des tests (une seule fois)
+pnpm dev                              # http://localhost:3000
 ```
 
-En développement, il n'y a pas de passerelle : le lien du CV (`/api/cv/download`) ne fonctionne qu'avec la production locale.
+Ou, depuis la racine du dépôt, avec Docker : `docker compose up --build`
+(site sur http://localhost:5173).
 
-Le détail du frontend (scripts, structure, contenu, tests) est dans [`frontend/README.md`](frontend/README.md).
+Pour juger les performances ou la fluidité, toujours passer par le build de
+production, nettement plus rapide que le mode dev :
 
-## 🙏 Remerciements
+```bash
+pnpm build && pnpm start
+```
 
-Merci à la communauté des développeurs et à l'écosystème open source, qui donne accès à des outils puissants et à une documentation permettant d'apprendre en continu — et qui encourage à rester curieux, projet après projet.
+### Variables d'environnement
+
+| Variable               | Rôle                                                                                                 | Exemple                  |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------ |
+| `NEXT_PUBLIC_SITE_URL` | Adresse publique du site : liens de partage (Open Graph), URL canonique, `sitemap.xml`, `robots.txt` | `https://mon-domaine.fr` |
+
+Elle est lue **au moment du build**. En local, sans elle, le site utilise
+`http://localhost:3000`.
+
+## Scripts
+
+| Commande            | Ce qu'elle fait                                                      |
+| ------------------- | -------------------------------------------------------------------- |
+| `pnpm dev`          | Serveur de développement                                             |
+| `pnpm build`        | Build de production (vérifie aussi les types, tests compris)         |
+| `pnpm start`        | Sert le build de production                                          |
+| `pnpm lint`         | ESLint                                                               |
+| `pnpm format`       | Met tout le projet au format Prettier                                |
+| `pnpm format:check` | Vérifie le format sans rien modifier                                 |
+| `pnpm test:unit`    | Tests unitaires (Vitest)                                             |
+| `pnpm test:e2e`     | Tests de bout en bout (lance lui-même le serveur sur le port 3100)   |
+| `pnpm run ci`       | Rejoue toute la CI en local : lint, format, tests, build, Lighthouse |
+
+`pnpm run ci` et non `pnpm ci` : `ci` est une commande réservée par pnpm.
+Pour l'étape Lighthouse sans Chrome installé :
+
+```bash
+export CHROME_PATH=$(node -e "console.log(require('@playwright/test').chromium.executablePath())")
+```
+
+## Structure du projet
+
+```
+app/
+├── layout.tsx              Mise en page racine unique, commune aux deux langues (→ components/RootShell)
+├── (fr)/                   Site français, à la racine des adresses (le groupe n'apparaît pas dans l'URL)
+│   ├── layout.tsx          Métadonnées du site français
+│   ├── page.tsx            /  (→ components/portfolio/HomePage)
+│   ├── mentions-legales/   /mentions-legales
+│   ├── confidentialite/    /confidentialite
+│   ├── gantt/              /gantt : chronologie du projet (diagramme de Gantt et tableau)
+│   └── opengraph-image.tsx Image d'aperçu générée au build (partage LinkedIn, Slack…)
+├── en/                     Site anglais : /en, /en/legal-notice, /en/privacy, /en/gantt (même structure)
+├── not-found.tsx           Page 404 de tout le site, dans la langue de l'adresse
+├── robots.ts               /robots.txt : indexable ; aperçus et moteurs de réponse IA admis, entraînement IA refusé
+├── sitemap.ts              /sitemap.xml (les deux langues, avec hreflang)
+├── icon.svg                Favicon
+│
+├── i18n/                   Langues : adresses de chaque page (config.ts), accès au contenu
+│                           (content.ts), type des traductions (types.ts), contexte client
+├── content/
+│   ├── profile.ts          TOUT le contenu du site en français (textes, projets, images, liens)
+│   ├── profile.en.ts       Le même contenu en anglais (même forme, vérifiée par TypeScript)
+│   ├── ui.ts               Petits textes de l'interface, chacun en { fr, en } (boutons, libellés…)
+│   ├── legal.ts            Données des pages Mentions légales et Confidentialité
+│   ├── legal.en.ts         Leurs textes à traduire (durées, crédits)
+│   └── timeline.ts         Chronologie du projet (page /gantt) : chantiers, jalons, commits par semaine
+│
+├── components/
+│   ├── portfolio/          Une section de la page par fichier (Hero, Experience, Projects…)
+│   ├── ui/
+│   │   ├── base/           Briques d'interface : Surface (cartes), Tag, ExternalLink, LogoTile, CopyEmail
+│   │   ├── motion/         Effets : Reveal, Parallax, Curtain, Stagger, ScrollWords, ScrollLine, ScrollSlide
+│   │   ├── media/          Visuels interactifs : LoopVideo, CompareSlider
+│   │   └── scroll/         Indicateurs de défilement : ScrollProgress, ScrollRail
+│   ├── seo/                Données structurées (JSON-LD Person)
+│   ├── RootShell.tsx       Coquille HTML commune aux deux langues : polices, thème, fond 3D
+│   ├── FogBackground.tsx   Fond 3D plein écran
+│   ├── LanguageSwitch.tsx  Bouton de langue : drapeau de la langue affichée (à droite de la maison)
+│   └── ThemeToggle.tsx     Bouton clair / sombre : soleil en clair, lune en sombre
+│
+├── hooks/                  Logique réutilisable (useFog, useMotionFactor, useActiveSection…)
+├── lib/
+│   ├── motion.ts           Courbes et variantes d'animation partagées
+│   └── fog/                Brouillard : moteur WebGL, shader, interaction, chargement
+├── providers/              ThemeProvider (next-themes), MotionProvider (mouvement réduit)
+├── styles/
+│   ├── globals.css         Base de l'application : Tailwind, couleurs, fond, défilement
+│   └── portfolio.css       Styles des composants : brouillard, cartes, rail
+└── assets/images/          Images importées (optimisées par next/image)
+
+public/
+└── videos/                 Vidéo de démonstration (WebM + MP4)
+
+proxy.ts                    Redirige /Gantt (majuscules) vers /gantt ; ne tourne que sur ces adresses
+tests/e2e/                  Tests Playwright + axe-core (shared/ : cas communs avec les tests unitaires)
+tests/unit/                 Tests unitaires Vitest (bouton de langue, dictionnaire d'interface)
+build.Dockerfile            Image de production (serveur Next.js standalone, port 8080)
+Dockerfile.dev              Image de développement (port 5173)
+```
+
+Le workflow de CI est à la racine du dépôt : `.github/workflows/ci-frontend.yml`.
+
+### Rendu serveur et client
+
+Les sections (`components/portfolio`) sont des **Server Components** : leur HTML
+est produit au build, sans JavaScript envoyé pour elles. Seuls les effets et les
+éléments interactifs sont des composants client (`"use client"`) : `Hero`,
+`SiteHeader`, et les composants de `ui/motion`, `ui/media`, `ui/scroll`,
+`Surface`, `CopyEmail`.
+
+## Modifier le contenu
+
+Tout se passe dans **`app/content/profile.ts`** (français) et **`app/content/profile.en.ts`**
+(anglais). Aucun composant n'est à toucher pour :
+
+| Changer…                                 | Où dans `profile.ts`                                                                     |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Nom, e-mail, réseaux                     | `PROFILE` (`linkedin`, `github` : boutons ronds de la barre et du pied de page)          |
+| Sections, ordre, titres, menu            | `SECTIONS` : la navigation et la numérotation en sont générées, aucun lien mort possible |
+| Titre et accroche du haut                | `HERO`                                                                                   |
+| Chiffres clés                            | `HIGHLIGHTS`                                                                             |
+| Expériences                              | `EXPERIENCES` (`featured: true` = étude de cas en grand)                                 |
+| Projets                                  | `PROJECTS` (`featured` = projet phare, `minor` = carte compacte en bas)                  |
+| Compétences, approche, vision, formation | `SKILLS`, `APPROACH`, `VISION`, `EDUCATION`, `CERTIFICATIONS`                            |
+
+Le CV n'est pas dans le frontend : `PROFILE.cv` pointe vers `/api/cv/download`,
+servi par le backend (dernier CV enregistré en base, fichier dans
+`backend/storage`). Pour changer de CV, c'est côté backend.
+
+`variant` choisit l'apparence d'une carte : `"glass"` (verre), `"solid"` (pleine)
+ou `"accent"` (orange).
+
+### Version anglaise
+
+Le site français reste à `/` ; l'anglais est sous `/en`, sans redirection selon la
+langue du navigateur : le bouton drapeau (celui de la langue affichée), à droite de la
+maison, mène à la même page dans l'autre langue (en gardant la section en cours sur
+l'accueil), **sans recharger la page** : le fond 3D et le thème restent en place, la
+barre ne rejoue pas son entrée.
+
+- Une seule mise en page racine (`app/layout.tsx`) pour les deux langues : c'est ce qui
+  permet la navigation sans rechargement (Next recharge tout entre deux mises en page
+  racines). Le HTML commun annonce `lang="fr"` ; sous `/en`, un script en ligne
+  (`HTML_LANG_SCRIPT`, `i18n/config.ts`) passe à `lang="en"` avant l'affichage, puis
+  `PathLocaleProvider` le suit à chaque changement de langue. Sans JavaScript, `<html>`
+  reste en `fr`, mais `app/en/layout.tsx` marque tout le contenu anglais `lang="en"`.
+
+- `profile.en.ts` a **exactement la forme** de `profile.ts` (type `Localized`) : une
+  entrée oubliée, en trop, ou un identifiant différent (`id` de section, `target`…)
+  fait échouer `tsc`. Les images et les données qui ne se traduisent pas sont reprises
+  de `profile.ts`.
+- Ajouter un texte d'interface : dans `ui.ts`, sous la forme `{ fr: "…", en: "…" }` ; une
+  langue oubliée fait échouer `tsc`. `getUi(locale)` rend les textes d'une langue.
+- Un test e2e (`tests/e2e/i18n.spec.ts`) compare `/` et `/en` : un texte français
+  resté sur la page anglaise le fait échouer. Les deux se complètent : le type vérifie
+  la forme (rien d'oublié ni de renommé), le test vérifie que le texte est bien traduit
+  (une entrée reprise du français avec `...` passerait le type, pas le test).
+- Tout est traduit sous `/en`, ancres comprises (`/#projets` ↔ `/en#projects`) : la table
+  est `SECTION_ANCHORS` dans `app/i18n/config.ts`. Le bouton de langue et le retour des pages
+  légales traduisent l'ancre ; tous les autres liens restent dans la langue de la page.
+- La destination du bouton de langue est calculée par `switchLanguageHref` (fonction pure) :
+  testée par Vitest (`pnpm test:unit`) et, avec les mêmes cas, par Playwright.
+
+### Images
+
+Les images vivent dans `app/assets/images/` et sont **importées** en haut de
+`profile.ts` :
+
+```ts
+import monProjet from "@/app/assets/images/projets/mon-projet.webp";
+// …
+media: { type: "image", src: monProjet, alt: "Ce que montre l'image" },
+```
+
+Next.js connaît ainsi leurs dimensions (pas de décalage de mise en page), génère
+un flou d'attente et les sert avec un cache d'un an. Prévoir des fichiers d'au
+moins **deux fois** leur largeur d'affichage pour les écrans Retina (WebP).
+
+### Vidéos
+
+Les vidéos restent dans `public/videos/` (un import ne convient pas à la
+lecture en continu) et sont référencées par leur chemin. Fournir une version
+**WebM** (VP9) et une **MP4** (H.264) : certains Chromium sous Linux ne lisent
+pas le H.264. Rien n'est téléchargé avant le clic sur « Voir la démo ».
+
+## Styles et thème
+
+| Fichier                    | Contient                                                                                                                                      |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/styles/globals.css`   | Tout ce qui vaut pour l'application : import de Tailwind, couleurs clair / sombre, fond et police de la page, défilement, animations d'entrée |
+| `app/styles/portfolio.css` | Les styles de composants : brouillard, cartes (verre, pleine, orange), rail de défilement                                                     |
+
+Les couleurs sont des variables CSS qui changent avec la classe `dark` posée par
+next-themes. Elles existent aussi en classes Tailwind :
+
+```html
+<a class="bg-accent-surface text-accent-ink">…</a>
+<!-- au lieu de bg-[var(--accent-surface)] -->
+```
+
+| Token                               | Rôle                                           |
+| ----------------------------------- | ---------------------------------------------- |
+| `--bg` / `bg-page`                  | Fond de page                                   |
+| `--ink` / `text-ink`                | Texte principal                                |
+| `--mute` / `.text-mute`             | Texte secondaire                               |
+| `--line` / `border-line`            | Filets et bordures                             |
+| `--accent`                          | Orange décoratif (titres, détails)             |
+| `--accent-text`                     | Petit texte orange (contraste AA sur le verre) |
+| `--accent-surface` / `--accent-ink` | Fond orange sous du texte blanc (contraste AA) |
+
+Le fond de page est posé sur `<body>`, jamais sur `<html>` : sinon il passerait
+au-dessus du brouillard et le masquerait.
+
+## Le fond 3D
+
+Le brouillard est un décor : il ne doit jamais ralentir l'affichage du contenu.
+
+- **Chargement différé.** Le moteur (~4 Ko compressés, sans bibliothèque) n'est
+  importé qu'au premier geste du visiteur (souris, toucher, défilement, clavier) ou
+  5 s après le chargement. Un dégradé CSS s'affiche en attendant, puis le
+  brouillard apparaît en fondu.
+- **Adapté à l'appareil.** Le palier est choisi dans le navigateur du visiteur
+  (`detectFogTier`, dans `fogSupport.ts`) :
+
+  | Palier  | Quand                                                                                  | Fond                                          |
+  | ------- | -------------------------------------------------------------------------------------- | --------------------------------------------- |
+  | `full`  | Ordinateur (souris, écran large)                                                       | 3D, canvas 2× moins dense que l'écran, 60 i/s |
+  | `lite`  | Écran tactile ou fenêtre étroite                                                       | 3D, canvas 4× moins dense, 30 i/s             |
+  | `offer` | Navigateur intégré (Instagram, Facebook, TikTok…), économie de données, mémoire ≤ 2 Go | Dégradé CSS + bouton « Activer le fond 3D »   |
+  | `off`   | Mouvement réduit demandé                                                               | Dégradé CSS seul                              |
+
+  Pendant les premières secondes, le moteur chronomètre ses images : si l'appareil
+  peine, il descend d'un niveau (`full` → `lite` → `low`). Le choix d'activer la 3D est
+  retenu pour les visites suivantes. Palier et qualité en cours se lisent dans les
+  attributs `data-tier` et `data-quality` de `.fog` (inspecteur). Réglages : `FOG_QUALITY`
+  et `FOG_PROBE` (`app/lib/fog/fogConfig.ts`).
+
+- **Peu de mémoire.** Sur iPhone, une page trop gourmande est rechargée par le
+  système. Le moteur garde donc le strict minimum : contexte WebGL sans transparence,
+  anticrénelage ni tampon de profondeur ; aucune réallocation quand la barre d'adresse
+  d'iOS bouge. Si le système reprend malgré tout le contexte WebGL, le dégradé CSS revient.
+- **Cartes en verre sur écran tactile** : l'anneau et le reflet, qui suivent la souris,
+  deviennent une bordure fixe. Chaque carte n'a plus qu'un calque de flou au lieu de trois.
+- **Pas de brouillard** si WebGL est indisponible : le dégradé reste.
+- **Interaction** : le pointeur remue le brouillard, un clic dans le fond lance
+  une onde. Réglages dans `app/lib/fog/fogConfig.ts` (`FOG_INTERACTION`).
+- **Couleurs** : une palette par thème (`FOG_PALETTES`), changée sans recréer le moteur.
+
+| Fichier                     | Rôle                                                      |
+| --------------------------- | --------------------------------------------------------- |
+| `components/FogBackground`  | Le fond : dégradé CSS, puis canvas en fondu               |
+| `hooks/useFog.ts`           | Cycle de vie : quand charger, créer, recolorer, détruire  |
+| `lib/fog/fogSupport.ts`     | Palier selon l'appareil, déclenchement différé            |
+| `lib/fog/createFog.ts`      | Moteur WebGL : taille, cadence, mesure, perte de contexte |
+| `components/FogOffer.tsx`   | Bouton « Activer le fond 3D » (palier `offer`)            |
+| `lib/fog/fogShader.ts`      | Shaders GLSL : bruit fractal, remous, ondes               |
+| `lib/fog/fogInteraction.ts` | Remous et ondes, image par image                          |
+| `lib/fog/fogConfig.ts`      | Palettes, réglages du rendu et de l'interaction           |
+| `hooks/useFogPointer.ts`    | Relie souris et toucher à l'interaction                   |
+
+## Qualité : tests, accessibilité, performance
+
+```bash
+pnpm build
+pnpm test:e2e
+```
+
+Les tests de bout en bout (`tests/e2e/portfolio.spec.ts` et `i18n.spec.ts`) tournent
+sur ordinateur et sur mobile (Pixel 7) ; les tests unitaires (`pnpm test:unit`) couvrent
+les fonctions pures. Ensemble, ils vérifient :
+
+| Thème         | Vérifications                                                                                            |
+| ------------- | -------------------------------------------------------------------------------------------------------- |
+| Contenu       | Le `h1` donne le nom et le poste, chaque section a un `h2`, aucune erreur console                        |
+| Navigation    | Chaque lien du menu mène à une section existante, lien d'évitement, liens externes sécurisés             |
+| Accessibilité | Aucune violation axe-core (WCAG 2.2 AA), en thème clair et sombre                                        |
+| Vidéo         | Rien n'est téléchargé avant le clic, puis la lecture démarre                                             |
+| Robustesse    | Mouvement réduit (pas de brouillard), changement de thème sans brouillard, page lisible sans JavaScript  |
+| SEO           | Open Graph, JSON-LD, URL canonique, groupes de `robots.txt` (IA d'entraînement refusées), `sitemap.xml`  |
+| Sécurité      | CSP et en-têtes de sécurité sur chaque page, aucune ressource bloquée par la CSP                         |
+| Langues       | Version anglaise complète, bouton de langue sans rechargement, aucun texte français oublié sur `/en`     |
+| Contact       | « M'écrire » et les liens e-mail, bouton « Copier l'adresse », téléchargement du CV par les deux boutons |
+| Intégration   | Redirections des anciennes URL (`/home`, `/xp-details/:id`), liens du CV vers le backend                 |
+| Version       | Le pied de page affiche la version de `package.json`                                                     |
+
+Pour viser un serveur déjà lancé : `BASE_URL=http://localhost:3000 pnpm test:e2e`.
+
+Le téléchargement du CV passe par le backend : ces tests ne tournent que contre
+la stack complète (`docker compose -f docker-compose.prod-local.yml up -d --build`
+à la racine, puis `BASE_URL=http://localhost:8000 pnpm test:e2e`). Sans
+`BASE_URL`, ils sont ignorés, y compris en CI.
+
+Accessibilité prise en compte dans le code : contrastes AA vérifiés (y compris
+sur le fond de secours), titres hiérarchisés, lien d'évitement, focus visible,
+`prefers-reduced-motion` respecté par toutes les animations (y compris celles
+liées au défilement), vidéo lancée par l'utilisateur avec description textuelle.
+
+## Intégration continue
+
+`.github/workflows/ci-frontend.yml` (à la racine du dépôt) s'exécute à chaque push
+et à chaque pull request qui touchent `frontend/` :
+
+1. Installation (`pnpm install --frozen-lockfile`) et audit des dépendances de prod
+   (`pnpm audit --prod --audit-level high` : une faille élevée ou critique bloque)
+2. Lint et format (`pnpm lint`, `pnpm format:check`)
+3. Tests unitaires (`pnpm test:unit`)
+4. Build, qui vérifie aussi les types
+5. Tests Playwright + axe
+6. Lighthouse CI (3 passages) avec des seuils : accessibilité et SEO à 100,
+   performance ≥ 85, CLS ≤ 0,05 (configuration dans `lighthouserc.json`)
+7. Image Docker : construite sur chaque pull request (sans publication), puis sur
+   `main`, si tout est vert, publiée sur Docker Hub (`descaravage/final-project-study-frontend`)
+   avec `latest` et le commit (`sha-…`). Les tags de version (`2.0.0`, `2.0`, `2`) ne sont
+   posés que si cette version n'est pas encore publiée : une version publiée ne change plus.
+   Pour en publier une nouvelle, monter `version` dans `package.json`.
+
+Le workflow n'a que le droit de lire le dépôt (`permissions: contents: read`).
+Dependabot (`.github/dependabot.yml`) propose chaque semaine les mises à jour des
+dépendances, des actions GitHub et des images Docker.
+
+En cas d'échec, le rapport Playwright est joint à l'exécution (onglet _Actions_).
+
+**Configuration GitHub** : _Settings → Secrets and variables → Actions_.
+Variable `SITE_URL` (adresse du site, utilisée pour les tests), secrets
+`DOCKERHUB_USERNAME` et `DOCKERHUB_TOKEN` (publication de l'image). Le champ
+`packageManager` de `package.json` indique à la CI quelle version de pnpm installer.
+
+Rejouer la CI en local : `pnpm run ci`.
+
+## Mise en production
+
+Les pages sont générées au build. En production, elles sont servies par le
+serveur minimal de Next.js (`output: "standalone"` dans `next.config.ts`), dans
+l'image construite par `build.Dockerfile` :
+
+- build avec pnpm, puis image finale qui ne contient que `.next/standalone`,
+  `.next/static` et `public` (pas de `node_modules` complet) ;
+- serveur sur le port **8080**, utilisateur non root (`1000`) : nginx y envoie
+  tout ce qui n'est pas `/api` ;
+- `NEXT_PUBLIC_SITE_URL` est un argument de build, `https://www.dany-sk-fsp.com`
+  par défaut.
+
+En local sans Docker : `pnpm build` puis `pnpm start` (port 3000).
+
+- `X-Powered-By` est désactivé (`poweredByHeader: false` dans `next.config.ts`).
+- Les anciennes URL de la version 1 redirigent vers la page (`/home` → `/`,
+  `/xp-details/:id` → `/#experience`), en 308 permanentes.
+- En-têtes de sécurité à poser dans le Caddyfile :
+
+```
+header {
+  Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  X-Content-Type-Options "nosniff"
+  Referrer-Policy "strict-origin-when-cross-origin"
+  -Server
+}
+```
+
+- Les fichiers de `public/` sont servis sans cache long. Pour les vidéos :
+  versionner le nom (`agentique-demo-v1.mp4`) et ajouter un cache d'un an sur
+  `/videos/*` dans Caddy.
+
+## Version
+
+La version du site est celle de `package.json` (actuellement **2.0.0**). Elle
+s'affiche dans le pied de page et sert de tag à l'image Docker. Pour en publier
+une nouvelle : `npm pkg set version=2.1.0`, regrouper sous `2.1.0` les blocs datés
+de « Non publié » du [CHANGELOG](../CHANGELOG.md) (le plus récent en haut), merger
+sur `main`, puis créer le tag Git `v2.1.0`.
+
+## Conventions
+
+- **Imports** : toujours l'alias `@/` (= racine du projet), jamais de chemins relatifs.
+- **Format** : Prettier (largeur 120, classes Tailwind triées) : `pnpm format` avant de commiter, vérifié par la CI.
+- **Composants** : Server Component par défaut ; `"use client"` seulement pour
+  l'état, les effets ou les événements, isolé dans le plus petit composant possible.
+- **Animations** : tout effet lié au défilement passe par `useMotionFactor()`
+  pour respecter le mouvement réduit.
+- **Contenu** : jamais de texte en dur dans un composant, tout vient de `profile.ts`
+  (et de sa traduction) ou de `ui.ts`.
+- **Langue** : les composants serveur reçoivent `locale` en prop (`getContent`, `getUi`) ;
+  les composants client reçoivent leurs données en props, ou leurs textes par `useUi()`.
