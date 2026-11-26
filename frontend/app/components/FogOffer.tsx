@@ -11,8 +11,9 @@ const FOCUS =
  * Proposé quand le fond 3D n'est pas lancé d'office (navigateur intégré à une
  * application, économie de données, appareil à faible mémoire) : le visiteur
  * peut l'activer quand même. Fond plein, sans flou : aucun calque de plus.
+ * data-fog-offer : repère du bandeau pour le CSS (bouton « Haut de page »), quelle que soit la langue.
  */
-export default function FogOffer({ onEnable }: { onEnable: () => void }) {
+export default function FogOffer({ onEnable }: Readonly<{ onEnable: () => void }>) {
   const [hidden, setHidden] = useState(false);
   const { fog: t } = useUi();
   if (hidden) return null;
@@ -20,6 +21,7 @@ export default function FogOffer({ onEnable }: { onEnable: () => void }) {
   return (
     <aside
       aria-label={t.region}
+      data-fog-offer
       className="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-sm items-start gap-3 rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-3 shadow-lg sm:right-auto sm:left-4 sm:mx-0"
     >
       <div className="min-w-0 flex-1">

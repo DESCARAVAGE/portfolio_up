@@ -14,6 +14,7 @@ export const ROUTES = {
   home: { fr: "/", en: "/en" },
   legalNotice: { fr: "/mentions-legales", en: "/en/legal-notice" },
   privacy: { fr: "/confidentialite", en: "/en/privacy" },
+  gantt: { fr: "/gantt", en: "/en/gantt" },
 } as const satisfies Record<string, Record<Locale, string>>;
 
 export type RouteKey = keyof typeof ROUTES;
@@ -52,10 +53,12 @@ export function translateHash(hash: string, from: Locale, to: Locale): string {
 /** Pages légales, dans l'ordre du pied de page (aussi listées dans le sitemap). */
 export const LEGAL_ROUTES = ["legalNotice", "privacy"] as const satisfies readonly RouteKey[];
 
+/** Pages annexes du pied de page : les pages légales, puis la chronologie du projet. */
+export const ANNEX_ROUTES = [...LEGAL_ROUTES, "gantt"] as const satisfies readonly RouteKey[];
+
 /** Valeur de og:locale (Open Graph). */
 export const OG_LOCALE: Record<Locale, string> = { fr: "fr_FR", en: "en_US" };
 
-/** Langue d'une adresse : /en et tout ce qui est dessous = anglais. */
 /** Adresse du site anglais : /en et tout ce qui est dessous. */
 export const EN_PATH = /^\/en(\/|$)/;
 

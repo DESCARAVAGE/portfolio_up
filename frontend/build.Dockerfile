@@ -17,7 +17,8 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Uniquement ce qu'il faut pour construire le site (pas de copie globale :
 # aucun fichier local ou secret ne peut se retrouver dans l'image par erreur)
-COPY next.config.ts tsconfig.json postcss.config.mjs ./
+# proxy.ts : redirige /Gantt vers /gantt (sans lui, l'image ne connaîtrait pas cette règle)
+COPY next.config.ts proxy.ts tsconfig.json postcss.config.mjs ./
 COPY app ./app
 COPY public ./public
 

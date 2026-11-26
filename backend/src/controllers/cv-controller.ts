@@ -14,7 +14,8 @@ export async function downloadLatestCv(_req: Request, res: Response) {
 
     stream.pipe(res);
   } catch (error) {
-    res.status(404).json({ message: error });
+    // Message fixe : l'erreur (chemin du fichier, détail de la base) reste dans les journaux
+    res.status(404).json({ message: "CV introuvable" });
     console.error(error);
   }
 }

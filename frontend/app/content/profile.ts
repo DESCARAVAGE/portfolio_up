@@ -1,13 +1,13 @@
 /**
- * Tout le contenu du portfolio (source : CV d'octobre 2026).
- * C'est le seul fichier à modifier : les composants n'ont aucun texte en dur.
+ * Tout le contenu du portfolio en français (source : CV d'octobre 2026). Sa traduction est
+ * dans profile.en.ts, les textes d'interface dans ui.ts : les composants n'ont aucun texte en dur.
  * Ajoute ou retire des entrées dans les listes, la mise en page suit.
  *
  * Images : rangées dans app/assets/images et IMPORTÉES ci-dessous (pas dans /public).
  * Next leur donne un nom unique (cache navigateur permanent), connaît leurs dimensions
  * et génère le flou de chargement. Une image manquante fait échouer le build.
  * Pour en ajouter une : dépose-la dans app/assets/images, importe-la ici, utilise la variable.
- * Restent dans /public : le CV (adresse fixe) et les vidéos (non gérées par next/image).
+ * Restent dans /public : les vidéos (non gérées par next/image). Le CV est servi par le backend.
  */
 
 import type { StaticImageData } from "next/image";

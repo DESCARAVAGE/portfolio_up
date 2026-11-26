@@ -234,8 +234,9 @@
  * bandeau « Activer le fond 3D » quand celui-ci est affiché (pleine largeur).
  * ------------------------------------------------------------------------- */
 
+/* Repère data-fog-offer, et non le libellé : celui-ci change avec la langue */
 @media (max-width: 639px) {
-  body:has(aside[aria-label="Fond animé"]) .back-to-top {
+  body:has([data-fog-offer]) .back-to-top {
     bottom: calc(9rem + env(safe-area-inset-bottom));
   }
 }

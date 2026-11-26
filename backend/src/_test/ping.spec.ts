@@ -44,4 +44,18 @@ describe("Ping backend", () => {
 
     expect(res.status).toBe(404);
   });
+
+  /**
+   * TEST 4
+   * En-têtes de sécurité posés par helmet, et Express n'est plus annoncé
+   */
+  it("sends security headers and hides X-Powered-By", async () => {
+    const res = await request(app).get("/api/health");
+
+    expect(res.headers["x-powered-by"]).toBeUndefined();
+    expect(res.headers["x-content-type-options"]).toBe("nosniff");
+    expect(res.headers["content-security-policy"]).toContain("default-src 'self'");
+    // Les réponses de l'API ne doivent pas être indexées par les moteurs
+    expect(res.headers["x-robots-tag"]).toBe("noindex, nofollow");
+  });
 });

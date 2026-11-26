@@ -1,90 +1,112 @@
-# .github/workflows/jest-backend-ci.yml
+# Backend Express : audit, tests Jest + Supertest, puis image Docker.
+# Sur une PR (ou hors main) : l'image est construite et contrôlée, sans être publiée.
+# Sur main : contrôlée puis publiée sur Docker Hub.
 name: jest-backend-ci
 
 on:
+  # Push : main et dev seulement (les autres branches passent par leur pull request)
   push:
+    branches: [main, dev]
     paths:
       - "backend/**"
       - ".github/workflows/jest-ci-backend.yml"
-  #   branches:
-  #     - dev
-  # pull_request:
-  #   branches:
-  #     - main
-  #     - dev
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/jest-ci-backend.yml"
+
+# Lecture seule : le workflow ne peut rien modifier dans le dépôt
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.ref }}
+  # Sur main, on ne coupe jamais une publication d'image en cours.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   test-back:
     runs-on: ubuntu-latest
-    container: node:lts-alpine
-
-    services:
-      db:
-        image: postgres
-        env:
-          POSTGRES_DB: ${{ secrets.DATABASE }}
-          POSTGRES_USER: ${{ secrets.USERNAME }}
-          POSTGRES_PASSWORD: ${{ secrets.PASSWORD }}
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
-
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Go to backend
-        env:
-          PORT: ${{ secrets.PORT }}
-          HOST: ${{ secrets.HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          DATABASE: ${{ secrets.DATABASE }}
-          # JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-        run: cd backend && npm i && npm run test
-    
-  # Hors main : l'image est construite pour vérifier le Dockerfile, sans être publiée.
-  # Sur main : construite puis publiée sur Docker Hub.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # Même version de Node que l'image de production (node:24-alpine)
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      # Installation exacte du lockfile, sans scripts d'installation des dépendances
+      - run: npm ci --ignore-scripts
+
+      # Une faille élevée ou critique dans une dépendance de production bloque la CI
+      - name: Audit des dépendances
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Build (vérifie aussi les types)
+        run: npm run build
+
+      # Les tests appellent la vraie application Express ; la base est simulée (service mocké),
+      # aucun PostgreSQL n'est donc nécessaire ici.
+      - name: Tests (Jest + Supertest)
+        run: npm test
+
   docker-back:
     needs: test-back
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       # Sans secrets (PR Dependabot, fork), un nom local : l'image n'est pas publiée de toute façon.
       IMAGE: ${{ secrets.DOCKERHUB_USERNAME || 'local' }}/final-project-study-backend
-      PUBLISH: ${{ github.ref == 'refs/heads/main' }}
+      PUBLISH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
         with:
           cleanup: false
-      - name: Login to Docker Hub
-        if: env.PUBLISH == 'true'
-        uses: docker/login-action@v3
+
+      - name: Tags
+        id: tags
+        run: echo "sha=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      # Toujours chargée en local d'abord : le contrôle ci-dessous tourne aussi sur main,
+      # c'est-à-dire sur l'image qui sera publiée.
+      - name: Build
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          push: ${{ env.PUBLISH == 'true' }}
-          load: ${{ env.PUBLISH != 'true' }}
+          load: true
           context: ./backend
           file: backend/build.Dockerfile
-          tags: ${{ env.IMAGE }}:latest
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ steps.tags.outputs.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
 
       # L'image est publique : elle ne doit contenir aucun CV (il est monté depuis le serveur).
       - name: Aucun CV dans l'image
-        if: env.PUBLISH != 'true'
         run: |
-          docker run --rm --entrypoint sh ${{ env.IMAGE }}:latest \
+          docker run --rm --entrypoint sh "$IMAGE:latest" \
             -c 'test -d storage && test -z "$(ls -A storage)" && echo "storage/ vide"'
+
+      - name: Login to Docker Hub
+        if: env.PUBLISH == 'true'
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # latest reste utilisé par le déploiement ; sha-… permet un retour arrière précis
+      - name: Publication
+        if: env.PUBLISH == 'true'
+        run: |
+          docker push "$IMAGE:latest"
+          docker push "$IMAGE:${{ steps.tags.outputs.sha }}"

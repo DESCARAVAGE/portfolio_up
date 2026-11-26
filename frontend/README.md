@@ -83,8 +83,9 @@ Elle est lue **au moment du build**. En local, sans elle, le site utilise
 | `pnpm lint`         | ESLint                                                               |
 | `pnpm format`       | Met tout le projet au format Prettier                                |
 | `pnpm format:check` | Vérifie le format sans rien modifier                                 |
+| `pnpm test:unit`    | Tests unitaires (Vitest)                                             |
 | `pnpm test:e2e`     | Tests de bout en bout (lance lui-même le serveur sur le port 3100)   |
-| `pnpm run ci`       | Rejoue toute la CI en local : lint, format, build, tests, Lighthouse |
+| `pnpm run ci`       | Rejoue toute la CI en local : lint, format, tests, build, Lighthouse |
 
 `pnpm run ci` et non `pnpm ci` : `ci` est une commande réservée par pnpm.
 Pour l'étape Lighthouse sans Chrome installé :
@@ -103,10 +104,12 @@ app/
 │   ├── page.tsx            /  (→ components/portfolio/HomePage)
 │   ├── mentions-legales/   /mentions-legales
 │   ├── confidentialite/    /confidentialite
+│   ├── gantt/              /gantt : chronologie du projet (diagramme de Gantt et tableau)
 │   └── opengraph-image.tsx Image d'aperçu générée au build (partage LinkedIn, Slack…)
-├── en/                     Site anglais : /en, /en/legal-notice, /en/privacy (même structure)
+├── en/                     Site anglais : /en, /en/legal-notice, /en/privacy, /en/gantt (même structure)
 ├── not-found.tsx           Page 404 de tout le site, dans la langue de l'adresse
-├── robots.ts, sitemap.ts   /robots.txt et /sitemap.xml (les deux langues, avec hreflang)
+├── robots.ts               /robots.txt : indexable ; aperçus et moteurs de réponse IA admis, entraînement IA refusé
+├── sitemap.ts              /sitemap.xml (les deux langues, avec hreflang)
 ├── icon.svg                Favicon
 │
 ├── i18n/                   Langues : adresses de chaque page (config.ts), accès au contenu
@@ -116,7 +119,8 @@ app/
 │   ├── profile.en.ts       Le même contenu en anglais (même forme, vérifiée par TypeScript)
 │   ├── ui.ts               Petits textes de l'interface, chacun en { fr, en } (boutons, libellés…)
 │   ├── legal.ts            Données des pages Mentions légales et Confidentialité
-│   └── legal.en.ts         Leurs textes à traduire (durées, crédits)
+│   ├── legal.en.ts         Leurs textes à traduire (durées, crédits)
+│   └── timeline.ts         Chronologie du projet (page /gantt) : chantiers, jalons, commits par semaine
 │
 ├── components/
 │   ├── portfolio/          Une section de la page par fichier (Hero, Experience, Projects…)
@@ -144,7 +148,9 @@ app/
 public/
 └── videos/                 Vidéo de démonstration (WebM + MP4)
 
-tests/e2e/                  Tests Playwright + axe-core
+proxy.ts                    Redirige /Gantt (majuscules) vers /gantt ; ne tourne que sur ces adresses
+tests/e2e/                  Tests Playwright + axe-core (shared/ : cas communs avec les tests unitaires)
+tests/unit/                 Tests unitaires Vitest (bouton de langue, dictionnaire d'interface)
 build.Dockerfile            Image de production (serveur Next.js standalone, port 8080)
 Dockerfile.dev              Image de développement (port 5173)
 ```
@@ -316,8 +322,9 @@ pnpm build
 pnpm test:e2e
 ```
 
-Les tests (`tests/e2e/portfolio.spec.ts`) tournent sur ordinateur et sur mobile
-(Pixel 7) et vérifient :
+Les tests de bout en bout (`tests/e2e/portfolio.spec.ts` et `i18n.spec.ts`) tournent
+sur ordinateur et sur mobile (Pixel 7) ; les tests unitaires (`pnpm test:unit`) couvrent
+les fonctions pures. Ensemble, ils vérifient :
 
 | Thème         | Vérifications                                                                                            |
 | ------------- | -------------------------------------------------------------------------------------------------------- |
@@ -326,7 +333,9 @@ Les tests (`tests/e2e/portfolio.spec.ts`) tournent sur ordinateur et sur mobile
 | Accessibilité | Aucune violation axe-core (WCAG 2.2 AA), en thème clair et sombre                                        |
 | Vidéo         | Rien n'est téléchargé avant le clic, puis la lecture démarre                                             |
 | Robustesse    | Mouvement réduit (pas de brouillard), changement de thème sans brouillard, page lisible sans JavaScript  |
-| SEO           | Open Graph, JSON-LD, URL canonique, `robots.txt`, `sitemap.xml`                                          |
+| SEO           | Open Graph, JSON-LD, URL canonique, groupes de `robots.txt` (IA d'entraînement refusées), `sitemap.xml`  |
+| Sécurité      | CSP et en-têtes de sécurité sur chaque page, aucune ressource bloquée par la CSP                         |
+| Langues       | Version anglaise complète, bouton de langue sans rechargement, aucun texte français oublié sur `/en`     |
 | Contact       | « M'écrire » et les liens e-mail, bouton « Copier l'adresse », téléchargement du CV par les deux boutons |
 | Intégration   | Redirections des anciennes URL (`/home`, `/xp-details/:id`), liens du CV vers le backend                 |
 | Version       | Le pied de page affiche la version de `package.json`                                                     |
@@ -348,16 +357,23 @@ liées au défilement), vidéo lancée par l'utilisateur avec description textue
 `.github/workflows/ci-frontend.yml` (à la racine du dépôt) s'exécute à chaque push
 et à chaque pull request qui touchent `frontend/` :
 
-1. Installation (`pnpm install --frozen-lockfile`)
+1. Installation (`pnpm install --frozen-lockfile`) et audit des dépendances de prod
+   (`pnpm audit --prod --audit-level high` : une faille élevée ou critique bloque)
 2. Lint et format (`pnpm lint`, `pnpm format:check`)
-3. Build, qui vérifie aussi les types
-4. Tests Playwright + axe
-5. Lighthouse CI (3 passages) avec des seuils : accessibilité et SEO à 100,
+3. Tests unitaires (`pnpm test:unit`)
+4. Build, qui vérifie aussi les types
+5. Tests Playwright + axe
+6. Lighthouse CI (3 passages) avec des seuils : accessibilité et SEO à 100,
    performance ≥ 85, CLS ≤ 0,05 (configuration dans `lighthouserc.json`)
+7. Image Docker : construite sur chaque pull request (sans publication), puis sur
+   `main`, si tout est vert, publiée sur Docker Hub (`descaravage/final-project-study-frontend`)
+   avec `latest` et le commit (`sha-…`). Les tags de version (`2.0.0`, `2.0`, `2`) ne sont
+   posés que si cette version n'est pas encore publiée : une version publiée ne change plus.
+   Pour en publier une nouvelle, monter `version` dans `package.json`.
 
-6. Sur `main` uniquement, si tout est vert : build de `build.Dockerfile` et
-   publication sur Docker Hub (`descaravage/final-project-study-frontend`), avec
-   les tags `latest`, la version (`2.0.0`, `2.0`, `2`) et le commit (`sha-…`)
+Le workflow n'a que le droit de lire le dépôt (`permissions: contents: read`).
+Dependabot (`.github/dependabot.yml`) propose chaque semaine les mises à jour des
+dépendances, des actions GitHub et des images Docker.
 
 En cas d'échec, le rapport Playwright est joint à l'exécution (onglet _Actions_).
 
@@ -411,7 +427,7 @@ une nouvelle : `npm pkg set version=2.1.0`, compléter le
 ## Conventions
 
 - **Imports** : toujours l'alias `@/` (= racine du projet), jamais de chemins relatifs.
-- **Format** : Prettier (largeur 120, classes Tailwind triées), lancé avant chaque commit.
+- **Format** : Prettier (largeur 120, classes Tailwind triées) : `pnpm format` avant de commiter, vérifié par la CI.
 - **Composants** : Server Component par défaut ; `"use client"` seulement pour
   l'état, les effets ou les événements, isolé dans le plus petit composant possible.
 - **Animations** : tout effet lié au défilement passe par `useMotionFactor()`

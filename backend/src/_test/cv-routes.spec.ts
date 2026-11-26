@@ -8,8 +8,7 @@ import { getLatestCvStream } from "../services/cv-service";
 /*
  * Tests de la route GET /api/cv/download.
  *
- * Contrairement à ping.spec.tsx (qui mocke la réponse HTTP avec nock),
- * ces tests appellent la vraie application Express via supertest :
+ * Comme ping.spec.ts, ces tests appellent la vraie application Express via supertest :
  * le routage, le contrôleur et les en-têtes HTTP sont réellement exécutés.
  *
  * Seul le service est simulé, pour ne pas dépendre d'une base PostgreSQL.
@@ -77,6 +76,8 @@ describe("GET /api/cv/download", () => {
     expect(res.status).toBe(200);
     expect(res.headers["content-type"]).toBe("application/pdf");
     expect(res.headers["content-disposition"]).toBe('attachment; filename="cv.pdf"');
+    // Le CV reste hors des moteurs de recherche
+    expect(res.headers["x-robots-tag"]).toBe("noindex, nofollow");
 
     // Le contenu reçu doit être exactement le fichier sur disque, octet pour octet.
     expect(Buffer.compare(res.body, fs.readFileSync(CV_PATH))).toBe(0);
@@ -122,6 +123,8 @@ describe("GET /api/cv/download", () => {
 
     expect(res.status).toBe(404);
     expect(res.headers["content-type"]).toMatch(/application\/json/);
+    // Message fixe : ni chemin de fichier ni détail interne dans la réponse
+    expect(res.body).toEqual({ message: "CV introuvable" });
   });
 
   it("renvoie 404 quand le fichier du CV est introuvable sur le disque", async () => {

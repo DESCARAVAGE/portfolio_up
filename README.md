@@ -66,7 +66,8 @@ Chaque service tourne dans son conteneur Docker. Le frontend et le backend sont 
 - **[TypeScript](https://www.typescriptlang.org/)** — Typage statique pour fiabiliser le code et limiter les erreurs à l'exécution, particulièrement utile en solo sur un projet qui grandit.
 - **[TypeORM](https://typeorm.io/)** — ORM pour gérer les entités et les migrations PostgreSQL sans écrire du SQL brut à chaque requête, tout en gardant la possibilité de descendre au SQL quand c'est nécessaire.
 - **[PostgreSQL](https://www.postgresql.org/)** — Base de données relationnelle robuste et éprouvée, adaptée à un modèle de données structuré.
-- **[Jest](https://jestjs.io/) + [Supertest](https://github.com/forwardemail/supertest)** — Tests unitaires et d'intégration de l'API, exécutés en CI contre une vraie instance PostgreSQL de test (pas de mock de la base).
+- **[Jest](https://jestjs.io/) + [Supertest](https://github.com/forwardemail/supertest)** — Tests de l'API : les requêtes traversent la vraie application Express (routes, contrôleurs, en-têtes) ; seul l'accès à la base est simulé, la CI n'a donc pas besoin de PostgreSQL.
+- **[helmet](https://helmetjs.github.io/)** — En-têtes de sécurité HTTP de l'API (et `X-Powered-By` retiré).
 
 ### Infrastructure & déploiement
 
@@ -80,17 +81,24 @@ Chaque service tourne dans son conteneur Docker. Le frontend et le backend sont 
 
 - **[GitHub Actions](https://docs.github.com/fr/actions)** — Deux pipelines indépendants, un pour le frontend et un pour le backend, déclenchés uniquement quand le dossier concerné change (pas de build inutile si un seul des deux évolue).
 - **[Docker Build](https://docs.docker.com/build/ci/github-actions/)** — Construction et publication des images sur [Docker Hub](https://hub.docker.com/).
+- **[Dependabot](https://docs.github.com/fr/code-security/dependabot)** — Mises à jour hebdomadaires des dépendances, des actions et des images, proposées en PR vers `dev`.
+
+Les deux workflows n'ont que le droit de lire le dépôt, leurs actions sont épinglées par SHA, et une faille élevée ou critique dans une dépendance de production bloque la CI (`pnpm audit` / `npm audit`).
 
 Chaque pipeline suit le même principe : **tester avant de construire**.
 
-| Étape           | Frontend ([`ci-frontend.yml`](.github/workflows/ci-frontend.yml))                            | Backend ([`jest-ci-backend.yml`](.github/workflows/jest-ci-backend.yml)) |
-| --------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| 1. Contrôles    | ESLint, Prettier, build Next.js (types compris)                                              | Installation des dépendances                                             |
-| 2. Tests        | Playwright + axe sur ordinateur et mobile, puis Lighthouse                                   | Jest + Supertest contre un vrai PostgreSQL éphémère                      |
-| 3. Image Docker | Sur `main` seulement, si les tests passent : tags `latest`, `2.0.0`, `2.0`, `2` et `sha-…`   | Sur `main` seulement, si les tests passent : tag `latest`                |
-| 4. Déploiement  | Le VPS lance `fetch-and-deploy.sh` : récupération des images `latest` et relance de la stack | idem                                                                     |
+| Étape           | Frontend ([`ci-frontend.yml`](.github/workflows/ci-frontend.yml))                                                                 | Backend ([`jest-ci-backend.yml`](.github/workflows/jest-ci-backend.yml))                    |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1. Contrôles    | Audit, ESLint, Prettier, build Next.js (types compris)                                                                            | Audit, build TypeScript                                                                     |
+| 2. Tests        | Vitest, Playwright + axe sur ordinateur et mobile, puis Lighthouse                                                                | Jest + Supertest (application réelle, base simulée)                                         |
+| 3. Image Docker | Construite sur chaque PR ; publiée sur `main` : `latest`, `sha-…`, et `2.0.0`, `2.0`, `2` à la première publication de la version | Construite sur chaque PR et contrôlée (aucun CV) ; publiée sur `main` : `latest` et `sha-…` |
+| 4. Déploiement  | Le VPS lance `fetch-and-deploy.sh` : récupération des images `latest` et relance de la stack                                      | idem                                                                                        |
 
-Ce découplage garantit qu'aucune image cassée n'atteint jamais Docker Hub : si les tests échouent, le build s'arrête avant la publication. Les tags de version permettent de revenir à une version précise en cas de problème.
+Ce découplage garantit qu'aucune image cassée n'atteint jamais Docker Hub : si les tests échouent, le build s'arrête avant la publication. Une version publiée ne change plus (ses tags ne sont posés qu'une fois), et les tags `sha-…` permettent de revenir à un commit précis en cas de problème.
+
+### Journaux du serveur
+
+La page Confidentialité annonce 6 mois de conservation des journaux nginx. Leur rotation se fait sur le VPS avec [`ops/logrotate-portfolio-nginx`](ops/logrotate-portfolio-nginx) : à copier dans `/etc/logrotate.d/` (instructions en tête du fichier).
 
 ## 🏷️ Versions
 
