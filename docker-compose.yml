@@ -45,7 +45,7 @@ services:
       retries: 10
   
   # nginx:
-  #   image: nginx:1.28.2
+  #   image: nginx:1.30.8
   #   depends_on:
   #     - frontend
   #     - backend
