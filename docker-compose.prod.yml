@@ -50,7 +50,7 @@ services:
   nginx:
     # 1.30.8 (stable) : corrige NGINX2Root (CVE-2026-123007 et neuf autres, 18/11/2026)
     # et CVE-2026-132779 (23/11/2026). La branche 1.28 n'est plus corrigée par nginx.
-    image: nginx:1.30.8
+    image: nginx:1.31.0
     restart: unless-stopped
     depends_on:
       - frontend
